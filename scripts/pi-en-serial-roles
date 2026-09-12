@@ -548,7 +548,7 @@ requested_issue_file_in_coord() {
     item_id="$(item_id_for_file "$file")"
     if [ "$item_id" = "$requested_id" ]; then
       matches="${matches}${file}"$'\n'
-      if item_in_serial_repo_scope "$file"; then
+      if issue_in_serial_repo_scope "$file"; then
         scoped_matches="${scoped_matches}${file}"$'\n'
       fi
     fi

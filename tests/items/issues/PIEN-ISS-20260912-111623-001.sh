@@ -173,6 +173,7 @@ add_repo_manifest "$SCENARIO_COORD" namp
 add_repo_manifest "$SCENARIO_COORD" namp-web
 add_issue "$SCENARIO_COORD" repos/namp FOREIGN-ISSUE open false false
 add_issue "$SCENARIO_COORD" repos/namp-web LOCAL-ISSUE open false false
+add_issue "$SCENARIO_COORD" . ROOT-ISSUE open false false
 commit_coord "$SCENARIO_COORD"
 out="$SCENARIO_DIR/local.txt"
 run_serial "$SCENARIO_PROJECT" "$SCENARIO_COORD" "$SCENARIO_DIR/local.lock" \
@@ -187,6 +188,15 @@ set -e
 [ "$foreign_status" -ne 0 ] || test_fail 'foreign explicit issue unexpectedly succeeded'
 test_grep 'requested issue is outside current repository scope (namp-web): FOREIGN-ISSUE' \
   "$foreign_out"
+root_out="$SCENARIO_DIR/root.txt"
+set +e
+run_serial "$SCENARIO_PROJECT" "$SCENARIO_COORD" "$SCENARIO_DIR/root.lock" \
+  --issue ROOT-ISSUE >"$root_out" 2>&1
+root_status=$?
+set -e
+[ "$root_status" -ne 0 ] || test_fail 'root explicit issue in repo layout unexpectedly succeeded'
+test_grep 'requested issue is outside current repository scope (namp-web): ROOT-ISSUE' \
+  "$root_out"
 
 # Legacy root-only coordination layouts retain root issues/... selection.
 make_project_and_coord legacy-root pi-en
