@@ -539,7 +539,7 @@ item_in_serial_repo_scope() {
 }
 
 requested_issue_file_in_coord() {
-  local requested_id file item_id matches scoped_matches match_count scoped_count
+  local requested_id file item_id matches scoped_matches match_count scoped_count raw_type file_type
   requested_id="$1"
   matches=""
   scoped_matches=""
@@ -548,6 +548,11 @@ requested_issue_file_in_coord() {
     item_id="$(item_id_for_file "$file")"
     if [ "$item_id" = "$requested_id" ]; then
       matches="${matches}${file}"$'\n'
+      raw_type="$(coord_item_value "$file" type || true)"
+      file_type="$(coord_item_type_canonical "$raw_type")"
+      if [ "$file_type" != "issue" ] && item_in_serial_repo_scope "$file"; then
+        die "requested item is not an issue: $requested_id ($file has type ${raw_type:-unknown})"
+      fi
       if issue_in_serial_repo_scope "$file"; then
         scoped_matches="${scoped_matches}${file}"$'\n'
       fi
