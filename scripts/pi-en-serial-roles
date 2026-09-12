@@ -443,6 +443,47 @@ pull_coordination() {
   ensure_clean_git "$coord_dir" "coordination"
 }
 
+single_active_repo_id_in_coord() {
+  local repos_dir file repo_id status matches count
+  repos_dir="$1/repos"
+  [ -d "$repos_dir" ] || return 1
+  matches=""
+  while IFS= read -r file; do
+    [ -n "$file" ] || continue
+    repo_id="$(coord_repo_manifest_value "$file" repo_id || true)"
+    [ -n "$repo_id" ] || repo_id="$(basename "$(dirname "$file")")"
+    status="$(coord_repo_manifest_value "$file" status || true)"
+    [ -n "$status" ] || status="active"
+    [ "$status" = "active" ] || continue
+    matches="${matches}${repo_id}"$'\n'
+  done < <(find "$repos_dir" -mindepth 2 -maxdepth 2 -name REPO.md -type f 2>/dev/null | sort)
+  count="$(printf '%s' "$matches" | sed '/^$/d' | wc -l | tr -d ' ')"
+  [ "$count" = "1" ] || return 1
+  printf '%s' "$matches" | sed '/^$/d' | head -n 1
+}
+
+resolve_serial_repo_id() {
+  local configured remote single
+  if [ ! -d "$coord_dir/repos" ]; then
+    printf 'root\n'
+    return 0
+  fi
+
+  configured="$(coord_impl_config_value repo_id "$project_root" || true)"
+  remote="$(git -C "$project_root" remote get-url origin 2>/dev/null || true)"
+  if [ -n "${PI_EN_COORD_REPO_ID:-}" ] || [ -n "$configured" ] || [ -n "$remote" ]; then
+    ( cd "$project_root" && coord_resolve_repo_id "" "$coord_dir" )
+    return $?
+  fi
+
+  if single="$(single_active_repo_id_in_coord "$coord_dir")"; then
+    printf '%s\n' "$single"
+    return 0
+  fi
+
+  ( cd "$project_root" && coord_resolve_repo_id "" "$coord_dir" )
+}
+
 item_id_for_file() {
   local file item_id
   file="$1"
@@ -460,28 +501,73 @@ status_lc_for_file() {
   coord_item_value "$1" status | tr '[:upper:]' '[:lower:]'
 }
 
+coord_uses_repo_layout_in_coord() {
+  [ -d repos ]
+}
+
+issue_in_serial_repo_scope() {
+  local file
+  file="$1"
+  if coord_uses_repo_layout_in_coord; then
+    case "$file" in
+      "repos/$serial_repo_id/issues/"*) return 0 ;;
+      *) return 1 ;;
+    esac
+  fi
+
+  case "$file" in
+    issues/*) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
+item_in_serial_repo_scope() {
+  local file
+  file="$1"
+  if coord_uses_repo_layout_in_coord; then
+    case "$file" in
+      "repos/$serial_repo_id/"*) return 0 ;;
+      repos/*) return 1 ;;
+      *) return 0 ;;
+    esac
+  fi
+
+  case "$file" in
+    repos/*) return 1 ;;
+    *) return 0 ;;
+  esac
+}
+
 requested_issue_file_in_coord() {
-  local requested_id file item_id matches match_count
+  local requested_id file item_id matches scoped_matches match_count scoped_count
   requested_id="$1"
   matches=""
+  scoped_matches=""
   while IFS= read -r file; do
     [ -n "$file" ] || continue
     item_id="$(item_id_for_file "$file")"
     if [ "$item_id" = "$requested_id" ]; then
       matches="${matches}${file}"$'\n'
+      if item_in_serial_repo_scope "$file"; then
+        scoped_matches="${scoped_matches}${file}"$'\n'
+      fi
     fi
   done < <(coord_item_find_files)
 
   match_count="$(printf '%s' "$matches" | sed '/^$/d' | wc -l | tr -d ' ')"
-  if [ "$match_count" = "0" ]; then
-    die "requested issue not found: $requested_id"
+  scoped_count="$(printf '%s' "$scoped_matches" | sed '/^$/d' | wc -l | tr -d ' ')"
+  if [ "$scoped_count" = "0" ]; then
+    if [ "$match_count" = "0" ]; then
+      die "requested issue not found: $requested_id"
+    fi
+    die "requested issue is outside current repository scope ($serial_repo_id): $requested_id"
   fi
-  if [ "$match_count" != "1" ]; then
-    printf 'pi-en-serial-roles: requested issue ID is ambiguous: %s\n%s' \
-      "$requested_id" "$matches" >&2
+  if [ "$scoped_count" != "1" ]; then
+    printf 'pi-en-serial-roles: requested issue ID is ambiguous in current repository scope (%s): %s\n%s' \
+      "$serial_repo_id" "$requested_id" "$scoped_matches" >&2
     exit 1
   fi
-  printf '%s' "$matches" | sed '/^$/d' | head -n 1
+  printf '%s' "$scoped_matches" | sed '/^$/d' | head -n 1
 }
 
 validate_requested_issues_in_coord() {
@@ -559,6 +645,7 @@ select_next_work_in_coord() {
 
   while IFS= read -r file; do
     [ -n "$file" ] || continue
+    issue_in_serial_repo_scope "$file" || continue
     raw_type="$(coord_item_value "$file" type || true)"
     file_type="$(coord_item_type_canonical "$raw_type")"
     [ "$file_type" = "issue" ] || continue
@@ -574,6 +661,7 @@ select_next_work_in_coord() {
 
   while IFS= read -r file; do
     [ -n "$file" ] || continue
+    issue_in_serial_repo_scope "$file" || continue
     raw_type="$(coord_item_value "$file" type || true)"
     file_type="$(coord_item_type_canonical "$raw_type")"
     [ "$file_type" = "issue" ] || continue
@@ -587,6 +675,7 @@ select_next_work_in_coord() {
 
   while IFS= read -r file; do
     [ -n "$file" ] || continue
+    issue_in_serial_repo_scope "$file" || continue
     raw_type="$(coord_item_value "$file" type || true)"
     file_type="$(coord_item_type_canonical "$raw_type")"
     [ "$file_type" = "issue" ] || continue
@@ -923,6 +1012,7 @@ run_pi_job() {
 
 project_root="$(resolve_project_root)"
 coord_dir="$(resolve_coord_dir "$project_root")"
+serial_repo_id="$(resolve_serial_repo_id)"
 pi_en_cmd="$(resolve_pi_en_cmd)"
 role_manager_package="$(resolve_role_manager)"
 role_manager_pi_arg="$(role_manager_arg_for_pi "$role_manager_package" "$project_root")"
