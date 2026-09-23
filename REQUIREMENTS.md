@@ -983,6 +983,18 @@ file edits:
   YAML current-state fields, appends a `closed` event/message, commits, and
   pushes unless disabled by options.
 
+In coordination domains that use repo-scoped issue layout under
+`repos/<repo_id>/issues/...`, issue lifecycle operations that mutate state
+must resolve the current implementation repo from `--repo-id`,
+`PI_EN_COORD_REPO_ID`, `.pi-en-coordination.yaml`, or implementation remote
+registry metadata, and must reject issue IDs or paths outside that repo scope
+by default. This protection applies to claim, done, review, verify, and close
+operations, must not be bypassed by lifecycle `--force` options, and includes
+rejecting root `issues/...` items when a repo registry/layout exists. Legacy
+root-only coordination domains without a `repos/` layout retain root issue
+lifecycle behavior. Read-only issue inspection may still provide explicit
+all-repository views, for example `--all-repos` list/status overviews.
+
 Commands that create commits must reject subject lines longer than 72
 characters.
 
@@ -2156,6 +2168,8 @@ Expected:
 - `pi-en-coord-lint` checks item metadata and item-matched test linkage;
 - status, push, claim, done, review, verify, and close helpers perform the
   expected file and Git state transitions;
+- repo-layout lifecycle helpers reject cross-repo issue mutation by default
+  while explicit read-only all-repository issue inspection remains available;
 - rule upgrade preview runs without mutating coordination state.
 
 #### TEST-030 Coordination conflict hardening
