@@ -21,6 +21,7 @@ Options:
   --coord-dir DIR   Coordination clone; default: PI_EN_COORD_DIR or .pi-en/coordination
   --agent-id ID     Agent identity; default: PI_EN_COORD_AGENT_ID or USER
   --role ROLE       Coordination role; default: PI_EN_COORD_ROLE
+  --repo-id ID      Lifecycle repository scope in repo-layout domains
   --pass            Mark verification passed; default
   --fail            Mark verification failed and reopen developer work
   --result TEXT     Verification message text
@@ -40,6 +41,7 @@ pull_first=1
 push_after=1
 force=0
 item_query=""
+repo_id_opt=""
 
 while [ "$#" -gt 0 ]; do
   case "$1" in
@@ -56,6 +58,11 @@ while [ "$#" -gt 0 ]; do
     --role)
       [ "$#" -ge 2 ] || coord_die "--role requires a value"
       role="$2"
+      shift 2
+      ;;
+    --repo-id)
+      [ "$#" -ge 2 ] || coord_die "--repo-id requires a value"
+      repo_id_opt="$2"
       shift 2
       ;;
     --pass)
@@ -100,6 +107,7 @@ done
 [ -n "$item_query" ] || coord_die "item is required"
 [ -n "$agent_id" ] || coord_die "agent id must not be empty"
 
+project_dir="$(coord_project_root)"
 coord_dir="$(coord_resolve_dir "$coord_dir_opt")"
 cd "$coord_dir"
 
@@ -107,7 +115,7 @@ if [ "$pull_first" = "1" ]; then
   coord_pull_rebase
 fi
 
-item_path="$(coord_repo_path "$(coord_find_item "$item_query")")"
+item_path="$(coord_repo_path "$(coord_find_issue_lifecycle_item "$item_query" "$repo_id_opt" "$project_dir" "$coord_dir" "pi-en-coord-verify")")"
 item_id="$(coord_item_value "$item_path" id || true)"
 status="$(coord_item_value "$item_path" status || true)"
 if [ -z "$item_id" ]; then

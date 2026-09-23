@@ -166,6 +166,7 @@ pi-en-coord-cat --coord-dir "$coord_dir" --path "$alias_issue_id" \
 
 pi-en-coord-claim \
   --coord-dir "$coord_dir" \
+  --repo-id beta \
   --agent-id agent-a \
   --role developer \
   --no-pull \
@@ -175,6 +176,7 @@ grep -q '^status: claimed$' "$coord_dir/$alias_issue_path"
 
 done_path="$(pi-en-coord-done \
   --coord-dir "$coord_dir" \
+  --repo-id beta \
   --agent-id agent-a \
   --role developer \
   --result "Repo issue implemented." \
@@ -191,6 +193,7 @@ grep -q '^      - repo: delta$' "$coord_dir/$done_path"
 
 pi-en-coord-review \
   --coord-dir "$coord_dir" \
+  --repo-id gamma \
   --agent-id reviewer-a \
   --role reviewer \
   --pass \
@@ -202,6 +205,7 @@ grep -q '^reviewed: true$' "$coord_dir/$done_path"
 
 pi-en-coord-verify \
   --coord-dir "$coord_dir" \
+  --repo-id gamma \
   --agent-id tester-a \
   --role tester \
   --pass \
@@ -213,6 +217,7 @@ grep -q '^verified: true$' "$coord_dir/$done_path"
 
 closed_path="$(pi-en-coord-close \
   --coord-dir "$coord_dir" \
+  --repo-id gamma \
   --agent-id tester-a \
   --role tester \
   --result "Repo issue closed." \
@@ -234,6 +239,7 @@ repo_fail_path="$(pi-en-coord-new --coord-dir "$coord_dir" --repo-id gamma "Repo
 repo_fail_id="$(basename "$repo_fail_path" .yaml)"
 pi-en-coord-claim \
   --coord-dir "$coord_dir" \
+  --repo-id gamma \
   --agent-id agent-a \
   --role developer \
   --no-pull \
@@ -241,6 +247,7 @@ pi-en-coord-claim \
   "$repo_fail_id" >/dev/null
 pi-en-coord-done \
   --coord-dir "$coord_dir" \
+  --repo-id gamma \
   --agent-id agent-a \
   --role developer \
   --result "Ready for repo-scoped failure." \
@@ -251,6 +258,7 @@ pi-en-coord-done \
   "$repo_fail_id" >/dev/null
 review_failed_path="$(pi-en-coord-review \
   --coord-dir "$coord_dir" \
+  --repo-id gamma \
   --agent-id reviewer-a \
   --role reviewer \
   --fail \

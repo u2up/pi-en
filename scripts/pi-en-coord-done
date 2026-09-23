@@ -113,7 +113,7 @@ if [ "$pull_first" = "1" ]; then
   coord_pull_rebase
 fi
 
-item_path="$(coord_repo_path "$(coord_find_item "$item_query")")"
+item_path="$(coord_repo_path "$(coord_find_issue_lifecycle_item "$item_query" "$repo_id_opt" "$project_dir" "$coord_dir" "pi-en-coord-done")")"
 item_id="$(coord_item_value "$item_path" id || true)"
 status="$(coord_item_value "$item_path" status || true)"
 owner="$(coord_item_value "$item_path" owner || true)"

@@ -1592,3 +1592,91 @@ coord_find_item() {
   fi
   printf '%s' "$matches" | sed '/^$/d' | head -n 1
 }
+
+coord_issue_lifecycle_scope_repo_id() {
+  local repo_id_opt project_dir coord_dir
+  repo_id_opt="${1:-}"
+  project_dir="${2:-}"
+  coord_dir="${3:-}"
+  [ -n "$project_dir" ] || project_dir="$(coord_project_root)"
+  [ -n "$coord_dir" ] || coord_dir="$(pwd -P)"
+  (cd "$project_dir" && coord_resolve_repo_id "$repo_id_opt" "$coord_dir")
+}
+
+coord_guard_issue_lifecycle_scope() {
+  local item_path repo_id command rel
+  item_path="$1"
+  repo_id="$2"
+  command="${3:-lifecycle command}"
+  rel="$(coord_repo_path "$item_path")"
+
+  case "$rel" in
+    "repos/$repo_id/issues/"*)
+      return 0
+      ;;
+    issues/*)
+      coord_die "$command refuses root issue outside repo scope '$repo_id': $rel"
+      ;;
+    repos/*/issues/*)
+      coord_die "$command refuses issue outside repo scope '$repo_id': $rel"
+      ;;
+    *)
+      coord_die "$command requires an issue under repos/$repo_id/issues: $rel"
+      ;;
+  esac
+}
+
+coord_find_issue_lifecycle_item() {
+  local query repo_id_opt project_dir coord_dir command repo_id root matches file id_value match_count found
+  query="$1"
+  repo_id_opt="${2:-}"
+  project_dir="${3:-}"
+  coord_dir="${4:-}"
+  command="${5:-lifecycle command}"
+
+  if [ ! -d repos ]; then
+    coord_find_item "$query"
+    return
+  fi
+
+  repo_id="$(coord_issue_lifecycle_scope_repo_id "$repo_id_opt" "$project_dir" "$coord_dir")"
+  [ -n "$repo_id" ] || coord_die "failed to resolve repo scope for $command"
+
+  if [ -f "$query" ]; then
+    found="$(coord_repo_path "$(coord_abs "$query")")"
+    coord_guard_issue_lifecycle_scope "$found" "$repo_id" "$command"
+    printf '%s\n' "$(coord_abs "$found")"
+    return
+  fi
+
+  root="repos/$repo_id/issues"
+  [ -d "$root" ] || coord_die "repo scope has no issue directory: $root"
+  matches=""
+  while IFS= read -r file; do
+    [ -n "$file" ] || continue
+    case "$(basename "$file")" in
+      "$query"|"$query".md|"$query".yaml|"$query".yml|"$query"-*)
+        matches="${matches}${file}"$'\n'
+        continue
+        ;;
+    esac
+    id_value="$(coord_item_value "$file" id || true)"
+    if [ "$id_value" = "$query" ]; then
+      matches="${matches}${file}"$'\n'
+    fi
+  done < <(find "$root" -type f \( -name '*.yaml' -o -name '*.yml' -o -name '*.md' \) 2>/dev/null | sort)
+
+  match_count="$(printf '%s' "$matches" | sed '/^$/d' | wc -l | tr -d ' ')"
+  if [ "$match_count" = "0" ]; then
+    if found="$(coord_find_item "$query" 2>/dev/null)" && [ -n "$found" ]; then
+      coord_guard_issue_lifecycle_scope "$(coord_repo_path "$found")" "$repo_id" "$command"
+    fi
+    coord_die "item not found in repo scope '$repo_id': $query"
+  fi
+
+  if [ "$match_count" != "1" ]; then
+    printf 'pi-en-coord: multiple items match %s in repo scope %s:\n%s' "$query" "$repo_id" "$matches" >&2
+    exit 1
+  fi
+  printf '%s' "$matches" | sed '/^$/d' | head -n 1
+}
