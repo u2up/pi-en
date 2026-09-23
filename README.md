@@ -1769,7 +1769,12 @@ When top-level `PROJECT.md` exists, omit `--project` for domain-common items;
 `PI_EN_COORD_PROJECT` can remain set for coordination-domain selection. For
 issues, pass `--repo-id` or set `PI_EN_COORD_REPO_ID`; helpers may also resolve it
 from the implementation repo's `.pi-en-coordination.yaml` or registry remote
-metadata.
+metadata. In repo-layout domains, lifecycle helpers that mutate issue state
+(`claim`, `done`, `review`, `verify`, and `close`) reject issue IDs or paths
+outside the resolved current repo by default, including root `issues/...`
+items; `--force` does not bypass this repo-scope protection. Explicit
+`--all-repos` issue views remain limited to read-only inspection commands such
+as `list` and `status`.
 
 Generated item IDs use a project item key prefix, a type code, a UTC timestamp,
 and a three-digit collision/order suffix that starts at `001`:

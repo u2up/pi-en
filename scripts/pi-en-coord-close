@@ -31,7 +31,9 @@ Options:
   -h, --help                  Show this help
 
 Items are normally closed only after developer work is done and both
-reviewed=true and verified=true are recorded on the item.
+reviewed=true and verified=true are recorded on the item. In repo-layout
+domains, mutating lifecycle operations reject issues outside --repo-id scope by
+default; --force does not bypass repo-scope protection.
 USAGE
 }
 

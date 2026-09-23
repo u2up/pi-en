@@ -26,6 +26,9 @@ Options:
   --no-push         Commit but do not push after claiming
   --force           Allow claiming an item owned by another agent
   -h, --help        Show this help
+
+In repo-layout domains, mutating lifecycle operations reject issues outside
+--repo-id scope by default; --force does not bypass repo-scope protection.
 USAGE
 }
 
