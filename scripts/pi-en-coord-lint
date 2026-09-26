@@ -27,6 +27,17 @@ Options:
   --warn-legacy-ids          Warn about IDs that predate the new ID format
   -h, --help                 Show this help
 
+Environment:
+  PI_EN_COORD_LINT_CACHE_DIR
+                             Optional implementation-local cache directory for
+                             content-addressed item-local lint facts. When unset,
+                             lint runs without a persistent cache.
+  PI_EN_COORD_LINT_CACHE_DEBUG=1
+                             Print cache hit/miss/fallback diagnostics to stderr.
+  PI_EN_COORD_LINT_CACHE=0   Disable the cache even when a cache dir is set.
+  PI_EN_COORD_LINT_VERSION_SALT
+                             Extra linter-version salt for cache invalidation.
+
 Checks:
   - item status and issue status-directory consistency;
   - closed issues have reviewed: true and verified: true;
@@ -362,6 +373,109 @@ declare -A active_requirement_key_first_file=()
 declare -A repo_manifest_id_cache=()
 declare -A repo_manifest_status_cache=()
 
+lint_cache_enabled=0
+lint_cache_dir="${PI_EN_COORD_LINT_CACHE_DIR:-}"
+lint_cache_context_hash=""
+lint_cache_hits=0
+lint_cache_misses=0
+lint_cache_fallbacks=0
+
+lint_cache_debug() {
+  if [ "${PI_EN_COORD_LINT_CACHE_DEBUG:-}" = "1" ]; then
+    printf 'pi-en-coord-lint: cache: %s\n' "$*" >&2
+  fi
+}
+
+lint_cache_init() {
+  local script_path script_hash manifest_hash tests_hash salt
+  [ -n "$lint_cache_dir" ] || return 0
+  [ "${PI_EN_COORD_LINT_CACHE:-1}" != "0" ] || return 0
+  mkdir -p "$lint_cache_dir/items" || {
+    lint_cache_debug "disabled; cannot create $lint_cache_dir/items"
+    return 0
+  }
+  script_path="${BASH_SOURCE[0]}"
+  script_hash="$(sha256sum "$script_path" | awk '{print $1}')"
+  manifest_hash="$({ find repos -path '*/REPO.md' -type f 2>/dev/null || true; } | sort | xargs -r sha256sum | sha256sum | awk '{print $1}')"
+  tests_hash="$({ find "$project_root/tests/items" -type f -name '*.sh' 2>/dev/null || true; } | sort | xargs -r sha256sum | sha256sum | awk '{print $1}')"
+  salt="${PI_EN_COORD_LINT_VERSION_SALT:-}"
+  lint_cache_context_hash="$(printf '%s\n%s\n%s\n%s\n' "$script_hash" "$manifest_hash" "$tests_hash" "$salt" | sha256sum | awk '{print $1}')"
+  lint_cache_enabled=1
+}
+
+lint_cache_key_for_file() {
+  local file content_hash
+  file="$1"
+  content_hash="$(sha256sum "$file" | awk '{print $1}')"
+  printf '%s\n%s\n%s\n' "$lint_cache_context_hash" "$file" "$content_hash" | sha256sum | awk '{print $1}'
+}
+
+lint_cache_read_item_facts() {
+  local file key cache_file
+  file="$1"
+  [ "$lint_cache_enabled" = "1" ] || return 1
+  key="$(lint_cache_key_for_file "$file")"
+  cache_file="$lint_cache_dir/items/$key.env"
+  if [ ! -f "$cache_file" ]; then
+    lint_cache_misses=$((lint_cache_misses + 1))
+    lint_cache_debug "miss $file"
+    return 1
+  fi
+  unset lint_cache_id lint_cache_type lint_cache_status lint_cache_reviewed \
+    lint_cache_verified lint_cache_testable lint_cache_testability_note \
+    lint_cache_requirement_key lint_cache_requirement_class \
+    lint_cache_requirement_kind lint_cache_requirement_domain
+  if ! . "$cache_file" 2>/dev/null; then
+    lint_cache_fallbacks=$((lint_cache_fallbacks + 1))
+    lint_cache_debug "fallback corrupt $file"
+    return 1
+  fi
+  if [ "${lint_cache_format:-}" != "1" ]; then
+    lint_cache_fallbacks=$((lint_cache_fallbacks + 1))
+    lint_cache_debug "fallback incompatible $file"
+    return 1
+  fi
+  id="${lint_cache_id:-}"
+  type="${lint_cache_type:-}"
+  status="${lint_cache_status:-}"
+  reviewed="${lint_cache_reviewed:-}"
+  verified="${lint_cache_verified:-}"
+  testable_raw="${lint_cache_testable:-}"
+  testability_note="${lint_cache_testability_note:-}"
+  requirement_key="${lint_cache_requirement_key:-}"
+  requirement_class="${lint_cache_requirement_class:-}"
+  requirement_kind="${lint_cache_requirement_kind:-}"
+  requirement_domain="${lint_cache_requirement_domain:-}"
+  lint_cache_hits=$((lint_cache_hits + 1))
+  lint_cache_debug "hit $file"
+  return 0
+}
+
+lint_cache_write_item_facts() {
+  local file key cache_file tmp
+  file="$1"
+  [ "$lint_cache_enabled" = "1" ] || return 0
+  key="$(lint_cache_key_for_file "$file")"
+  cache_file="$lint_cache_dir/items/$key.env"
+  tmp="$cache_file.$$"
+  {
+    printf 'lint_cache_format=1\n'
+    printf 'lint_cache_id=%q\n' "$id"
+    printf 'lint_cache_type=%q\n' "$type"
+    printf 'lint_cache_status=%q\n' "$status"
+    printf 'lint_cache_reviewed=%q\n' "$reviewed"
+    printf 'lint_cache_verified=%q\n' "$verified"
+    printf 'lint_cache_testable=%q\n' "$testable_raw"
+    printf 'lint_cache_testability_note=%q\n' "$testability_note"
+    printf 'lint_cache_requirement_key=%q\n' "$requirement_key"
+    printf 'lint_cache_requirement_class=%q\n' "$requirement_class"
+    printf 'lint_cache_requirement_kind=%q\n' "$requirement_kind"
+    printf 'lint_cache_requirement_domain=%q\n' "$requirement_domain"
+  } >"$tmp" && mv "$tmp" "$cache_file" || rm -f "$tmp"
+}
+
+lint_cache_init
+
 repo_manifest_id() {
   local repo_id manifest
   repo_id="$1"
@@ -396,17 +510,20 @@ build_item_index() {
     esac
 
     item_index_files+=("$file")
-    id="$(coord_item_value "$file" id || true)"
-    type="$(coord_item_value "$file" type || true)"
-    status="$(coord_item_value "$file" status || true)"
-    reviewed="$(coord_item_value "$file" reviewed || true)"
-    verified="$(coord_item_value "$file" verified || true)"
-    testable_raw="$(coord_item_value "$file" testable || true)"
-    testability_note="$(coord_item_value "$file" testability_note || true)"
-    requirement_key="$(coord_item_value "$file" requirement_key || true)"
-    requirement_class="$(coord_item_value "$file" requirement_class || true)"
-    requirement_kind="$(coord_item_value "$file" requirement_kind || true)"
-    requirement_domain="$(coord_item_value "$file" domain || true)"
+    if ! lint_cache_read_item_facts "$file"; then
+      id="$(coord_item_value "$file" id || true)"
+      type="$(coord_item_value "$file" type || true)"
+      status="$(coord_item_value "$file" status || true)"
+      reviewed="$(coord_item_value "$file" reviewed || true)"
+      verified="$(coord_item_value "$file" verified || true)"
+      testable_raw="$(coord_item_value "$file" testable || true)"
+      testability_note="$(coord_item_value "$file" testability_note || true)"
+      requirement_key="$(coord_item_value "$file" requirement_key || true)"
+      requirement_class="$(coord_item_value "$file" requirement_class || true)"
+      requirement_kind="$(coord_item_value "$file" requirement_kind || true)"
+      requirement_domain="$(coord_item_value "$file" domain || true)"
+      lint_cache_write_item_facts "$file"
+    fi
     stem="$(basename "$file")"
     stem="${stem%.yaml}"
     stem="${stem%.yml}"
@@ -694,6 +811,10 @@ if [ "$failures" -gt 0 ]; then
   printf 'pi-en-coord-lint: %d failure(s), %d warning(s), %d item(s) checked\n' \
     "$failures" "$warnings" "$items_seen" >&2
   exit 1
+fi
+
+if [ "$lint_cache_enabled" = "1" ]; then
+  lint_cache_debug "summary hits=$lint_cache_hits misses=$lint_cache_misses fallbacks=$lint_cache_fallbacks"
 fi
 
 printf 'pi-en-coord-lint: ok (%d item(s), %d warning(s))\n' \

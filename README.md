@@ -179,6 +179,18 @@ tracked files, and refuses target overwrites or duplicate issue ids. Root
 `issues/` paths are migration-compatible by default with warnings; set
 `PI_EN_COORD_LINT_ROOT_ISSUES=fail` to reject them.
 
+Coordination lint can optionally reuse item-local parse facts from an
+implementation-local content-addressed cache. Set
+`PI_EN_COORD_LINT_CACHE_DIR` to a writable directory outside coordination item
+YAML to enable it. Cache keys include the lint script hash (plus optional
+`PI_EN_COORD_LINT_VERSION_SALT`), the item path and content hash, repo manifest
+content hashes, and item-test content hashes. Unset the variable or set
+`PI_EN_COORD_LINT_CACHE=0` for a full uncached run. Missing, stale, corrupt, or
+incompatible entries are recomputed safely, and cached facts never bypass global
+checks such as duplicate IDs, duplicate active requirement keys, orphan tests,
+repo manifest consistency, selected-repo test scope, or design coverage.
+`PI_EN_COORD_LINT_CACHE_DEBUG=1` prints cache hit/miss/fallback diagnostics.
+
 ### Simple coordination workflow
 
 A typical human-and-agent workflow with a coordination repository is:

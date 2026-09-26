@@ -301,4 +301,59 @@ if [ "$find_call_count" != "1" ]; then
   exit 1
 fi
 
+cache_dir="$tmp/lint-cache"
+PI_EN_COORD_LINT_CACHE_DIR="$cache_dir" \
+PI_EN_COORD_LINT_CACHE_DEBUG=1 \
+  pi-en-coord-lint \
+    --coord-dir .pi-en/coordination \
+    --project-root . >/dev/null 2>"$tmp/cache-warm.err"
+grep -q 'cache: miss ' "$tmp/cache-warm.err"
+PI_EN_COORD_LINT_CACHE_DIR="$cache_dir" \
+PI_EN_COORD_LINT_CACHE_DEBUG=1 \
+  pi-en-coord-lint \
+    --coord-dir .pi-en/coordination \
+    --project-root . >/dev/null 2>"$tmp/cache-hit.err"
+grep -q 'cache: hit ' "$tmp/cache-hit.err"
+
+cp ".pi-en/coordination/$item_path" "$tmp/cache-item.clean.yaml"
+printf '# cache invalidation marker\n' >>".pi-en/coordination/$item_path"
+PI_EN_COORD_LINT_CACHE_DIR="$cache_dir" \
+PI_EN_COORD_LINT_CACHE_DEBUG=1 \
+  pi-en-coord-lint \
+    --coord-dir .pi-en/coordination \
+    --project-root . >/dev/null 2>"$tmp/cache-item-change.err"
+grep -q "cache: miss $item_path" "$tmp/cache-item-change.err"
+cp "$tmp/cache-item.clean.yaml" ".pi-en/coordination/$item_path"
+
+PI_EN_COORD_LINT_CACHE_DIR="$cache_dir" \
+PI_EN_COORD_LINT_CACHE_DEBUG=1 \
+PI_EN_COORD_LINT_VERSION_SALT=changed-linter-version \
+  pi-en-coord-lint \
+    --coord-dir .pi-en/coordination \
+    --project-root . >/dev/null 2>"$tmp/cache-version-change.err"
+grep -q 'cache: miss ' "$tmp/cache-version-change.err"
+
+cache_entry="$(find "$cache_dir/items" -type f | sort | head -n 1)"
+printf 'not valid shell syntax ***\n' >"$cache_entry"
+PI_EN_COORD_LINT_CACHE_DIR="$cache_dir" \
+PI_EN_COORD_LINT_CACHE_DEBUG=1 \
+  pi-en-coord-lint \
+    --coord-dir .pi-en/coordination \
+    --project-root . >/dev/null 2>"$tmp/cache-corrupt.err"
+grep -q 'cache: fallback corrupt ' "$tmp/cache-corrupt.err"
+
+cached_duplicate_path=".pi-en/coordination/repos/pi-en/issues/open/${item_id}-duplicate.yaml"
+cp ".pi-en/coordination/$item_path" "$cached_duplicate_path"
+if PI_EN_COORD_LINT_CACHE_DIR="$cache_dir" \
+   PI_EN_COORD_LINT_CACHE_DEBUG=1 \
+     pi-en-coord-lint \
+       --coord-dir .pi-en/coordination \
+       --project-root . >/dev/null 2>"$tmp/cache-duplicate.err"; then
+  printf 'expected cached lint to fail for duplicate item IDs\n' >&2
+  exit 1
+fi
+grep -q 'duplicates item id' "$tmp/cache-duplicate.err"
+grep -q 'cache: hit ' "$tmp/cache-duplicate.err"
+rm "$cached_duplicate_path"
+
 printf 'agent coordination lint tests passed\n'
