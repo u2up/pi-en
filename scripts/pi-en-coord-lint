@@ -66,6 +66,7 @@ USAGE
 coord_dir_opt=""
 project_root_opt=""
 repo_id_opt=""
+explicit_repo_id=0
 all_repos=0
 require_done_or_closed=0
 warn_legacy_ids=0
@@ -85,6 +86,7 @@ while [ "$#" -gt 0 ]; do
     --repo-id)
       [ "$#" -ge 2 ] || coord_die "--repo-id requires a value"
       repo_id_opt="$2"
+      explicit_repo_id=1
       shift 2
       ;;
     --all-repos)
@@ -120,6 +122,11 @@ resolved_repo_id=""
 repo_err=""
 if [ -n "$repo_id_opt" ]; then
   resolved_repo_id="$(coord_registry_canonical_repo_id "$repo_id_opt" "$coord_dir")"
+elif [ "$all_repos" = "1" ]; then
+  # In all-repos mode, structural checks still cover every item in the
+  # single per-run index, but item-matched issue tests are not required from
+  # any implementation checkout unless --repo-id selects one explicitly.
+  resolved_repo_id=""
 else
   repo_err="$(mktemp "${TMPDIR:-/tmp}/pi-en-coord-lint-repo.XXXXXX")" || coord_die "failed to create temporary file"
   if resolved_repo_id="$(cd "$project_root" && coord_resolve_repo_id "" "$coord_dir" 2>"$repo_err")"; then
@@ -214,7 +221,7 @@ item_repo_id() {
   esac
 }
 
-should_check_item_test() {
+should_require_item_test() {
   local file type repo_id
   file="$1"
   type="$2"
@@ -222,6 +229,24 @@ should_check_item_test() {
     repo_id="$(item_repo_id "$file")"
     if [ -n "$repo_id" ]; then
       [ -n "$resolved_repo_id" ] && [ "$repo_id" = "$resolved_repo_id" ]
+      return
+    fi
+  fi
+  return 0
+}
+
+should_allow_item_test() {
+  local file type repo_id
+  file="$1"
+  type="$2"
+  if coord_item_type_uses_issue_status_dirs "$type"; then
+    repo_id="$(item_repo_id "$file")"
+    if [ -n "$repo_id" ]; then
+      if [ -n "$resolved_repo_id" ]; then
+        [ "$repo_id" = "$resolved_repo_id" ]
+        return
+      fi
+      [ "$all_repos" = "1" ] && [ "$explicit_repo_id" = "0" ]
       return
     fi
   fi
@@ -601,7 +626,7 @@ while IFS= read -r file; do
   if [ -z "$testable" ]; then
     lint_fail "$file must declare testable: yes or testable: no"
   elif [ "$testable" = "yes" ]; then
-    if should_check_item_test "$file" "$type"; then
+    if should_require_item_test "$file" "$type"; then
       expected_test="$(expected_test_path "$file" "$id" "$type")"
       if [ ! -f "$expected_test" ]; then
         lint_fail "$file is testable but missing $expected_test"
@@ -632,7 +657,7 @@ if [ -d "$items_tests_dir" ]; then
       continue
     fi
     item_type="${item_index_type[$item_file]}"
-    if ! should_check_item_test "$item_file" "$item_type"; then
+    if ! should_allow_item_test "$item_file" "$item_type"; then
       lint_fail "$test_file matches repo-scoped item outside selected repo; use --repo-id for that implementation repo"
       continue
     fi

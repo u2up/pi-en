@@ -99,6 +99,18 @@ chmod +x "$project_root/tests/items/issues/ALPHA-ISS-1.sh"
 pi-en-coord-lint --coord-dir "$coord_dir" --project-root "$project_root" >/dev/null
 pi-en-coord-lint --coord-dir "$coord_dir" --project-root "$project_root" --all-repos >/dev/null
 
+# All-repos mode validates every repo structurally through the item index, but
+# it does not require repo-scoped item tests unless --repo-id is explicit.
+mv "$project_root/tests/items/issues/ALPHA-ISS-1.sh" "$tmp/ALPHA-ISS-1.sh"
+if pi-en-coord-lint --coord-dir "$coord_dir" --project-root "$project_root" \
+  >"$tmp/default-missing-alpha.out" 2>"$tmp/default-missing-alpha.err"; then
+  printf 'expected default lint to require selected alpha issue test\n' >&2
+  exit 1
+fi
+grep -q 'ALPHA-ISS-1.yaml is testable but missing' "$tmp/default-missing-alpha.err"
+pi-en-coord-lint --coord-dir "$coord_dir" --project-root "$project_root" --all-repos >/dev/null
+mv "$tmp/ALPHA-ISS-1.sh" "$project_root/tests/items/issues/ALPHA-ISS-1.sh"
+
 # Explicit repo selection requires that repo's item-matched issue tests.
 if pi-en-coord-lint --coord-dir "$coord_dir" --project-root "$project_root" \
   --repo-id beta >"$tmp/beta.out" 2>"$tmp/beta.err"; then
