@@ -4,8 +4,8 @@ This file is generated from active requirement items and `designs/*.md`.
 
 ## Summary
 
-- Requirements: 176
-- Covered by design: 176
+- Requirements: 177
+- Covered by design: 177
 - Not covered by design: 0
 
 ## Coverage by requirement
@@ -166,6 +166,7 @@ This file is generated from active requirement items and `designs/*.md`.
 | TEST-020 | PIEN-QRQ-20260612-210000-022 | designs/verification-strategy.md |
 | TEST-021 | PIEN-QRQ-20260612-210000-023 | designs/verification-strategy.md |
 | TEST-022 | PIEN-QRQ-20260612-210000-024 | designs/verification-strategy.md |
+| PERF-001 | PIEN-QRQ-20260926-164321-001 | designs/agent-coordination.md |
 | TEST-023 | PIEN-QRQ-20260612-210000-025 | designs/verification-strategy.md |
 | TEST-024 | PIEN-QRQ-20260612-210000-026 | designs/verification-strategy.md |
 | TEST-025 | PIEN-QRQ-20260612-210000-027 | designs/verification-strategy.md |

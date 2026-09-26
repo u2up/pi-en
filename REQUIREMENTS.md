@@ -1013,6 +1013,13 @@ Item-matched tests must live in the project repository under paths such as
 `tests/items/requirements/<item-id>.sh`; they must not mirror issue status
 directories.
 
+Lint implementations should build and reuse per-run item metadata for item
+lookup, duplicate detection, type/status checks, and test-script matching so
+validation remains scalable. Optional caching may skip repeated parsing of
+unchanged inputs, but full lint remains authoritative and caches must be
+invalidated by content and linter-version changes rather than item-local
+`linted` flags.
+
 #### CMD-015 `pi-en-coord-upgrade-rules`
 
 `pi-en-coord-upgrade-rules --preview` must show template diffs without
@@ -2252,6 +2259,29 @@ Coverage must verify that:
   documented opt-in;
 - role-manager and coordination helper behavior either works in host mode
   or fails with clear diagnostics.
+
+### 4.3 Performance and scalability requirements
+
+#### PERF-001 — Keep coordination lint scalable as coordination history grows
+
+`pi-en-coord-lint` must remain practical to run as a routine coordination
+guard after the coordination domain accumulates many closed items,
+requirements, and item-matched tests.
+
+Full lint must avoid repeated full item-tree rescans for checks that can be
+answered from one per-run item metadata index. In particular, matching
+`tests/items/**/*.sh` scripts back to coordination items must use indexed item
+IDs or filename stems rather than scanning every item for each test script.
+
+Any incremental or cached lint mode must be derived from content-addressed
+inputs such as item file content or Git blob hashes, relevant repo manifest
+content, linter version, and relevant item-test content. It must not rely on a
+mutable `linted` flag stored inside coordination item YAML.
+
+A full lint mode must remain the authoritative validation path and must still
+run global checks such as duplicate item IDs, duplicate active requirement
+keys, orphan test scripts, repo manifest consistency, and design coverage
+validation.
 
 ## 5. Constraint requirements
 
