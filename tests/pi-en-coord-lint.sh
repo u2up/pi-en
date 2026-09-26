@@ -334,13 +334,17 @@ PI_EN_COORD_LINT_VERSION_SALT=changed-linter-version \
 grep -q 'cache: miss ' "$tmp/cache-version-change.err"
 
 cache_entry="$(find "$cache_dir/items" -type f | sort | head -n 1)"
-printf 'not valid shell syntax ***\n' >"$cache_entry"
+printf 'touch %s/cache-pwned\nnot valid shell syntax ***\n' "$tmp" >"$cache_entry"
 PI_EN_COORD_LINT_CACHE_DIR="$cache_dir" \
 PI_EN_COORD_LINT_CACHE_DEBUG=1 \
   pi-en-coord-lint \
     --coord-dir .pi-en/coordination \
     --project-root . >/dev/null 2>"$tmp/cache-corrupt.err"
 grep -q 'cache: fallback corrupt ' "$tmp/cache-corrupt.err"
+if [ -e "$tmp/cache-pwned" ]; then
+  printf 'expected corrupt lint cache to be parsed as data, not executed\n' >&2
+  exit 1
+fi
 
 cached_duplicate_path=".pi-en/coordination/repos/pi-en/issues/open/${item_id}-duplicate.yaml"
 cp ".pi-en/coordination/$item_path" "$cached_duplicate_path"

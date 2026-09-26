@@ -410,8 +410,20 @@ lint_cache_key_for_file() {
   printf '%s\n%s\n%s\n' "$lint_cache_context_hash" "$file" "$content_hash" | sha256sum | awk '{print $1}'
 }
 
+lint_cache_encode_value() {
+  printf '%s' "$1" | base64 | tr -d '\n'
+}
+
+lint_cache_decode_value() {
+  local encoded
+  encoded="$1"
+  [[ "$encoded" =~ ^[A-Za-z0-9+/]*={0,2}$ ]] || return 1
+  [ $((${#encoded} % 4)) -ne 1 ] || return 1
+  printf '%s' "$encoded" | base64 --decode 2>/dev/null
+}
+
 lint_cache_read_item_facts() {
-  local file key cache_file
+  local file key cache_file line name encoded value lint_cache_format
   file="$1"
   [ "$lint_cache_enabled" = "1" ] || return 1
   key="$(lint_cache_key_for_file "$file")"
@@ -425,12 +437,47 @@ lint_cache_read_item_facts() {
     lint_cache_verified lint_cache_testable lint_cache_testability_note \
     lint_cache_requirement_key lint_cache_requirement_class \
     lint_cache_requirement_kind lint_cache_requirement_domain
-  if ! . "$cache_file" 2>/dev/null; then
-    lint_cache_fallbacks=$((lint_cache_fallbacks + 1))
-    lint_cache_debug "fallback corrupt $file"
-    return 1
-  fi
-  if [ "${lint_cache_format:-}" != "1" ]; then
+  while IFS= read -r line || [ -n "$line" ]; do
+    case "$line" in
+      $'format\t2')
+        lint_cache_format=2
+        continue
+        ;;
+      *$'\t'*)
+        name="${line%%$'\t'*}"
+        encoded="${line#*$'\t'}"
+        ;;
+      *)
+        lint_cache_fallbacks=$((lint_cache_fallbacks + 1))
+        lint_cache_debug "fallback corrupt $file"
+        return 1
+        ;;
+    esac
+    value="$(lint_cache_decode_value "$encoded")" || {
+      lint_cache_fallbacks=$((lint_cache_fallbacks + 1))
+      lint_cache_debug "fallback corrupt $file"
+      return 1
+    }
+    case "$name" in
+      id) lint_cache_id="$value" ;;
+      type) lint_cache_type="$value" ;;
+      status) lint_cache_status="$value" ;;
+      reviewed) lint_cache_reviewed="$value" ;;
+      verified) lint_cache_verified="$value" ;;
+      testable) lint_cache_testable="$value" ;;
+      testability_note) lint_cache_testability_note="$value" ;;
+      requirement_key) lint_cache_requirement_key="$value" ;;
+      requirement_class) lint_cache_requirement_class="$value" ;;
+      requirement_kind) lint_cache_requirement_kind="$value" ;;
+      requirement_domain) lint_cache_requirement_domain="$value" ;;
+      *)
+        lint_cache_fallbacks=$((lint_cache_fallbacks + 1))
+        lint_cache_debug "fallback corrupt $file"
+        return 1
+        ;;
+    esac
+  done <"$cache_file"
+  if [ "${lint_cache_format:-}" != "2" ]; then
     lint_cache_fallbacks=$((lint_cache_fallbacks + 1))
     lint_cache_debug "fallback incompatible $file"
     return 1
@@ -459,18 +506,18 @@ lint_cache_write_item_facts() {
   cache_file="$lint_cache_dir/items/$key.env"
   tmp="$cache_file.$$"
   {
-    printf 'lint_cache_format=1\n'
-    printf 'lint_cache_id=%q\n' "$id"
-    printf 'lint_cache_type=%q\n' "$type"
-    printf 'lint_cache_status=%q\n' "$status"
-    printf 'lint_cache_reviewed=%q\n' "$reviewed"
-    printf 'lint_cache_verified=%q\n' "$verified"
-    printf 'lint_cache_testable=%q\n' "$testable_raw"
-    printf 'lint_cache_testability_note=%q\n' "$testability_note"
-    printf 'lint_cache_requirement_key=%q\n' "$requirement_key"
-    printf 'lint_cache_requirement_class=%q\n' "$requirement_class"
-    printf 'lint_cache_requirement_kind=%q\n' "$requirement_kind"
-    printf 'lint_cache_requirement_domain=%q\n' "$requirement_domain"
+    printf 'format\t2\n'
+    printf 'id\t%s\n' "$(lint_cache_encode_value "$id")"
+    printf 'type\t%s\n' "$(lint_cache_encode_value "$type")"
+    printf 'status\t%s\n' "$(lint_cache_encode_value "$status")"
+    printf 'reviewed\t%s\n' "$(lint_cache_encode_value "$reviewed")"
+    printf 'verified\t%s\n' "$(lint_cache_encode_value "$verified")"
+    printf 'testable\t%s\n' "$(lint_cache_encode_value "$testable_raw")"
+    printf 'testability_note\t%s\n' "$(lint_cache_encode_value "$testability_note")"
+    printf 'requirement_key\t%s\n' "$(lint_cache_encode_value "$requirement_key")"
+    printf 'requirement_class\t%s\n' "$(lint_cache_encode_value "$requirement_class")"
+    printf 'requirement_kind\t%s\n' "$(lint_cache_encode_value "$requirement_kind")"
+    printf 'requirement_domain\t%s\n' "$(lint_cache_encode_value "$requirement_domain")"
   } >"$tmp" && mv "$tmp" "$cache_file" || rm -f "$tmp"
 }
 
