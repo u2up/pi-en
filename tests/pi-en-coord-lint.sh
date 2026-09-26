@@ -315,6 +315,16 @@ PI_EN_COORD_LINT_CACHE_DEBUG=1 \
     --project-root . >/dev/null 2>"$tmp/cache-hit.err"
 grep -q 'cache: hit ' "$tmp/cache-hit.err"
 
+(
+  cd "$repo_root"
+  PI_EN_COORD_LINT_CACHE_DIR="$tmp/relative-lint-cache" \
+  PI_EN_COORD_LINT_CACHE_DEBUG=1 \
+    scripts/pi-en-coord-lint \
+      --coord-dir "$tmp/project/.pi-en/coordination" \
+      --project-root "$tmp/project" >/dev/null 2>"$tmp/cache-relative-script.err"
+)
+grep -q 'cache: miss ' "$tmp/cache-relative-script.err"
+
 cp ".pi-en/coordination/$item_path" "$tmp/cache-item.clean.yaml"
 printf '# cache invalidation marker\n' >>".pi-en/coordination/$item_path"
 PI_EN_COORD_LINT_CACHE_DIR="$cache_dir" \

@@ -1,11 +1,13 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+lint_script_path="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)/$(basename "${BASH_SOURCE[0]}")"
+
 if [ -n "${PI_EN_COORD_LIB:-}" ]; then
   # shellcheck source=/dev/null
   . "$PI_EN_COORD_LIB"
 else
-  script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
+  script_dir="$(dirname "$lint_script_path")"
   # shellcheck source=pi-en-coord-lib.sh
   . "$script_dir/pi-en-coord-lib.sh"
 fi
@@ -394,7 +396,7 @@ lint_cache_init() {
     lint_cache_debug "disabled; cannot create $lint_cache_dir/items"
     return 0
   }
-  script_path="${BASH_SOURCE[0]}"
+  script_path="$lint_script_path"
   script_hash="$(sha256sum "$script_path" | awk '{print $1}')"
   manifest_hash="$({ find repos -path '*/REPO.md' -type f 2>/dev/null || true; } | sort | xargs -r sha256sum | sha256sum | awk '{print $1}')"
   tests_hash="$({ find "$project_root/tests/items" -type f -name '*.sh' 2>/dev/null || true; } | sort | xargs -r sha256sum | sha256sum | awk '{print $1}')"
