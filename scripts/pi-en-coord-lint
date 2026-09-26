@@ -135,8 +135,6 @@ cd "$coord_dir"
 failures=0
 warnings=0
 items_seen=0
-item_identity_seen=$'\n'
-active_requirement_key_seen=$'\n'
 
 lint_fail() {
   printf 'pi-en-coord-lint: FAIL: %s\n' "$*" >&2
@@ -185,11 +183,11 @@ if [ -d repos ]; then
 fi
 
 item_yaml_files() {
-  while IFS= read -r file; do
-    case "$file" in
-      *.yaml|*.yml) printf '%s\n' "$file" ;;
-    esac
-  done < <(coord_item_find_files)
+  local file
+  for file in "${item_index_files[@]}"; do
+    [ -n "$file" ] || continue
+    printf '%s\n' "$file"
+  done
 }
 
 item_status_dir() {
@@ -253,23 +251,16 @@ expected_test_path() {
 }
 
 item_file_for_id() {
-  local candidate file id_value stem
+  local candidate
   candidate="$1"
-  while IFS= read -r file; do
-    [ -n "$file" ] || continue
-    id_value="$(coord_item_value "$file" id || true)"
-    if [ "$id_value" = "$candidate" ]; then
-      printf '%s\n' "$file"
-      return 0
-    fi
-    stem="$(basename "$file")"
-    stem="${stem%.yaml}"
-    stem="${stem%.yml}"
-    if [ "$stem" = "$candidate" ]; then
-      printf '%s\n' "$file"
-      return 0
-    fi
-  done < <(coord_item_find_files)
+  if [ -n "${item_index_by_id[$candidate]:-}" ]; then
+    printf '%s\n' "${item_index_by_id[$candidate]}"
+    return 0
+  fi
+  if [ -n "${item_index_by_stem[$candidate]:-}" ]; then
+    printf '%s\n' "${item_index_by_stem[$candidate]}"
+    return 0
+  fi
   return 1
 }
 
@@ -323,21 +314,143 @@ item_has_nonempty_top_level_body() {
   ' "$file"
 }
 
+declare -a item_index_files=()
+declare -A item_index_by_id=()
+declare -A item_index_by_stem=()
+declare -A item_index_id=()
+declare -A item_index_type=()
+declare -A item_index_status=()
+declare -A item_index_reviewed=()
+declare -A item_index_verified=()
+declare -A item_index_testable=()
+declare -A item_index_testability_note=()
+declare -A item_index_requirement_key=()
+declare -A item_index_requirement_class=()
+declare -A item_index_requirement_kind=()
+declare -A item_index_requirement_domain=()
+declare -A item_index_stem=()
+declare -A item_index_status_dir=()
+declare -A item_index_repo_id=()
+declare -A item_index_duplicate_identity=()
+declare -A item_index_duplicate_requirement_key=()
+declare -A active_requirement_key_first_file=()
+declare -A repo_manifest_id_cache=()
+declare -A repo_manifest_status_cache=()
+
+repo_manifest_id() {
+  local repo_id manifest
+  repo_id="$1"
+  if [ -z "${repo_manifest_id_cache[$repo_id]+set}" ]; then
+    manifest="repos/$repo_id/REPO.md"
+    repo_manifest_id_cache[$repo_id]="$(coord_repo_manifest_value "$manifest" repo_id || true)"
+  fi
+  printf '%s\n' "${repo_manifest_id_cache[$repo_id]}"
+}
+
+repo_manifest_status() {
+  local repo_id manifest status
+  repo_id="$1"
+  if [ -z "${repo_manifest_status_cache[$repo_id]+set}" ]; then
+    manifest="repos/$repo_id/REPO.md"
+    status="$(coord_repo_manifest_value "$manifest" status || true)"
+    [ -n "$status" ] || status="active"
+    repo_manifest_status_cache[$repo_id]="$status"
+  fi
+  printf '%s\n' "${repo_manifest_status_cache[$repo_id]}"
+}
+
+build_item_index() {
+  local file id type status reviewed verified testable_raw testability_note
+  local requirement_key requirement_class requirement_kind requirement_domain
+  local stem identity_key canonical_type
+  while IFS= read -r file; do
+    [ -n "$file" ] || continue
+    case "$file" in
+      *.yaml|*.yml) ;;
+      *) continue ;;
+    esac
+
+    item_index_files+=("$file")
+    id="$(coord_item_value "$file" id || true)"
+    type="$(coord_item_value "$file" type || true)"
+    status="$(coord_item_value "$file" status || true)"
+    reviewed="$(coord_item_value "$file" reviewed || true)"
+    verified="$(coord_item_value "$file" verified || true)"
+    testable_raw="$(coord_item_value "$file" testable || true)"
+    testability_note="$(coord_item_value "$file" testability_note || true)"
+    requirement_key="$(coord_item_value "$file" requirement_key || true)"
+    requirement_class="$(coord_item_value "$file" requirement_class || true)"
+    requirement_kind="$(coord_item_value "$file" requirement_kind || true)"
+    requirement_domain="$(coord_item_value "$file" domain || true)"
+    stem="$(basename "$file")"
+    stem="${stem%.yaml}"
+    stem="${stem%.yml}"
+
+    item_index_id[$file]="$id"
+    item_index_type[$file]="$type"
+    item_index_status[$file]="$status"
+    item_index_reviewed[$file]="$reviewed"
+    item_index_verified[$file]="$verified"
+    item_index_testable[$file]="$testable_raw"
+    item_index_testability_note[$file]="$testability_note"
+    item_index_requirement_key[$file]="$requirement_key"
+    item_index_requirement_class[$file]="$requirement_class"
+    item_index_requirement_kind[$file]="$requirement_kind"
+    item_index_requirement_domain[$file]="$requirement_domain"
+    item_index_stem[$file]="$stem"
+    item_index_status_dir[$file]="$(item_status_dir "$file")"
+    item_index_repo_id[$file]="$(item_repo_id "$file")"
+
+    if [ -n "$id" ]; then
+      identity_key="$id"
+      if [ -n "${item_index_by_id[$id]:-}" ]; then
+        item_index_duplicate_identity[$file]="$identity_key"
+      else
+        item_index_by_id[$id]="$file"
+      fi
+    else
+      identity_key="$stem"
+    fi
+    if [ -n "${item_index_by_stem[$stem]:-}" ] && [ -z "${item_index_duplicate_identity[$file]:-}" ]; then
+      item_index_duplicate_identity[$file]="$identity_key"
+    else
+      item_index_by_stem[$stem]="$file"
+    fi
+
+    canonical_type="$(coord_item_type_canonical "$type")"
+    case "$canonical_type:$status" in
+      functional-requirement:closed|functional-requirement:superseded|quality-requirement:closed|quality-requirement:superseded|constraint-requirement:closed|constraint-requirement:superseded)
+        ;;
+      functional-requirement:*|quality-requirement:*|constraint-requirement:*)
+        if [ -n "$(coord_trim "$requirement_key")" ] && ! printf '%s' "$requirement_key" | grep -Eq '^[A-Z0-9]+-[A-Z0-9]{1,4}-[0-9]{8}-[0-9]{6}-[0-9]{3}$'; then
+          if [ -n "${active_requirement_key_first_file[$requirement_key]:-}" ]; then
+            item_index_duplicate_requirement_key[$file]="$requirement_key"
+          else
+            active_requirement_key_first_file[$requirement_key]="$file"
+          fi
+        fi
+        ;;
+    esac
+  done < <(coord_item_find_files)
+}
+
+build_item_index
+
 while IFS= read -r file; do
   [ -n "$file" ] || continue
   items_seen=$((items_seen + 1))
 
-  id="$(coord_item_value "$file" id || true)"
-  type="$(coord_item_value "$file" type || true)"
-  status="$(coord_item_value "$file" status || true)"
-  reviewed="$(coord_item_value "$file" reviewed || true)"
-  verified="$(coord_item_value "$file" verified || true)"
-  testable_raw="$(coord_item_value "$file" testable || true)"
-  testability_note="$(coord_item_value "$file" testability_note || true)"
-  requirement_key="$(coord_item_value "$file" requirement_key || true)"
-  requirement_class="$(coord_item_value "$file" requirement_class || true)"
-  requirement_kind="$(coord_item_value "$file" requirement_kind || true)"
-  requirement_domain="$(coord_item_value "$file" domain || true)"
+  id="${item_index_id[$file]}"
+  type="${item_index_type[$file]}"
+  status="${item_index_status[$file]}"
+  reviewed="${item_index_reviewed[$file]}"
+  verified="${item_index_verified[$file]}"
+  testable_raw="${item_index_testable[$file]}"
+  testability_note="${item_index_testability_note[$file]}"
+  requirement_key="${item_index_requirement_key[$file]}"
+  requirement_class="${item_index_requirement_class[$file]}"
+  requirement_kind="${item_index_requirement_kind[$file]}"
+  requirement_domain="${item_index_requirement_domain[$file]}"
 
   [ -n "$id" ] || lint_fail "$file is missing id"
   [ -n "$type" ] || lint_fail "$file is missing type"
@@ -346,22 +459,10 @@ while IFS= read -r file; do
     lint_fail "$file uses legacy issue_type metadata; use category"
   fi
 
-  stem="$(basename "$file")"
-  stem="${stem%.yaml}"
-  stem="${stem%.yml}"
-  if [ -n "$id" ]; then
-    identity_key="$id"
-  else
-    identity_key="$stem"
+  stem="${item_index_stem[$file]}"
+  if [ -n "${item_index_duplicate_identity[$file]:-}" ]; then
+    lint_fail "$file duplicates item id ${item_index_duplicate_identity[$file]}"
   fi
-  case "$item_identity_seen" in
-    *$'\n'"$identity_key"$'\n'*)
-      lint_fail "$file duplicates item id $identity_key"
-      ;;
-    *)
-      item_identity_seen="${item_identity_seen}${identity_key}"$'\n'
-      ;;
-  esac
 
   if printf '%s' "$id" | grep -Eq '^[A-Z0-9]+-[A-Z0-9]{1,4}-[0-9]{8}-[0-9]{6}-[0-9]{3}$'; then
     if [ "$stem" != "$id" ]; then
@@ -392,14 +493,9 @@ while IFS= read -r file; do
         case "$status" in
           closed|superseded) ;;
           *)
-            case "$active_requirement_key_seen" in
-              *$'\n'"$requirement_key"$'\n'*)
-                lint_fail "$file duplicates active requirement_key $requirement_key"
-                ;;
-              *)
-                active_requirement_key_seen="${active_requirement_key_seen}${requirement_key}"$'\n'
-                ;;
-            esac
+            if [ -n "${item_index_duplicate_requirement_key[$file]:-}" ]; then
+              lint_fail "$file duplicates active requirement_key $requirement_key"
+            fi
             ;;
         esac
       fi
@@ -448,16 +544,15 @@ while IFS= read -r file; do
       || lint_fail "$file issue item is missing events history"
     item_has_top_level_field "$file" messages \
       || lint_fail "$file issue item is missing messages history"
-    repo_id="$(item_repo_id "$file")"
+    repo_id="${item_index_repo_id[$file]}"
     if [ -n "$repo_id" ]; then
       if ! coord_repo_id_is_valid "$repo_id"; then
         lint_fail "$file is under invalid repo id $repo_id"
       elif [ ! -f "repos/$repo_id/REPO.md" ]; then
         lint_fail "$file is under unregistered repo id $repo_id"
       else
-        repo_manifest_id="$(coord_repo_manifest_value "repos/$repo_id/REPO.md" repo_id || true)"
-        repo_manifest_status="$(coord_repo_manifest_value "repos/$repo_id/REPO.md" status || true)"
-        [ -n "$repo_manifest_status" ] || repo_manifest_status="active"
+        repo_manifest_id="$(repo_manifest_id "$repo_id")"
+        repo_manifest_status="$(repo_manifest_status "$repo_id")"
         [ "$repo_manifest_id" = "$repo_id" ] \
           || lint_fail "$file repo manifest id $repo_manifest_id does not match $repo_id"
         [ "$repo_manifest_status" = "active" ] \
@@ -475,7 +570,7 @@ while IFS= read -r file; do
       esac
     fi
 
-    dir_status="$(item_status_dir "$file")"
+    dir_status="${item_index_status_dir[$file]}"
     if [ -z "$dir_status" ]; then
       lint_fail "$file issue item is not under a valid issues status directory"
     elif [ "$dir_status" = "open" ]; then
@@ -536,7 +631,7 @@ if [ -d "$items_tests_dir" ]; then
       lint_fail "$test_file does not match any coordination item id"
       continue
     fi
-    item_type="$(coord_item_value "$item_file" type || true)"
+    item_type="${item_index_type[$item_file]}"
     if ! should_check_item_test "$item_file" "$item_type"; then
       lint_fail "$test_file matches repo-scoped item outside selected repo; use --repo-id for that implementation repo"
       continue

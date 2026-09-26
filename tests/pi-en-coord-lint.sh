@@ -278,5 +278,27 @@ if pi-en-coord-lint \
   printf 'expected lint to fail for non-executable item-matched test\n' >&2
   exit 1
 fi
+chmod +x "tests/items/issues/$item_id.sh"
+
+cat >"$tmp/counting-lib.sh" <<EOF_LIB
+. "$repo_root/scripts/pi-en-coord-lib.sh"
+eval "\$(declare -f coord_item_find_files | sed '1s/coord_item_find_files/coord_item_find_files_real/')"
+coord_item_find_files() {
+  printf x >>"\$PI_EN_COORD_LINT_FIND_COUNT_FILE"
+  coord_item_find_files_real "\$@"
+}
+EOF_LIB
+: >"$tmp/find-count"
+PI_EN_COORD_LIB="$tmp/counting-lib.sh" \
+PI_EN_COORD_LINT_FIND_COUNT_FILE="$tmp/find-count" \
+  pi-en-coord-lint \
+    --coord-dir .pi-en/coordination \
+    --project-root . >/dev/null
+find_call_count="$(wc -c <"$tmp/find-count" | tr -d ' ')"
+if [ "$find_call_count" != "1" ]; then
+  printf 'expected lint to build one item index, saw %s item scans\n' \
+    "$find_call_count" >&2
+  exit 1
+fi
 
 printf 'agent coordination lint tests passed\n'
