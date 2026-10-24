@@ -4,9 +4,9 @@ This file is generated from active requirement items and `designs/*.md`.
 
 ## Summary
 
-- Requirements: 177
+- Requirements: 181
 - Covered by design: 177
-- Not covered by design: 0
+- Not covered by design: 4
 
 ## Coverage by requirement
 
@@ -87,7 +87,9 @@ This file is generated from active requirement items and `designs/*.md`.
 | CMD-023 | PIEN-FRQ-20260711-092100-001 | designs/pien-command-namespace.md |
 | CMD-024 | PIEN-FRQ-20260711-092100-002 | designs/pien-command-namespace.md |
 | CMD-025 | PIEN-FRQ-20260711-092100-003 | designs/pien-command-namespace.md |
+| BHV-001 | PIEN-FRQ-20261024-215014-001 | Not covered |
 | CMD-026 | PIEN-FRQ-20260711-170000-001 | designs/pien-command-namespace.md |
+| BHV-002 | PIEN-FRQ-20261024-215016-001 | Not covered |
 | CMD-027 | PIEN-FRQ-20260720-091901-001 | designs/nix-runtime.md |
 | CMD-028 | PIEN-FRQ-20260725-125507-001 | designs/pien-command-namespace.md |
 | PATH-004 | PIEN-FRQ-20260612-210000-051 | designs/bubblewrap-sandbox.md |
@@ -147,6 +149,8 @@ This file is generated from active requirement items and `designs/*.md`.
 | DOC-005 | PIEN-QRQ-20260720-091907-001 | designs/nix-runtime.md |
 | TEST-002 | PIEN-QRQ-20260612-210000-004 | designs/verification-strategy.md |
 | TEST-003 | PIEN-QRQ-20260612-210000-005 | designs/verification-strategy.md |
+| BHV-003 | PIEN-QRQ-20261024-215018-001 | Not covered |
+| BHV-004 | PIEN-QRQ-20261024-215021-001 | Not covered |
 | TEST-004 | PIEN-QRQ-20260612-210000-006 | designs/verification-strategy.md |
 | TEST-005 | PIEN-QRQ-20260612-210000-007 | designs/verification-strategy.md |
 | TEST-006 | PIEN-QRQ-20260612-210000-008 | designs/verification-strategy.md |

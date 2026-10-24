@@ -1287,6 +1287,27 @@ and known options for leaf commands. Path-valued options should keep path
 completion. The completion implementation should not require Nix-only tools;
 it must work in host-runtime installations as well as Nix-provided shells.
 
+#### BHV-001 — Project-owned behavior command and file contracts
+
+pi-en must provide project-owned Behavior Specifications (BHVs) as tracked
+source artifacts. The canonical behavior root is
+`pi-en-behaviors/`, which is separate from ignored mutable `.pi-en/` state
+and must not be added to coordination item directories or coordination
+lifecycle commands.
+
+The behavior namespace is a sibling of `pien coord` and exposes `init`,
+`new`, `lint`, `test`, `coverage`, and `requirements snapshot`. The generic
+tooling must resolve its manifest from an explicit or discovered project
+root and support ordinary project CI without a coordination checkout.
+
+`MANIFEST.yaml` must declare the v1 schema, repository ID, local item key,
+glossary, project adapter, optional requirements snapshot, and advisory or
+enforced compliance mode. Local BHV IDs use
+`<ITEMKEY>-BHV-<YYYYMMDD-HHMMSS>-<NNN>` and are not coordination item IDs.
+
+Coordination requirements and issues may reference BHV IDs, but
+coordination stores neither BHV bodies nor their lifecycle.
+
 #### CMD-026 pi-en-prefixed low-level commands
 
 All lower-level commands that are called by the `pien` command collection
@@ -1310,6 +1331,26 @@ documentation, tests, and `pien` help/completion output must use the new
 names. The old lower-level commands `pi-bwrap`, `bootstrap-coordination`,
 `agent-coord-*`, `pi-serial-roles`, and `install-non-nix` must not remain
 supported command entrypoints after the rename.
+
+#### BHV-002 — Versioned behavior DSL and adapter model
+
+BHVs, manifests, and glossaries use versioned YAML schemas parsed by a real
+YAML parser bundled with or explicitly verified by the behavior command.
+Complex scenario data must not be parsed with grep or awk, and DSL values
+must never be evaluated as shell syntax.
+
+Each repository owns a versioned domain glossary that declares its nouns,
+value types, given/when/then terms, accepted argument shapes, and any
+deprecated aliases in domain language. A BHV declares its glossary version,
+active/deprecated/superseded status, `satisfies` requirement keys, and one or
+more contrasting scenarios. It must not contain shell snippets or
+implementation-private assertions.
+
+The generic runner invokes the manifest's executable project adapter as
+`given`, `when`, or `then`, passing a term, JSON input file, and state
+directory. The adapter must implement `describe`; lint compares that output
+with the glossary so every declared executable term is implemented and term
+arguments are validated before execution.
 
 #### CMD-027 — Canonical flake agent shell integration recipe
 
@@ -1884,6 +1925,44 @@ Documentation updates must include:
   under the host home directory;
 - confirmation that `nix run`, `nix develop`, and flake integration remain
   supported for reproducible team workflows.
+
+### 4.1 Safety and isolation requirements
+
+#### BHV-003 — Isolated deterministic behavior execution
+
+The behavior runner must execute every scenario in a fresh temporary state
+directory and remove that state after the result is reported. It must set a
+deterministic baseline including `TZ=UTC`, a fixed locale, isolated `HOME`,
+and explicit temporary work and state paths. Results must identify both the
+BHV and scenario ID.
+
+Behavior commands must neither discover nor inherit `PI_EN_COORD_DIR` and
+must not read, write, pull, or otherwise use a developer's real coordination
+checkout. A coordination behavior adapter must instead create its own
+temporary project and bare remote. Only `pien behavior requirements snapshot`
+may read coordination state, and then only from its required explicit
+`--coord-dir` argument.
+
+#### BHV-004 — Local requirement-to-behavior coverage reporting
+
+`pien behavior requirements snapshot` must require `--coord-dir` and a
+repository ID, read that explicit coordination source without modifying it,
+and write only `pi-en-behaviors/requirements.snapshot.yaml`. The tracked
+snapshot records source revision, repository ID, requirement key, item ID,
+status, title, body, applicability, and behavior-coverage policy.
+
+Requirements may declare `applicable_repos` (omission means domain-wide) and
+`behavior_coverage` as `required`, `optional`, or `not-applicable`.
+Coordination may validate only the shape of issue/requirement BHV references;
+local behavior tooling validates existence to avoid a cross-repository CI
+dependency.
+
+`pien behavior coverage` must work only from local tracked artifacts, report
+JSON on request, and detect missing snapshot requirements, inactive or
+superseded claims, missing active coverage for applicable required
+requirements, and active BHVs without executable scenarios. Compliance is
+advisory by default and may be enforced only after a repository explicitly
+selects enforced mode.
 
 ### 4.2 Blackbox verification requirements
 
