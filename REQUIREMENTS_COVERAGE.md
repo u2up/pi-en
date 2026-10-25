@@ -4,9 +4,9 @@ This file is generated from active requirement items and `designs/*.md`.
 
 ## Summary
 
-- Requirements: 182
+- Requirements: 183
 - Covered by design: 177
-- Not covered by design: 5
+- Not covered by design: 6
 
 ## Coverage by requirement
 
@@ -93,6 +93,7 @@ This file is generated from active requirement items and `designs/*.md`.
 | CMD-027 | PIEN-FRQ-20260720-091901-001 | designs/nix-runtime.md |
 | BHV-005 | PIEN-FRQ-20261025-054332-001 | Not covered |
 | CMD-028 | PIEN-FRQ-20260725-125507-001 | designs/pien-command-namespace.md |
+| BHV-006 | PIEN-FRQ-20261025-072024-001 | Not covered |
 | PATH-004 | PIEN-FRQ-20260612-210000-051 | designs/bubblewrap-sandbox.md |
 | PATH-005 | PIEN-FRQ-20260612-210000-052 | designs/bubblewrap-sandbox.md |
 | PATH-006 | PIEN-FRQ-20260701-110514-001 | designs/host-runtime.md |

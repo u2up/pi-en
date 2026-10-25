@@ -1296,8 +1296,9 @@ and must not be added to coordination item directories or coordination
 lifecycle commands.
 
 The behavior namespace is a sibling of `pien coord` and exposes `init`,
-`new`, `lint`, `test`, `coverage`, and `requirements snapshot`. The generic
-tooling must resolve its manifest from an explicit or discovered project
+`new`, `list`, `regroup`, `index`, `lint`, `test`, `coverage`, and
+`requirements snapshot`. The generic tooling must resolve its manifest from
+an explicit or discovered project
 root and support ordinary project CI without a coordination checkout.
 
 `MANIFEST.yaml` must declare the v1 schema, repository ID, local item key,
@@ -1348,7 +1349,8 @@ Complex scenario data must not be parsed with grep or awk, and DSL values
 must never be evaluated as shell syntax.
 
 Each repository owns a versioned domain glossary that declares its nouns,
-value types, given/when/then terms, accepted argument shapes, and any
+value types, given/when/then terms, accepted argument shapes, logical BHV
+group taxonomy, and any
 deprecated aliases in domain language. A BHV declares its glossary version,
 active/deprecated/superseded status, `satisfies` requirement keys, and one or
 more contrasting scenarios. It must not contain shell snippets or
@@ -1397,7 +1399,8 @@ history preserves changed and removed specifications; current BHV status
 only determines what is normative in the checked-out suite.
 
 The adoption workflow must be additive: initialize a behavior root, define
-domain terms, implement a public-interface adapter, add a small reviewed
+domain terms and logical groups, implement a public-interface adapter, add a
+small reviewed
 behavior slice, and run lint/test in ordinary CI. Requirements snapshots and
 coverage are optional rather than prerequisites. Existing projects may begin
 with characterization examples derived from known-good observable behavior,
@@ -1434,6 +1437,29 @@ the sandbox layer, not by guessing from paths. The marker lets the canonical
 `pien` namespace apply a safe allow/block policy while preserving current
 behavior in outer terminals, Nix devshells, direct checkouts, and profile or
 non-Nix installs.
+
+#### BHV-006 — Logical behavior grouping and catalog discovery
+
+A behavior root keeps reserved control files at its top level and stores BHV
+files as ID-named regular YAML files directly in `specifications/`. The
+runner discovers only that collection, rejects unexpected YAML files there,
+and rejects duplicate BHV IDs across active, deprecated, and superseded
+specifications. Filesystem layout is deliberately not a behavior taxonomy.
+
+Each BHV must declare one normalized slash-separated logical `group` such as
+`features/coordination/item-lifecycle`, plus its title, feature, rule, and
+optional secondary tags. Group segments must be non-empty portable slugs and
+must reject leading/trailing slashes, `.`, `..`, and path traversal. Groups
+describe externally meaningful capabilities rather than implementation
+modules. The immutable BHV ID remains the only cross-file and
+cross-repository reference identity.
+
+`pien behavior list --group GROUP` and `test --group GROUP` must support
+segment-aware descendant selection; `new --group GROUP` scaffolds the
+metadata; and `regroup` changes only group metadata, never IDs or references.
+`pien behavior index` generates a catalog containing ID, group, title,
+feature, rule, status, tags, requirements, and scenario count. The catalog
+is derived output, not a hand-maintained source of truth.
 
 ### 3.5 Project root and working directory requirements
 
