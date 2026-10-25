@@ -38,7 +38,7 @@ make_stub() {
 make_stub_at "$tmp_dir/support/pi-en-update" pi-en-update-bundled
 
 for name in \
-  nix pi-en pi-en-shell pi-en-bwrap pi-en-bootstrap-coordination \
+  nix pi-en pi-en-shell pi-en-bwrap pi-en-behavior pi-en-bootstrap-coordination \
   pi-en-coord-init pi-en-coord-clone pi-en-coord-status pi-en-coord-list \
   pi-en-coord-cat pi-en-coord-new pi-en-coord-claim pi-en-coord-done \
   pi-en-coord-review pi-en-coord-verify pi-en-coord-close pi-en-coord-pull \
@@ -73,6 +73,7 @@ run_case $'cmd=pi-en\narg=--raw\narg=--runtime\narg=host\narg=--flake\narg=.#age
 run_case $'cmd=pi-en-shell\narg=--runtime\narg=nix' shell --runtime nix
 run_case $'cmd=pi-en-bwrap\narg=--continue' sandbox --continue
 run_case $'cmd=pi-en-bwrap\narg=--shell\narg=--\narg=-l' sandbox shell -- -l
+run_case $'cmd=pi-en-behavior\narg=lint\narg=--project-root\narg=/tmp/project' behavior lint --project-root /tmp/project
 run_case $'cmd=pi-en-bootstrap-coordination\narg=--help' coord bootstrap --help
 run_case $'cmd=pi-en-coord-status\narg=--repo-id\narg=pi-en' coord status --repo-id pi-en
 run_case $'cmd=pi-en-coord-cat\narg=ITEM-1' coord show ITEM-1

@@ -18,6 +18,7 @@ Usage:
   pien sandbox [pi args...]
   pien sandbox shell [shell args...]
   pien coord <command> [args...]
+  pien behavior <command> [args...]
   pien roles serial [args...]
   pien recipe flake-agent-shell
   pien install [args...]
@@ -34,6 +35,7 @@ Commands:
   shell               Run a pi-en shell (existing command: pi-en-shell)
   sandbox             Run the sandbox helper (existing command: pi-en-bwrap)
   coord               Coordination helpers (existing commands: pi-en-coord-*)
+  behavior            Project-owned behavior specifications
   roles serial        Serial role orchestrator (existing command: pi-en-serial-roles)
   recipe              Print non-mutating integration recipes
   install             Non-Nix installer (existing command: pi-en-install-non-nix)
@@ -390,7 +392,7 @@ _pien() {
   }
 
   launcher_options="--runtime --runtime= --flake --flake= --devshell --devshell= --help -h"
-  path_options="--coord-dir --coordination-dir --designs-dir --output -o --prefix --artifact-url --flake --domain-generated-file"
+  path_options="--coord-dir --coordination-dir --designs-dir --output -o --prefix --artifact-url --flake --domain-generated-file --project-root"
 
   raw_marker_seen=false
   for ((i = 1; i < cword; i++)); do
@@ -417,7 +419,7 @@ _pien() {
           ;;
       esac
       ;;
-    run|raw|shell) command_path="${words[1]}" ;;
+    run|raw|shell|behavior) command_path="${words[1]}" ;;
     sandbox) command_path="sandbox" ;;
     roles)
       command_path="roles"
@@ -454,6 +456,7 @@ _pien() {
       coord\ claim|coord\ done|coord\ review|coord\ verify|coord\ close) option_words="--coord-dir --agent-id --role --result --message --no-pull --no-push --force --pass --fail --help -h" ;;
       coord\ bootstrap) option_words="--project-root --root --remote --project --project-key --repo-id --register-repo --implementation-remote --domain-generated-file --generated-requirements-docs --dir --agent-id --bare-only --print-only --dry-run --no-status --help -h" ;;
       coord\ pull|coord\ push|coord\ lint|coord\ repo|coord\ init|coord\ clone|coord\ new) option_words="--coord-dir --repo-id --help -h" ;;
+      behavior) option_words="--project-root --group --id --title --help -h" ;;
       run|shell|"")
         if $raw_marker_seen; then
           option_words="--help -h"
@@ -474,7 +477,7 @@ _pien() {
   fi
 
   case "$cword" in
-    1) COMPREPLY=( $(_pien_comp_words "run raw shell sandbox coord roles recipe install update uninstall diagnostics version help completion") ); return 0 ;;
+    1) COMPREPLY=( $(_pien_comp_words "run raw shell sandbox coord behavior roles recipe install update uninstall diagnostics version help completion") ); return 0 ;;
   esac
 
   case "${words[1]:-}" in
@@ -487,6 +490,9 @@ _pien() {
         requirements) [ "$cword" -eq 3 ] && COMPREPLY=( $(_pien_comp_words "generate coverage") ) ;;
         *) [ "$cword" -eq 2 ] && COMPREPLY=( $(_pien_comp_words "bootstrap init clone status list show new claim done review verify close pull push lint repo rules requirements") ) ;;
       esac
+      ;;
+    behavior)
+      [ "$cword" -eq 2 ] && COMPREPLY=( $(_pien_comp_words "init new list regroup index lint test coverage requirements") )
       ;;
     roles)
       [ "$cword" -eq 2 ] && COMPREPLY=( $(_pien_comp_words "serial") )
@@ -647,6 +653,7 @@ help_dispatch() {
       ;;
     run) run_command_help pi-en ;;
     raw) run_command_help pi-en ;;
+    behavior) run_command_help pi-en-behavior ;;
     shell) run_command_help pi-en-shell ;;
     sandbox) run_command_help pi-en-bwrap ;;
     install) run_command_help pi-en-install-non-nix ;;
@@ -748,6 +755,10 @@ case "${1:-}" in
         ;;
     esac
     exec_command pi-en-bwrap "$@"
+    ;;
+  behavior)
+    shift
+    exec_command pi-en-behavior "$@"
     ;;
   coord)
     shift

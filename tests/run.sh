@@ -18,6 +18,7 @@ scripts=(
   tests/design-covers.sh
   tests/pi-en-install-non-nix.sh
   tests/pien-dispatcher.sh
+  tests/pi-en-behavior.sh
   tests/coordination-items-closed-or-done.sh
   tests/role-manager-package.sh
   tests/role-manager-schema.sh

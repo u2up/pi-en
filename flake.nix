@@ -65,6 +65,14 @@
           exec ${pkgs.bash}/bin/bash ${./scripts/pi-en-bwrap} "$@"
         '';
 
+      mkPiEnBehavior = pkgs:
+        let
+          python = mkBehaviorPython pkgs;
+        in
+        pkgs.writeShellScriptBin "pi-en-behavior" ''
+          exec ${python}/bin/pi-en-behavior-python ${./scripts/pi-en-behavior.py} "$@"
+        '';
+
       mkPiEn = pkgs:
         let
           piBwrap = mkPiBwrap pkgs;
@@ -101,6 +109,7 @@
             (mkPiEn pkgs)
             (mkPiEnShell pkgs)
             (mkPiBwrap pkgs)
+            (mkPiEnBehavior pkgs)
           ] ++ installCommands ++ coordinationCommands);
           pienBin = pkgs.writeShellScriptBin "pien" ''
             set -euo pipefail
@@ -227,6 +236,7 @@
           piBwrap = mkPiBwrap pkgs;
           piEn = mkPiEn pkgs;
           piEnShell = mkPiEnShell pkgs;
+          piEnBehavior = mkPiEnBehavior pkgs;
           pien = mkPien pkgs { inherit includeCoordinationHelpers; };
           piEnNixUpdate = mkPiEnNixUpdate pkgs;
           agentCoordCommands = builtins.attrValues (mkAgentCoordCommands pkgs);
@@ -248,6 +258,7 @@
             piBwrap
             piEn
             piEnShell
+            piEnBehavior
             pien
             piEnNixUpdate
           ] ++ coordinationPackages ++ extraPackages;
@@ -283,6 +294,7 @@
           mkPiBwrap
           mkPiEn
           mkPiEnShell
+          mkPiEnBehavior
           mkPien
           mkPiEnNixUpdate
           mkInstallNonNixCommands
@@ -300,6 +312,7 @@
         piBwrap = mkPiBwrap pkgs;
         piEn = mkPiEn pkgs;
         piEnShell = mkPiEnShell pkgs;
+        piEnBehavior = mkPiEnBehavior pkgs;
         pien = mkPien pkgs { };
         agentCoordCommands = mkAgentCoordCommands pkgs;
         agentCoordCommandPackages = builtins.attrValues agentCoordCommands;
@@ -309,6 +322,7 @@
           piBwrap
           piEn
           piEnShell
+          piEnBehavior
           piCorePien
         ];
         piCore = pkgs.buildEnv {
