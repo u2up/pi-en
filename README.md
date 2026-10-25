@@ -1239,6 +1239,32 @@ and project sessions bind-mounted into the sandbox can be read by commands or
 tools inside the sandbox. This is still safer than mounting your whole home, but
 use least-privilege API keys or a provider proxy when possible.
 
+### Behavior runner Python runtime
+
+Nix runtime and the default development shell provide a pinned Python with
+PyYAML. Future behavior-runner code must invoke
+`pi-en-behavior-python` (not a host `python` or `python3`); this exact wrapper
+executes the pinned interpreter. Behavior specifications must be parsed only
+with `yaml.safe_load`; unsafe YAML loaders are prohibited.
+
+After updating Pi-en, rebuild and relaunch from an **outer terminal** so the
+new Nix closure is selected; an already-running Pi sandbox cannot acquire this
+runtime retroactively:
+
+```bash
+cd /path/to/pi-en
+nix develop
+pien
+```
+
+Non-Nix installations do not provide `pi-en-behavior-python`. When a future
+behavior-runner invocation cannot find it, it must fail with this diagnostic
+rather than falling back to a host interpreter:
+
+```text
+pi-en behavior: Python runtime unavailable; rebuild and relaunch with `nix develop`.
+```
+
 ## 7. Configuration reference
 
 Common environment knobs:

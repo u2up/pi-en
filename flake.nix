@@ -10,6 +10,17 @@
     let
       defaultTools = "read,bash,edit,write,grep,find,ls";
 
+      mkBehaviorPythonEnv = pkgs:
+        pkgs.python3.withPackages (pythonPackages: [ pythonPackages.pyyaml ]);
+
+      mkBehaviorPython = pkgs:
+        let
+          python = mkBehaviorPythonEnv pkgs;
+        in
+        pkgs.writeShellScriptBin "pi-en-behavior-python" ''
+          exec ${python}/bin/python "$@"
+        '';
+
       mkRuntime = pkgs:
         with pkgs; [
           bash
@@ -26,6 +37,8 @@
           gzip
           jq
           nodejs
+          (mkBehaviorPythonEnv pkgs)
+          (mkBehaviorPython pkgs)
           ripgrep
           which
         ];
