@@ -1308,6 +1308,14 @@ enforced compliance mode. Local BHV IDs use
 Coordination requirements and issues may reference BHV IDs, but
 coordination stores neither BHV bodies nor their lifecycle.
 
+`init` must be additive and non-destructive: it must not rewrite an existing
+manifest, glossary, or BHV. An implementation repository commits and owns
+its BHVs, adapter, fixtures, and CI configuration; it may pin the pi-en
+runner version for reproducible CI. BHV execution needs no coordination
+checkout. A runner must either support a BHV's declared schema and glossary
+language version or fail clearly and locally with an upgrade/migration
+indication; it must not guess or silently reinterpret the specification.
+
 #### CMD-026 pi-en-prefixed low-level commands
 
 All lower-level commands that are called by the `pien` command collection
@@ -1352,6 +1360,14 @@ directory. The adapter must implement `describe`; lint compares that output
 with the glossary so every declared executable term is implemented and term
 arguments are validated before execution.
 
+BHVs are executable acceptance examples: their feature, rule, and scenario
+language must describe public domain or user-visible outcomes rather than
+implementation structure. They define conformance only for their stated
+observables; they do not prove complete behavioral equivalence or replace
+unit, security, property, performance, or other appropriate tests. A
+scaffold or recorded interaction may assist authoring, but it is not an
+accepted BHV until a human reviews its domain meaning and intended outcome.
+
 #### CMD-027 — Canonical flake agent shell integration recipe
 
 pi-en must provide a deterministic user-facing recipe for adding an
@@ -1371,6 +1387,26 @@ The recipe should recommend that pi-en-integrated projects provide the
 `.#agent` selector consistently. If the default shell is already pi-en-aware,
 the recipe may show `agent` as an alias of that normal `nix develop` shell;
 otherwise it should show a separate `pi-en.lib.mkPiShell` agent shell.
+
+#### BHV-005 — Project-local BDD adoption and interpretation
+
+pi-en must document BHVs as project-local, executable acceptance examples.
+An implementation repository owns and commits its behavior root, glossary,
+adapter, fixtures, and pin or integration of the behavior runner. Git
+history preserves changed and removed specifications; current BHV status
+only determines what is normative in the checked-out suite.
+
+The adoption workflow must be additive: initialize a behavior root, define
+domain terms, implement a public-interface adapter, add a small reviewed
+behavior slice, and run lint/test in ordinary CI. Requirements snapshots and
+coverage are optional rather than prerequisites. Existing projects may begin
+with characterization examples derived from known-good observable behavior,
+but those examples must be reviewed before being treated as intended
+acceptance behavior.
+
+Documentation must distinguish this limited behavioral contract from proof
+of complete reimplementation equivalence and explain that complementary test
+techniques remain necessary.
 
 #### CMD-028 — Sandbox-aware pien command surface
 
@@ -1962,7 +1998,11 @@ JSON on request, and detect missing snapshot requirements, inactive or
 superseded claims, missing active coverage for applicable required
 requirements, and active BHVs without executable scenarios. Compliance is
 advisory by default and may be enforced only after a repository explicitly
-selects enforced mode.
+selects enforced mode. Requirement snapshots and coverage are optional for
+external-project adoption: a project can initialize, author, lint, and test
+its project-local BHVs using only its own repository. They become available
+only when that project deliberately supplies an explicit coordination source
+and chooses to use requirement traceability.
 
 ### 4.2 Blackbox verification requirements
 
