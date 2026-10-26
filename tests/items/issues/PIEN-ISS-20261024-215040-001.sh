@@ -104,4 +104,12 @@ if "$runner" --project-root "$project" coverage --format json > "$tmp/enforced.j
 fi
 grep -Fq 'claims inactive requirement BHV-ONE' "$tmp/enforced.json"
 
+# Coverage must report an active BHV without executable scenarios instead of
+# failing structural validation before it can produce an advisory report.
+sed -i 's/compliance: enforced/compliance: advisory/' "$project/pi-en-behaviors/MANIFEST.yaml"
+sed -i '/^scenarios:/,$c\scenarios: []' "$project/pi-en-behaviors/specifications/EXAMPLE-BHV-20261024-215040-001.yaml"
+"$runner" --project-root "$project" coverage --format json > "$tmp/no-scenarios.json"
+grep -Fq '"passed": false' "$tmp/no-scenarios.json"
+grep -Fq 'has no executable scenarios' "$tmp/no-scenarios.json"
+
 echo 'PIEN-ISS-20261024-215040-001 passed'

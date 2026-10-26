@@ -83,7 +83,7 @@ def specs(base):
         item = load(path); item["_path"] = path; result.append(item)
     return result
 
-def validate(base):
+def validate(base, require_scenarios=True):
     man = manifest(base); lex = glossary(base, man); entries = specs(base); seen = set()
     terms = lex["terms"]
     for item in entries:
@@ -99,7 +99,7 @@ def validate(base):
         for key in ("title", "feature", "rule"):
             if not isinstance(item.get(key), str) or not item[key]: fail(f"{ident}: requires {key}")
         scenarios = item.get("scenarios")
-        if not isinstance(scenarios, list) or not scenarios: fail(f"{ident}: requires scenarios")
+        if not isinstance(scenarios, list) or (require_scenarios and not scenarios): fail(f"{ident}: requires scenarios")
         scenario_ids = set()
         for scenario in scenarios:
             if not isinstance(scenario, dict) or not isinstance(scenario.get("id"), str): fail(f"{ident}: scenario requires id")
@@ -235,7 +235,9 @@ def snapshot(args):
     print(output)
 
 def coverage(args):
-    base = root(args); man, _, entries = validate(base)
+    # Coverage must report active BHVs with no scenarios rather than rejecting
+    # the specification before it can produce the advisory/enforced report.
+    base = root(args); man, _, entries = validate(base, require_scenarios=False)
     snapshot_path = base / "requirements.snapshot.yaml"
     violations = []
     snapshot_data = None
