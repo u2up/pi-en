@@ -121,3 +121,116 @@ Coverage is advisory unless the manifest selects enforced compliance. On runner
 upgrade, pin the previous runner or explicitly migrate and review the versioned
 artifacts before changing CI. No coordination checkout is required for init,
 new, lint, test, grouping, or catalog generation.
+
+## Deferred advanced tooling proposals
+
+Do not implement the following proposals until v1 has been used and reviewed
+in external projects. Record demand as concrete authoring or assurance problems
+from those projects, including the affected public outcome, the current manual
+workaround, and why the existing YAML BHV model is insufficient. A proposal
+must preserve project-local ownership and ordinary CI execution; it must not
+make a coordination checkout, Gherkin parser, or inference service a v1
+requirement.
+
+### Adapter conformance fixtures
+
+**Problem to validate:** adapter authors can accidentally implement a glossary
+term with the wrong phase, argument shape, state handling, or observable result
+while still passing their own BHVs.
+
+**Candidate scope:** publish versioned, runner-owned fixture suites that invoke
+an adapter through the documented `describe`, `given`, `when`, and `then`
+protocol. Fixtures would assert protocol conformance only, with a small set of
+portable success/failure adapters and no project domain vocabulary. Projects
+would opt in with a separate command or CI target.
+
+**Costs and safeguards:** fixtures must version with the runner protocol and
+must distinguish a runner-protocol failure from a project behavior failure.
+They must not require network access, execute untrusted fixture inputs outside
+the existing sandbox model, or expose adapter internals in living
+documentation. Compatibility requires an explicit fixture/protocol version
+matrix and a retained runner pin or reviewed migration path.
+
+### Reviewed recording and characterization helpers
+
+**Problem to validate:** teams need a low-friction way to turn observed public
+interactions into reviewable candidate examples without treating recordings as
+requirements.
+
+**Candidate scope:** add an explicitly experimental helper that captures only
+user-approved, redacted public inputs and outputs, then emits a draft BHV with
+the `characterization` tag and conspicuous review metadata. It may never add a
+draft directly to the active acceptance suite or remove that tag; promotion
+remains a reviewed glossary/BHV commit.
+
+**Costs and safeguards:** require an opt-in output directory, stable and
+inspectable serialization, redaction hooks, and no default capture of secrets,
+tokens, personal data, or ambient environment. Define retention and access
+rules per adopting project. The helper needs compatibility tests against each
+supported schema version and clear failure behavior when it cannot safely
+redact or represent a value.
+
+### Rich scenario syntax and Gherkin interchange
+
+**Problem to validate:** repeated external-project demand demonstrates that
+scenario outlines, example tables, tags, backgrounds, or Gherkin
+import/export convey public behavior more clearly than current explicit YAML
+scenarios.
+
+**Candidate scope:** evaluate each construct independently, starting with a
+lossless import/export prototype and fixtures showing its mapping to the
+current glossary and logical groups. Do not adopt a whole Gherkin grammar by
+default. Tags must not replace the single logical group taxonomy, and any
+outline/table expansion must retain stable scenario identity and readable
+review diffs.
+
+**Costs and safeguards:** specify escaping, type conversion, duplicate names,
+background state isolation, unsupported constructs, and round-trip loss policy
+before enabling interchange. New syntax must have a declared language version,
+an explicit migration command, and an old-runner pin path; importing external
+text must be parsed as data, never evaluated as shell. Adoption requires
+maintainer evidence that the added grammar and parser maintenance cost is
+justified.
+
+### Complementary assurance integrations
+
+**Problem to validate:** users need guidance or narrow integrations for
+assurance gaps that BHVs intentionally do not cover.
+
+**Candidate scope:** document and prototype optional links from a BHV's public
+outcome to property/model-based, contract, security, performance/load, and
+mutation test evidence. These tests remain independent suites: properties
+explore input spaces, models compare defined state behavior, contracts check
+service boundaries, security and load testing assess adversarial and capacity
+risks, and mutation testing assesses test sensitivity. None may be reported as
+BHV conformance or replace scenario review.
+
+**Costs and safeguards:** integrations must avoid importing test-framework
+lock-in into the generic runner and must not publish sensitive security or load
+artifacts by default. Each integration needs a reproducible tool/version pin,
+separate failure reporting, bounded resource settings, and an explicit policy
+for CI secrets and test environments.
+
+### Umbrella system-level BHVs
+
+**Problem to validate:** a system spanning independently released components
+needs outcome-focused acceptance evidence that component-local BHVs cannot
+provide.
+
+**Candidate scope:** define an umbrella repository that owns its own glossary,
+adapter, and system-level BHVs. It consumes immutable, pinned component
+artifacts, attestations, or result contracts and asserts only cross-component
+public outcomes. Component repositories retain their component BHVs and are
+not required to expose implementation details.
+
+**Costs and safeguards:** the proposal must define artifact provenance,
+digest/lock-file pinning, compatibility matrices, test-data isolation, secret
+boundaries, rollback, and how stale component results are identified. It must
+also establish maintenance ownership and release cadence so umbrella failures
+can be assigned without making every component change block unrelated systems.
+
+For any proposal, submit a separately scoped implementation issue only after
+recording external evidence, compatibility and migration behavior, security
+review, expected maintenance owner, and executable acceptance tests. Keep the
+proposal optional and additive unless a later decision explicitly changes the
+BHV compatibility contract.
