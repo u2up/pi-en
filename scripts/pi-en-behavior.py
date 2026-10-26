@@ -232,10 +232,20 @@ def snapshot(args):
     # only its project-local tracked artifact.
     if output.is_symlink():
         fail("requirements snapshot output must not be a symlink")
-    with open(output, "w", encoding="utf-8") as stream:
-        yaml.safe_dump({"schema": VERSION, "source_revision": revision,
-                        "repository_id": args.repo_id, "requirements": requirements}, stream,
-                       sort_keys=False)
+    # Replace an existing regular output atomically.  In particular, this
+    # replaces a hard link rather than truncating the link's other name.
+    temp_name = None
+    try:
+        with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", dir=base,
+                                         prefix=".requirements.snapshot.", delete=False) as stream:
+            temp_name = Path(stream.name)
+            yaml.safe_dump({"schema": VERSION, "source_revision": revision,
+                            "repository_id": args.repo_id, "requirements": requirements}, stream,
+                           sort_keys=False)
+        os.replace(temp_name, output)
+    finally:
+        if temp_name is not None and temp_name.exists():
+            temp_name.unlink()
     print(output)
 
 def coverage(args):

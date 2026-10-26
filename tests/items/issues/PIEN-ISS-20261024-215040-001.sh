@@ -101,7 +101,14 @@ if "$runner" --project-root "$project" requirements snapshot --coord-dir "$coord
 fi
 grep -Fxq 'unchanged' "$target"
 rm "$project/pi-en-behaviors/requirements.snapshot.yaml"
+
+# Replacing a hard link must not truncate the external name.  Atomic replace
+# leaves the target unchanged and installs an independent local snapshot.
+ln "$target" "$project/pi-en-behaviors/requirements.snapshot.yaml"
 "$runner" --project-root "$project" requirements snapshot --coord-dir "$coord" --repo-id example >/dev/null
+grep -Fxq 'unchanged' "$target"
+[ "$(stat -c %h "$project/pi-en-behaviors/requirements.snapshot.yaml")" -eq 1 ]
+grep -Fq 'BHV-ONE' "$project/pi-en-behaviors/requirements.snapshot.yaml"
 
 "$runner" --project-root "$project" coverage --format json > "$tmp/advisory.json"
 grep -Fq '"passed": true' "$tmp/advisory.json"
