@@ -36,8 +36,14 @@ YAML
 cat > "$tmp/pi-en-behaviors/adapter" <<'SH'
 #!/usr/bin/env bash
 set -euo pipefail
-if [ "$1" = describe ]; then printf '%s\n' '{"terms":{"prepared":{},"invoked":{},"observed":{}}}'; exit 0; fi
+if [ "$1" = describe ]; then
+  [ -z "${PI_EN_COORD_DIR:-}" ]
+  [ "$PWD" != "${0%/*}" ]
+  printf '%s\n' '{"terms":{"prepared":{},"invoked":{},"observed":{}}}'
+  exit 0
+fi
 [ -f "$3" ] && [ -d "$4" ]
+[ "$PWD" = "$4" ]
 [ "$PATH" = '/bin:/usr/bin' ]
 [ -z "${PI_EN_COORD_DIR:-}" ]
 SH

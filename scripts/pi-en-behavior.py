@@ -126,11 +126,24 @@ def python_cache_prefix():
     cache_home = os.environ.get("XDG_CACHE_HOME") or str(Path.home() / ".cache")
     return str(Path(cache_home) / "pi-en" / "python-bytecode")
 
+def adapter_env(work):
+    """Return the deterministic, coordination-free adapter environment."""
+    return {
+        "PATH": os.defpath, "TZ": "UTC", "LC_ALL": "C", "LANG": "C",
+        "HOME": str(work / "home"), "TMPDIR": str(work / "tmp"),
+        "PYTHONPYCACHEPREFIX": os.environ.get("PYTHONPYCACHEPREFIX") or python_cache_prefix(),
+    }
+
 def lint(args):
     base = root(args); man, lex, entries = validate(base)
     adapter = (base / man["adapter"]).resolve()
     if not adapter.is_file() or not os.access(adapter, os.X_OK): fail("manifest adapter must be executable")
-    try: described = json.loads(subprocess.check_output([str(adapter), "describe"], text=True))
+    try:
+        with tempfile.TemporaryDirectory(prefix="pien-behavior-lint-") as temporary:
+            work = Path(temporary)
+            (work / "home").mkdir(); (work / "tmp").mkdir()
+            described = json.loads(subprocess.check_output(
+                [str(adapter), "describe"], text=True, env=adapter_env(work), cwd=work))
     except (subprocess.CalledProcessError, json.JSONDecodeError) as exc: fail(f"adapter describe failed: {exc}")
     supported = described.get("terms", described) if isinstance(described, dict) else None
     if not isinstance(supported, dict) or set(supported) != set(lex["terms"]): fail("adapter describe terms must exactly match glossary terms")
@@ -145,12 +158,12 @@ def test(args):
             state = Path(tempfile.mkdtemp(prefix="pien-behavior-"))
             try:
                 # Do not pass caller-controlled PATH or coordination settings to adapters.
-                env = {"PATH": os.defpath, "TZ": "UTC", "LC_ALL": "C", "LANG": "C", "HOME": str(state / "home"), "TMPDIR": str(state / "tmp"), "PYTHONPYCACHEPREFIX": os.environ.get("PYTHONPYCACHEPREFIX") or python_cache_prefix()}
+                env = adapter_env(state)
                 (state / "home").mkdir(); (state / "tmp").mkdir()
                 for phase in ("given", "when", "then"):
                     for step in scenario.get(phase, []):
                         data = state / "input.json"; data.write_text(json.dumps(step.get("args", {})), encoding="utf-8")
-                        call = subprocess.run([str(adapter), phase, step["term"], str(data), str(state)], env=env, text=True, capture_output=True)
+                        call = subprocess.run([str(adapter), phase, step["term"], str(data), str(state)], env=env, cwd=state, text=True, capture_output=True)
                         if call.returncode:
                             raise RuntimeError((call.stderr or call.stdout).strip() or "adapter failed")
                 print(f"PASS {item['id']} {scenario['id']}")
