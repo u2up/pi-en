@@ -118,6 +118,10 @@ def init(args):
 def selected(entries, group):
     return [x for x in entries if not group or x["group"] == group or x["group"].startswith(group + "/")]
 
+def python_cache_prefix():
+    cache_home = os.environ.get("XDG_CACHE_HOME") or str(Path.home() / ".cache")
+    return str(Path(cache_home) / "pi-en" / "python-bytecode")
+
 def lint(args):
     base = root(args); man, lex, entries = validate(base)
     adapter = (base / man["adapter"]).resolve()
@@ -136,7 +140,7 @@ def test(args):
         for scenario in item["scenarios"]:
             state = Path(tempfile.mkdtemp(prefix="pien-behavior-"))
             try:
-                env = {"PATH": os.environ.get("PATH", ""), "TZ": "UTC", "LC_ALL": "C", "LANG": "C", "HOME": str(state / "home"), "TMPDIR": str(state / "tmp")}
+                env = {"PATH": os.environ.get("PATH", ""), "TZ": "UTC", "LC_ALL": "C", "LANG": "C", "HOME": str(state / "home"), "TMPDIR": str(state / "tmp"), "PYTHONPYCACHEPREFIX": os.environ.get("PYTHONPYCACHEPREFIX") or python_cache_prefix()}
                 (state / "home").mkdir(); (state / "tmp").mkdir()
                 for phase in ("given", "when", "then"):
                     for step in scenario.get(phase, []):

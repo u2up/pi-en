@@ -1187,6 +1187,7 @@ bwrap_args+=(
   --setenv PI_CODING_AGENT_SESSION_DIR /home/pi/.pi/agent/sessions
   --setenv PI_EN_INSIDE_SANDBOX 1
   --setenv XDG_CACHE_HOME /home/pi/.cache
+  --setenv PYTHONPYCACHEPREFIX /home/pi/.cache/python-bytecode
   --setenv TMPDIR /tmp
   --setenv PATH "$sandbox_path"
   --setenv SSL_CERT_FILE "${PI_EN_BWRAP_CA_BUNDLE:-/etc/ssl/certs/ca-certificates.crt}"

@@ -18,6 +18,7 @@
           python = mkBehaviorPythonEnv pkgs;
         in
         pkgs.writeShellScriptBin "pi-en-behavior-python" ''
+          export PYTHONPYCACHEPREFIX="''${XDG_CACHE_HOME:-''${HOME}/.cache}/pi-en/python-bytecode"
           exec ${python}/bin/python "$@"
         '';
 

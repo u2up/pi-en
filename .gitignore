@@ -1,5 +1,8 @@
 result
 result-*
+__pycache__/
+*.pyc
+*.pyo
 .direnv/
 .pi/
 !/examples/project-role-override/.pi/

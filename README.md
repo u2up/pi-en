@@ -1320,6 +1320,14 @@ because it can contain copied auth, settings, sessions, and caches; use
 `PI_EN_BWRAP_STATE_DIR=$PWD/.pi-en/state` only when you explicitly want that
 project-local operational state.
 
+Pi-en redirects Python bytecode to
+`/home/pi/.cache/python-bytecode` in the sandbox, which is backed by the
+per-project sandbox cache. Pi-en-controlled Python outside the sandbox uses
+`${XDG_CACHE_HOME:-$HOME/.cache}/pi-en/python-bytecode` instead. This avoids
+creating `__pycache__` in the mounted project while retaining reusable cache
+data; an explicit project-local state directory also makes that cache local to
+the project and safe to discard.
+
 ## 8. Common vs project-specific Pi resources
 
 `pi-en` keeps the runtime separate from user-specific agent behavior. It does
