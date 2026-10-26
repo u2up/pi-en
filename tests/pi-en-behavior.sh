@@ -95,6 +95,8 @@ env PATH=/caller-controlled-path HOME="$HOME" PI_EN_COORD_DIR="$repo_root/.pi-en
 "$runner" --project-root "$tmp" document > "$tmp/behavior-documentation.md"
 grep -Fq '# Behavior documentation: test' "$tmp/behavior-documentation.md"
 grep -Fq '[features/demo](#features-demo)' "$tmp/behavior-documentation.md"
+# Catalog links target an explicit stable anchor, not renderer-specific heading slugs.
+grep -Fqx '<a id="features-demo"></a>' "$tmp/behavior-documentation.md"
 grep -Fq '### Demonstrate behavior (`TEST-BHV-20261024-215036-001`)' "$tmp/behavior-documentation.md"
 grep -Fq -- '- Feature: Demo' "$tmp/behavior-documentation.md"
 "$runner" --project-root "$tmp" regroup TEST-BHV-20261024-215036-001 --group features/demo/renamed

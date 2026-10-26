@@ -212,7 +212,9 @@ def document(args):
     for group in groups:
         print(f"- [{group}](#{group.replace('/', '-')})")
     for group in groups:
-        print(f"\n## {group}")
+        # Keep catalog targets stable for slash-separated logical groups;
+        # Markdown heading sluggers differ on how they treat slashes.
+        print(f'\n<a id="{group.replace("/", "-")}"></a>\n## {group}')
         for item in (entry for entry in entries if entry['group'] == group):
             print(f"\n### {item['title']} (`{item['id']}`)")
             print(f"- Status: {item['status']}")
