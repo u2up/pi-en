@@ -297,7 +297,8 @@ def coverage(args):
         if not isinstance(references, list) or not all(isinstance(x, str) for x in references):
             violations.append(f"{item['id']} has invalid satisfies references")
             continue
-        if item["status"] == "active" and not item.get("scenarios"):
+        executable = item["status"] == "active" and bool(item.get("scenarios"))
+        if item["status"] == "active" and not executable:
             violations.append(f"{item['id']} has no executable scenarios")
         for reference in references:
             requirement = by_reference.get(reference)
@@ -305,7 +306,9 @@ def coverage(args):
                 violations.append(f"{item['id']} claims missing snapshot requirement {reference}")
             elif requirement.get("status") != "active":
                 violations.append(f"{item['id']} claims inactive requirement {reference}")
-            elif item["status"] == "active":
+            elif executable:
+                # Required coverage must be backed by a behavior that can run,
+                # not merely by a traceability reference.
                 claims.setdefault(requirement.get("item_id"), []).append(item["id"])
     for requirement in requirements:
         if not isinstance(requirement, dict): continue

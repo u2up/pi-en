@@ -164,5 +164,8 @@ sed -i '/^scenarios:/,$c\scenarios: []' "$project/pi-en-behaviors/specifications
 "$runner" --project-root "$project" coverage --format json > "$tmp/no-scenarios.json"
 grep -Fq '"passed": false' "$tmp/no-scenarios.json"
 grep -Fq 'has no executable scenarios' "$tmp/no-scenarios.json"
+# A behavior without scenarios is not executable coverage: report both its
+# structural violation and the missing required requirement coverage.
+grep -Fq 'required requirement BHV-TWO has no active BHV coverage' "$tmp/no-scenarios.json"
 
 echo 'PIEN-ISS-20261024-215040-001 passed'
