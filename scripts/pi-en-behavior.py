@@ -62,7 +62,8 @@ def specs(base):
     files = sorted(directory.iterdir())
     result = []
     for path in files:
-        if path.is_dir(): fail(f"unexpected directory in specifications: {path.name}")
+        if path.is_symlink() or not path.is_file():
+            fail(f"specification must be a regular file: {path.name}")
         if path.suffix not in (".yaml", ".yml"): continue
         if path.suffix != ".yaml" or not ID_RE.fullmatch(path.stem): fail(f"unexpected YAML specification: {path.name}")
         item = load(path); item["_path"] = path; result.append(item)

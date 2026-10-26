@@ -63,6 +63,15 @@ env PATH=/caller-controlled-path HOME="$HOME" PI_EN_COORD_DIR="$repo_root/.pi-en
 "$runner" --project-root "$tmp" lint
 ! "$runner" --project-root "$tmp" new --id TEST-BHV-20261024-215036-002 --group ../unsafe --title unsafe
 ! "$runner" --project-root "$tmp" new --id TEST-BHV-20261024-215036-002 --group unlisted --title unsafe
+cp "$tmp/pi-en-behaviors/specifications/TEST-BHV-20261024-215036-001.yaml" "$tmp/outside.yaml"
+before="$(sha256sum "$tmp/outside.yaml")"
+rm "$tmp/pi-en-behaviors/specifications/TEST-BHV-20261024-215036-001.yaml"
+ln -s "$tmp/outside.yaml" "$tmp/pi-en-behaviors/specifications/TEST-BHV-20261024-215036-001.yaml"
+! "$runner" --project-root "$tmp" lint
+! "$runner" --project-root "$tmp" regroup TEST-BHV-20261024-215036-001 --group features/demo
+[ "$before" = "$(sha256sum "$tmp/outside.yaml")" ]
+rm "$tmp/pi-en-behaviors/specifications/TEST-BHV-20261024-215036-001.yaml"
+cp "$tmp/outside.yaml" "$tmp/pi-en-behaviors/specifications/TEST-BHV-20261024-215036-001.yaml"
 cp "$tmp/pi-en-behaviors/specifications/TEST-BHV-20261024-215036-001.yaml" "$tmp/pi-en-behaviors/specifications/TEST-BHV-20261024-215036-003.yaml"
 ! "$runner" --project-root "$tmp" lint
 printf 'pi-en behavior tests passed\n'
