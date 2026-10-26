@@ -186,12 +186,38 @@ validate_related_behaviors() {
     return 0
   fi
   value="$(sed -n 's/^related_behaviors:[[:space:]]*//p' "$file" | head -n1)"
-  # YAML comments begin after whitespace. Strip a trailing inline comment
-  # before recognizing the flow-style list, while preserving list entries.
+  # A YAML flow list may span lines.  Collect it through its closing bracket
+  # before stripping comments and validating its shape-only BHV references.
+  if [[ "$value" == \[* ]]; then
+    value="$(awk '
+      /^related_behaviors:[[:space:]]*\[/ {
+        collecting=1; value=$0
+        sub(/^related_behaviors:[[:space:]]*/, "", value)
+        if (value ~ /\]/) { print value; exit }
+        next
+      }
+      collecting {
+        value=value "\n" $0
+        if ($0 ~ /\]/) { print value; exit }
+      }
+    ' "$file")"
+  fi
+  # YAML comments begin after whitespace. Strip trailing inline comments from
+  # every collected flow-list line while preserving list entries.
   value="$(printf '%s\n' "$value" | sed 's/[[:space:]][[:space:]]*#.*$//')"
   if [ -n "$value" ] && [ "$value" != '[]' ]; then
-    if [[ "$value" =~ ^\[.*\]$ ]]; then
+    if [[ "$value" == \[* && "$value" == *] ]]; then
       value="${value#[}"; value="${value%]}"
+      # Formatting newlines around flow entries are not empty list entries.
+      # Flatten them before splitting comma-separated YAML flow entries.
+      value="$(printf '%s\n' "$value" | sed '/^[[:space:]]*$/d' | tr '\n' ' ')"
+      if [ -z "$(coord_trim "$value")" ]; then
+        return
+      fi
+      if [[ "$value" =~ ,[[:space:]]*(,|$) ]]; then
+        lint_fail "$file related_behaviors entry has invalid BHV ID shape: "
+        return
+      fi
       while IFS= read -r reference; do
         validate_behavior_reference "$reference"
       done < <(printf '%s\n' "$value" | tr ',' '\n')
