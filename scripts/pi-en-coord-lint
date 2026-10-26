@@ -204,7 +204,7 @@ validate_related_behaviors() {
   fi
   # YAML comments begin after whitespace. Strip trailing inline comments from
   # every collected flow-list line while preserving list entries.
-  value="$(printf '%s\n' "$value" | sed 's/[[:space:]][[:space:]]*#.*$//')"
+  value="$(printf '%s\n' "$value" | sed -e 's/^#.*$//' -e 's/[[:space:]][[:space:]]*#.*$//')"
   if [ -n "$value" ] && [ "$value" != '[]' ]; then
     if [[ "$value" == \[* && "$value" == *] ]]; then
       value="${value#[}"; value="${value%]}"
@@ -229,10 +229,11 @@ validate_related_behaviors() {
   # Do not use process substitution here: its command's nonzero status is
   # not reflected by the loop, allowing mapping values to bypass validation.
   if ! list_entries="$(awk '
-    /^related_behaviors:[[:space:]]*$/ { active=1; next }
+    /^related_behaviors:[[:space:]]*(#.*)?$/ { active=1; next }
     active && /^[^[:space:]#]/ { active=0 }
     active && /^[[:space:]]*-[[:space:]]*/ {
       sub(/^[[:space:]]*-[[:space:]]*/, ""); sub(/[[:space:]]+#.*$/, ""); print
+      next
     }
     active && NF && !/^[[:space:]]*#/ && !/^[[:space:]]*-[[:space:]]*/ { bad=1 }
     END { if (bad) exit 2 }

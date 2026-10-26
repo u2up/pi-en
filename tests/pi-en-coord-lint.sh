@@ -138,6 +138,9 @@ cp "$tmp/requirement.key.clean.yaml" ".pi-en/coordination/$requirement_path"
 printf 'related_behaviors: [\n  PIEN-BHV-20261024-215040-001,\n  PIEN-BHV-20261024-215040-002\n] # local traceability\n' >>".pi-en/coordination/$requirement_path"
 pi-en-coord-lint --coord-dir .pi-en/coordination --project-root . >/dev/null
 cp "$tmp/requirement.key.clean.yaml" ".pi-en/coordination/$requirement_path"
+printf 'related_behaviors: # local traceability\n  - PIEN-BHV-20261024-215040-001\n' >>".pi-en/coordination/$requirement_path"
+pi-en-coord-lint --coord-dir .pi-en/coordination --project-root . >/dev/null
+cp "$tmp/requirement.key.clean.yaml" ".pi-en/coordination/$requirement_path"
 printf 'related_behaviors: [PIEN-BHV-20261024-215040-001, ]\n' >>".pi-en/coordination/$requirement_path"
 if pi-en-coord-lint \
   --coord-dir .pi-en/coordination \
