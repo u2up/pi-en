@@ -82,7 +82,16 @@ git -C "$coord" add requirements
 git -C "$coord" commit -qm requirements
 
 # An ambient coordination directory is ignored; both explicit options are
-# mandatory and the only file written is the local tracked snapshot.
+# mandatory and the only file written is the local tracked snapshot.  argparse
+# accepts an explicit empty value, so reject it rather than treating it as a
+# repository scope that includes every domain-wide requirement.
+if "$runner" --project-root "$project" requirements snapshot \
+  --coord-dir "$coord" --repo-id '' > "$tmp/empty-repo-id.out" 2>&1; then
+  echo 'snapshot unexpectedly accepted an empty repository ID' >&2
+  exit 1
+fi
+grep -Fq 'requires a non-empty repository ID' "$tmp/empty-repo-id.out"
+[ ! -e "$project/pi-en-behaviors/requirements.snapshot.yaml" ]
 PI_EN_COORD_DIR="$tmp/ignored" "$runner" --project-root "$project" requirements snapshot \
   --coord-dir "$coord" --repo-id example >/dev/null
 [ -f "$project/pi-en-behaviors/requirements.snapshot.yaml" ]

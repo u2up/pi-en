@@ -205,6 +205,8 @@ def index(args):
 def snapshot(args):
     # The coordination source is deliberately explicit: snapshots are an opt-in
     # local traceability artifact, never discovered through the environment.
+    if not args.repo_id.strip():
+        fail("requirements snapshot requires a non-empty repository ID")
     coord = Path(args.coord_dir).resolve()
     if not coord.is_dir(): fail(f"coordination directory not found: {coord}")
     try:
