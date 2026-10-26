@@ -9,6 +9,7 @@ except ImportError as exc:
     sys.exit("pien behavior: PyYAML is required; use the pi-en Nix runtime or install PyYAML")
 
 VERSION = "v1"
+ARGUMENT_TYPES = {"string", "integer", "boolean"}
 ID_RE = re.compile(r"^[A-Z0-9]+-BHV-[0-9]{8}-[0-9]{6}-[0-9]{3}$")
 SLUG_RE = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 
@@ -54,6 +55,13 @@ def glossary(base, man):
     if not isinstance(terms, dict): fail("glossary requires a terms mapping")
     groups = data.get("groups", [])
     if not isinstance(groups, list) or not all(group_valid(x) for x in groups): fail("glossary groups must be normalized slash-separated slugs")
+    for name, term in terms.items():
+        if not isinstance(name, str) or not isinstance(term, dict): fail("glossary terms must be named mappings")
+        arguments = term.get("args", {})
+        if not isinstance(arguments, dict): fail(f"glossary term {name} args must be a mapping")
+        for argument, kind in arguments.items():
+            if not isinstance(argument, str) or not isinstance(kind, str) or kind not in ARGUMENT_TYPES:
+                fail(f"glossary term {name} has unsupported argument type for {argument}")
     return data
 
 def specs(base):

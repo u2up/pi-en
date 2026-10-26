@@ -98,4 +98,18 @@ rm "$tmp/pi-en-behaviors/specifications/TEST-BHV-20261024-215036-001.yaml"
 cp "$tmp/outside.yaml" "$tmp/pi-en-behaviors/specifications/TEST-BHV-20261024-215036-001.yaml"
 cp "$tmp/pi-en-behaviors/specifications/TEST-BHV-20261024-215036-001.yaml" "$tmp/pi-en-behaviors/specifications/TEST-BHV-20261024-215036-003.yaml"
 ! "$runner" --project-root "$tmp" lint
+rm "$tmp/pi-en-behaviors/specifications/TEST-BHV-20261024-215036-003.yaml"
+cat > "$tmp/pi-en-behaviors/GLOSSARY.yaml" <<'YAML'
+language_version: v1
+groups: [features/demo]
+terms:
+  prepared: {phase: given, args: {name: unsupported}}
+  invoked: {phase: when, args: {}}
+  observed: {phase: then, args: {ok: boolean}}
+YAML
+if "$runner" --project-root "$tmp" lint >"$tmp/unsupported-type.out" 2>&1; then
+  echo 'behavior lint accepted an unsupported glossary argument type' >&2
+  exit 1
+fi
+grep -Fq 'unsupported argument type' "$tmp/unsupported-type.out"
 printf 'pi-en behavior tests passed\n'
