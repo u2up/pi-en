@@ -1,0 +1,16 @@
+schema: v1
+language_version: v1
+id: SHOP-BHV-20261026-120000-001
+group: features/checkout
+status: active
+title: Shopper receives a confirmed order
+feature: Checkout confirmation
+rule: A submitted basket is confirmed with its public total
+tags: [checkout, characterization]
+satisfies: []
+scenarios:
+  - id: known-current-result
+    title: Known current basket total is confirmed
+    given: [{term: shopper with a basket, args: {total: 42}}]
+    when: [{term: submits checkout, args: {}}]
+    then: [{term: order is confirmed, args: {total: 42}}]

@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+case "$1" in
+  describe)
+    printf '%s\n' '{"terms":{"shopper with a basket":{},"submits checkout":{},"order is confirmed":{}}}'
+    ;;
+  given)
+    IFS= read -r basket < "$3" || true
+    printf '%s\n' "$basket" > "$4/basket.json"
+    ;;
+  when)
+    test -f "$4/basket.json"
+    ;;
+  then)
+    IFS= read -r basket < "$4/basket.json" || true
+    IFS= read -r expected < "$3" || true
+    test "$basket" = "$expected"
+    ;;
+esac

@@ -68,8 +68,28 @@ A BHV has one normalized slash-separated logical `group`, such as
 `features/checkout/refunds`. Groups are declared by the glossary and describe
 capabilities, not directory paths or implementation modules. `list --group`
 and `test --group` select a group and its descendants. `regroup` changes only
-metadata. `index` produces the derived catalog; do not edit a catalog as a
-source artifact.
+metadata. `index` produces the derived JSON catalog; do not edit a catalog as a
+source artifact. `document` renders a readable Markdown catalog from the same
+metadata, grouping features and rules by logical group without exposing adapter
+internals.
+
+## Discovery and review workflow
+
+Keep discovery local to the implementation repository. Product or domain
+participants propose a public outcome, shared terms, and contrasting examples;
+implementation participants confirm that the terms are executable and the
+adapter can observe the stated result. Review the generated
+`pien behavior document` output with the BHV change: it provides navigable
+logical groups, feature/rule intent, acceptance references, and scenario names
+without requiring coordination state. Commit the approved glossary and BHV
+changes together, then run `lint` and `test` in ordinary CI.
+
+Characterization examples record known observable behavior and are valuable
+review inputs, but are not intended acceptance behavior merely because they
+pass. Promote one only after a domain reviewer confirms its terminology,
+public outcome, and expected result; give it a stable scenario title and commit
+that review as an explicit BHV/glossary change. Keep uncertain examples clearly
+identified as characterization work or out of the active acceptance suite.
 
 ## Adoption and CI
 
@@ -85,6 +105,7 @@ pien behavior new --id SHOP-BHV-20261026-120000-001 \
 pien behavior lint
 pien behavior test
 pien behavior index > pi-en-behaviors/catalog.json
+pien behavior document > pi-en-behaviors/BEHAVIOR_DOCUMENTATION.md
 ```
 
 Snapshots and requirement coverage are optional. To opt into traceability,

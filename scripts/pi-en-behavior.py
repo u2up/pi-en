@@ -202,6 +202,30 @@ def index(args):
     _, _, entries = validate(root(args)); out = [{k: x.get(k, [] if k in ('tags','satisfies') else None) for k in ('id','group','title','feature','rule','status','tags','satisfies')} | {"scenario_count": len(x['scenarios'])} for x in entries]
     print(json.dumps(out, indent=2, sort_keys=True))
 
+def document(args):
+    """Render a reviewable, adapter-independent view of the local BHVs."""
+    man, _, entries = validate(root(args))
+    print(f"# Behavior documentation: {man['repository_id']}")
+    print("\nGenerated from local BHV metadata. This catalog intentionally omits adapter details.")
+    print("\n## Catalog")
+    groups = sorted({item['group'] for item in entries})
+    for group in groups:
+        print(f"- [{group}](#{group.replace('/', '-')})")
+    for group in groups:
+        print(f"\n## {group}")
+        for item in (entry for entry in entries if entry['group'] == group):
+            print(f"\n### {item['title']} (`{item['id']}`)")
+            print(f"- Status: {item['status']}")
+            print(f"- Feature: {item['feature']}")
+            print(f"- Rule: {item['rule']}")
+            if item.get('tags'):
+                print(f"- Tags: {', '.join(item['tags'])}")
+            if item.get('satisfies'):
+                print(f"- Acceptance references: {', '.join(item['satisfies'])}")
+            print(f"- Scenarios ({len(item['scenarios'])}):")
+            for scenario in item['scenarios']:
+                print(f"  - {scenario['title']} (`{scenario['id']}`)")
+
 def snapshot(args):
     # The coordination source is deliberately explicit: snapshots are an opt-in
     # local traceability artifact, never discovered through the environment.
@@ -365,7 +389,7 @@ def main():
     parser = argparse.ArgumentParser(prog="pien behavior"); parser.add_argument("--project-root", default=".")
     sub = parser.add_subparsers(dest="command", required=True)
     sub.add_parser("init").set_defaults(func=init)
-    for name, func in (("lint",lint),("test",test),("list",list_specs),("index",index),("coverage",coverage)):
+    for name, func in (("lint",lint),("test",test),("list",list_specs),("index",index),("document",document),("coverage",coverage)):
         p=sub.add_parser(name); p.set_defaults(func=func)
         if name in ("test","list"): p.add_argument("--group")
         if name == "coverage": p.add_argument("--format", choices=("text", "json"), default="text")

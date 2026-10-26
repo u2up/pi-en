@@ -92,6 +92,11 @@ printf '%s\n' 'compliance: advisory' >> "$tmp/pi-en-behaviors/MANIFEST.yaml"
 env PATH=/caller-controlled-path HOME="$HOME" PI_EN_COORD_DIR="$repo_root/.pi-en/coordination" PI_EN_BEHAVIOR_RUNTIME_PATH="$runtime" "$(command -v python3)" "$repo_root/scripts/pi-en-behavior.py" --project-root "$tmp" test --group features
 "$runner" --project-root "$tmp" list --group features/demo | grep -Fq 'TEST-BHV-20261024-215036-001'
 "$runner" --project-root "$tmp" index | grep -Fq 'scenario_count'
+"$runner" --project-root "$tmp" document > "$tmp/behavior-documentation.md"
+grep -Fq '# Behavior documentation: test' "$tmp/behavior-documentation.md"
+grep -Fq '[features/demo](#features-demo)' "$tmp/behavior-documentation.md"
+grep -Fq '### Demonstrate behavior (`TEST-BHV-20261024-215036-001`)' "$tmp/behavior-documentation.md"
+grep -Fq -- '- Feature: Demo' "$tmp/behavior-documentation.md"
 "$runner" --project-root "$tmp" regroup TEST-BHV-20261024-215036-001 --group features/demo/renamed
 ! "$runner" --project-root "$tmp" regroup TEST-BHV-20261024-215036-001 --group unlisted
 "$runner" --project-root "$tmp" lint

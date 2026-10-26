@@ -1,0 +1,13 @@
+language_version: v1
+groups:
+  - features/checkout
+terms:
+  shopper with a basket:
+    phase: given
+    args: {total: integer}
+  submits checkout:
+    phase: when
+    args: {}
+  order is confirmed:
+    phase: then
+    args: {total: integer}

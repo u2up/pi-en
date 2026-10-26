@@ -492,7 +492,7 @@ _pien() {
       esac
       ;;
     behavior)
-      [ "$cword" -eq 2 ] && COMPREPLY=( $(_pien_comp_words "init new list regroup index lint test coverage requirements") )
+      [ "$cword" -eq 2 ] && COMPREPLY=( $(_pien_comp_words "init new list regroup index document lint test coverage requirements") )
       ;;
     roles)
       [ "$cword" -eq 2 ] && COMPREPLY=( $(_pien_comp_words "serial") )

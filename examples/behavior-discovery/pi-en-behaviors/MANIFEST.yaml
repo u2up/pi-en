@@ -1,0 +1,6 @@
+schema: v1
+repository_id: example-shop
+item_key: SHOP
+glossary: GLOSSARY.yaml
+adapter: ./adapter
+compliance: advisory

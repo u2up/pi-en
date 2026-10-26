@@ -2174,7 +2174,20 @@ a deliberate artifact migration or an explicit retained runner pin.
 BHV files stay flat under `pi-en-behaviors/specifications/`; their immutable
 IDs are cross-repository references. Use declared logical groups and
 `--group` selectors rather than directories, use `regroup` to change metadata,
-and generate the catalog with `pien behavior index`.
+and generate the catalog with `pien behavior index`. For review-friendly living
+documentation, commit or publish the optional Markdown output from:
+
+```bash
+pien behavior document > pi-en-behaviors/BEHAVIOR_DOCUMENTATION.md
+```
+
+It navigates logical groups and presents BHV IDs, feature/rule intent, tags,
+acceptance references, and scenarios without adapter internals. Review it with
+domain participants alongside glossary and BHV changes. Characterization
+examples are review inputs, and become intended acceptance behavior only when a
+domain reviewer explicitly confirms their terms, outcome, and expectation. See
+[`examples/behavior-discovery/`](examples/behavior-discovery/) for a
+coordination-free external-project example.
 
 Requirement snapshots and coverage are optional. A project that deliberately
 uses coordination may create a local snapshot with
