@@ -119,6 +119,28 @@ if "$runner" --project-root "$project" requirements snapshot --coord-dir "$coord
 fi
 grep -Fq 'must be a clean Git checkout' "$tmp/dirty.out"
 grep -Fq 'BHV-ONE' "$project/pi-en-behaviors/requirements.snapshot.yaml"
+git -C "$coord" checkout -- requirements/EXAMPLE-FRQ-20261024-215040-001.yaml
+
+# Ignored, untracked requirement YAML must not enter a snapshot that identifies
+# only the committed source revision.
+printf 'requirements/ignored.yaml\n' > "$coord/.gitignore"
+git -C "$coord" add .gitignore
+git -C "$coord" commit -qm ignore-untracked-requirement
+cat > "$coord/requirements/ignored.yaml" <<'YAML'
+schema: coordination-item/v1
+id: EXAMPLE-FRQ-20261024-215040-099
+type: functional-requirement
+status: active
+requirement_key: IGNORED
+title: Ignored
+body: ignored
+behavior_coverage: required
+YAML
+"$runner" --project-root "$project" requirements snapshot --coord-dir "$coord" --repo-id example >/dev/null
+if grep -Fq 'IGNORED' "$project/pi-en-behaviors/requirements.snapshot.yaml"; then
+  echo 'snapshot unexpectedly included ignored requirement YAML' >&2
+  exit 1
+fi
 
 "$runner" --project-root "$project" coverage --format json > "$tmp/advisory.json"
 grep -Fq '"passed": true' "$tmp/advisory.json"

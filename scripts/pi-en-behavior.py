@@ -216,7 +216,21 @@ def snapshot(args):
     requirements = []
     directory = coord / "requirements"
     if not directory.is_dir(): fail("coordination directory has no requirements directory")
-    for path in sorted(directory.glob("*.yaml")):
+    # Enumerate blobs recorded by the revision above, rather than the working
+    # directory.  Ignored/untracked YAML can otherwise be silently included
+    # while the snapshot claims it came from HEAD.
+    try:
+        tracked = subprocess.check_output(
+            ["git", "-C", str(coord), "ls-tree", "-r", "--name-only", revision,
+             "--", "requirements"], text=True).splitlines()
+    except (OSError, subprocess.CalledProcessError):
+        fail("coordination directory must expose requirements at its HEAD revision")
+    paths = [coord / relative for relative in tracked
+             if Path(relative).parent == Path("requirements")
+             and Path(relative).suffix == ".yaml"]
+    for path in sorted(paths):
+        if path.is_symlink() or not path.is_file():
+            fail(f"tracked requirement must be a regular file: {path}")
         item = load(path)
         applicable = item.get("applicable_repos")
         if applicable is not None and (not isinstance(applicable, list) or not all(isinstance(x, str) and x for x in applicable)):
