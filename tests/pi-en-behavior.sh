@@ -5,6 +5,12 @@ tmp="$(mktemp -d)"; trap 'rm -rf "$tmp"' EXIT
 runner="$repo_root/scripts/pi-en-behavior"
 command -v python3 >/dev/null
 python3 -c 'import yaml' 2>/dev/null || { echo 'PyYAML unavailable; behavior runtime test skipped'; exit 0; }
+# The launcher must not fall back to a caller-selected host interpreter.
+if env PATH=/bin:/usr/bin PYTHON="$(command -v python3)" "$runner" --help >"$tmp/no-runtime.out" 2>&1; then
+  echo 'behavior runner unexpectedly used a host Python fallback' >&2
+  exit 1
+fi
+grep -Fqx 'pi-en behavior: Python runtime unavailable; rebuild and relaunch with `nix develop`.' "$tmp/no-runtime.out"
 "$runner" --project-root "$tmp" init
 [ -f "$tmp/pi-en-behaviors/MANIFEST.yaml" ]
 [ -f "$tmp/pi-en-behaviors/GLOSSARY.yaml" ]
