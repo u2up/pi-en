@@ -55,11 +55,13 @@ mkdir -p "$agent_a_project" "$agent_b_project"
 
 pi-en-coord-claim \
   --coord-dir "$agent_a_coord" \
+  --repo-id pi-en \
   --agent-id agent-a \
   "$item_id" >/dev/null
 
 if pi-en-coord-claim \
   --coord-dir "$agent_b_coord" \
+  --repo-id pi-en \
   --agent-id agent-b \
   --no-pull \
   "$item_id" >/dev/null 2>&1; then
@@ -72,6 +74,7 @@ git -C "$agent_b_coord" reset --hard origin/main >/dev/null
 
 if pi-en-coord-claim \
   --coord-dir "$agent_b_coord" \
+  --repo-id pi-en \
   --agent-id agent-b \
   "$item_id" >/dev/null 2>&1; then
   printf 'expected owned claim to fail\n' >&2
@@ -80,6 +83,7 @@ fi
 
 if pi-en-coord-done \
   --coord-dir "$agent_b_coord" \
+  --repo-id pi-en \
   --agent-id agent-b \
   "$item_id" >/dev/null 2>&1; then
   printf 'expected done by non-owner to fail\n' >&2
@@ -88,6 +92,7 @@ fi
 
 done_path="$(pi-en-coord-done \
   --coord-dir "$agent_a_coord" \
+  --repo-id pi-en \
   --agent-id agent-a \
   --result "Done by owning agent." \
   "$item_id" | tail -n 1)"
@@ -98,6 +103,7 @@ grep -q '^owner: agent-a$' "$agent_a_coord/$done_path"
 
 if pi-en-coord-close \
   --coord-dir "$agent_a_coord" \
+  --repo-id pi-en \
   --agent-id agent-a \
   "$item_id" >/dev/null 2>&1; then
   printf 'expected close before review/verification to fail\n' >&2
@@ -106,6 +112,7 @@ fi
 
 pi-en-coord-review \
   --coord-dir "$agent_b_coord" \
+  --repo-id pi-en \
   --agent-id reviewer-b \
   --role reviewer \
   --pass \
@@ -113,6 +120,7 @@ pi-en-coord-review \
 
 pi-en-coord-verify \
   --coord-dir "$agent_b_coord" \
+  --repo-id pi-en \
   --agent-id tester-b \
   --role tester \
   --pass \
@@ -120,6 +128,7 @@ pi-en-coord-verify \
 
 closed_path="$(pi-en-coord-close \
   --coord-dir "$agent_b_coord" \
+  --repo-id pi-en \
   --agent-id tester-b \
   --role tester \
   --result "Closed after review and verification." \
