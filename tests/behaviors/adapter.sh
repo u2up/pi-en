@@ -7,7 +7,7 @@ pien="$repo_root/pien"
 phase="${1:-}"
 
 if [ "$phase" = describe ]; then
-  printf '%s\n' '{"terms":{"isolated fixture":{},"coordination fixture":{},"dispatcher command":{},"open item command":{},"lint command":{},"status command":{},"dispatcher output":{},"item is listed":{},"lint rejects missing test":{},"state is unchanged":{}}}'
+  printf '%s\n' '{"terms":{"isolated fixture":{},"coordination fixture":{},"dispatcher command":{},"open item command":{},"lint command":{},"status command":{},"coverage report command":{},"behavior group listing":{},"behavior catalog generation":{},"dispatcher output":{},"item is listed":{},"lint rejects missing test":{},"state is unchanged":{},"runner environment is isolated":{},"coverage report passes":{},"behavior output":{}}}'
   exit 0
 fi
 
@@ -77,6 +77,15 @@ case "$phase:$term" in
     (cd "$state/project" && PI_EN_COORD_DIR="$state/project/.pi-en/coordination" \
       "$pien" coord status --repo-id fixture) >"$state/output" 2>&1
     ;;
+  'when:coverage report command')
+    "$pien" behavior --project-root "$repo_root" coverage --format json >"$state/output" 2>&1
+    ;;
+  'when:behavior group listing')
+    "$pien" behavior --project-root "$repo_root" list --group "$(value group)" >"$state/output" 2>&1
+    ;;
+  'when:behavior catalog generation')
+    "$pien" behavior --project-root "$repo_root" index >"$state/output" 2>&1
+    ;;
   'then:dispatcher output')
     grep -Fq "$(value contains)" "$state/output"
     expected="$(value succeeds)"; actual=false
@@ -96,6 +105,17 @@ case "$phase:$term" in
     repository="$state/project"
     [ -d "$state/project/.pi-en/coordination/.git" ] && repository="$state/project/.pi-en/coordination"
     [ "$(git -C "$repository" rev-parse HEAD)" = "$(cat "$state/before")" ]
+    ;;
+  'then:runner environment is isolated')
+    [ "$TZ" = UTC ] && [ "$LC_ALL" = C ] && [ "$LANG" = C ]
+    [ "$HOME" = "$state/home" ] && [ "$TMPDIR" = "$state/tmp" ]
+    [ -z "${PI_EN_COORD_DIR+x}" ]
+    ;;
+  'then:coverage report passes')
+    python3 -c 'import json, sys; assert json.load(open(sys.argv[1]))["passed"]' "$state/output"
+    ;;
+  'then:behavior output')
+    grep -Fq "$(value contains)" "$state/output"
     ;;
   *)
     printf 'unsupported behavior term: %s %s\n' "$phase" "$term" >&2

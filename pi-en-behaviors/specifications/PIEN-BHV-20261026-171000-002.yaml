@@ -1,0 +1,16 @@
+schema: v1
+language_version: v1
+id: PIEN-BHV-20261026-171000-002
+group: features/behavior-specifications
+status: active
+title: Report local requirement-to-behavior coverage
+feature: Behavior traceability
+rule: Local snapshots and executable BHVs produce a machine-readable coverage result
+satisfies: [PIEN-QRQ-20261024-215021-001]
+tags: [coverage, traceability]
+scenarios:
+  - id: json-coverage-report
+    title: The tracked snapshot and executable specifications pass coverage
+    given: [{term: isolated fixture, args: {name: json-coverage-report}}]
+    when: [{term: coverage report command, args: {}}]
+    then: [{term: coverage report passes, args: {}}]

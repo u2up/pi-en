@@ -2,6 +2,7 @@ language_version: v1
 groups:
   - features/dispatcher
   - features/coordination
+  - features/behavior-specifications
 terms:
   isolated fixture:
     phase: given
@@ -21,6 +22,15 @@ terms:
   status command:
     phase: when
     args: {}
+  coverage report command:
+    phase: when
+    args: {}
+  behavior group listing:
+    phase: when
+    args: {group: string}
+  behavior catalog generation:
+    phase: when
+    args: {}
   dispatcher output:
     phase: then
     args: {contains: string, succeeds: boolean}
@@ -33,3 +43,12 @@ terms:
   state is unchanged:
     phase: then
     args: {}
+  runner environment is isolated:
+    phase: then
+    args: {}
+  coverage report passes:
+    phase: then
+    args: {}
+  behavior output:
+    phase: then
+    args: {contains: string}

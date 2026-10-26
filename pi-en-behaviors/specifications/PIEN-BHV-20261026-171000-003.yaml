@@ -1,0 +1,21 @@
+schema: v1
+language_version: v1
+id: PIEN-BHV-20261026-171000-003
+group: features/behavior-specifications
+status: active
+title: Discover behavior specifications by logical group
+feature: Behavior catalog discovery
+rule: Logical group selectors and the generated catalog preserve immutable behavior identities
+satisfies: [PIEN-FRQ-20261025-072024-001]
+tags: [groups, catalog]
+scenarios:
+  - id: group-selection
+    title: A group selector lists its descendant behavior specifications
+    given: [{term: isolated fixture, args: {name: group-selection}}]
+    when: [{term: behavior group listing, args: {group: features}}]
+    then: [{term: behavior output, args: {contains: PIEN-BHV-20261026-171000-003}}]
+  - id: catalog-identity
+    title: The generated catalog includes behavior identity and group metadata
+    given: [{term: isolated fixture, args: {name: catalog-identity}}]
+    when: [{term: behavior catalog generation, args: {}}]
+    then: [{term: behavior output, args: {contains: '"group": "features/behavior-specifications"'}}]
