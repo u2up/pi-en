@@ -169,6 +169,19 @@ lint_warn() {
 
 validate_related_behaviors() {
   local file="$1" value reference list_entries
+  normalize_behavior_reference() {
+    reference="$(coord_trim "$1")"
+    if [[ "$reference" =~ ^\".*\"$ ]] || [[ "$reference" =~ ^\'.*\'$ ]]; then
+      reference="${reference:1:${#reference}-2}"
+    fi
+    printf '%s\n' "$reference"
+  }
+  validate_behavior_reference() {
+    reference="$(normalize_behavior_reference "$1")"
+    if [ -z "$reference" ] || ! printf '%s' "$reference" | grep -Eq '^[A-Z0-9]+-BHV-[0-9]{8}-[0-9]{6}-[0-9]{3}$'; then
+      lint_fail "$file related_behaviors entry has invalid BHV ID shape: $reference"
+    fi
+  }
   if ! grep -q '^related_behaviors:' "$file"; then
     return 0
   fi
@@ -177,10 +190,7 @@ validate_related_behaviors() {
     if [[ "$value" =~ ^\[.*\]$ ]]; then
       value="${value#[}"; value="${value%]}"
       while IFS= read -r reference; do
-        reference="$(coord_trim "${reference//\"/}")"
-        if ! printf '%s' "$reference" | grep -Eq '^[A-Z0-9]+-BHV-[0-9]{8}-[0-9]{6}-[0-9]{3}$'; then
-          lint_fail "$file related_behaviors entry has invalid BHV ID shape: $reference"
-        fi
+        validate_behavior_reference "$reference"
       done < <(printf '%s\n' "$value" | tr ',' '\n')
       return
     fi
@@ -202,10 +212,7 @@ validate_related_behaviors() {
     return
   fi
   while IFS= read -r reference; do
-    [ -n "$reference" ] || continue
-    if ! printf '%s' "$reference" | grep -Eq '^[A-Z0-9]+-BHV-[0-9]{8}-[0-9]{6}-[0-9]{3}$'; then
-      lint_fail "$file related_behaviors entry has invalid BHV ID shape: $reference"
-    fi
+    validate_behavior_reference "$reference"
   done <<< "$list_entries"
 }
 
