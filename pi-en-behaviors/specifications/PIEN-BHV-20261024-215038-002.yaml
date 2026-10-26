@@ -1,0 +1,28 @@
+schema: v1
+language_version: v1
+id: PIEN-BHV-20261024-215038-002
+group: features/coordination
+status: active
+title: Create and inspect repo-scoped coordination issues
+feature: Coordination commands
+rule: An empty isolated domain exposes new issues and missing test coverage
+satisfies: [PIEN-FRQ-20261024-215016-001]
+tags: [coordination, lint]
+scenarios:
+  - id: create-and-list
+    title: A repo-scoped issue is listed after creation
+    given: [{term: coordination fixture, args: {name: create-and-list}}]
+    when: [{term: open item command, args: {title: 'Create issue'}}]
+    then: [{term: item is listed, args: {}}]
+  - id: missing-test-is-reported
+    title: Lint rejects the new testable issue without an item test
+    given: [{term: coordination fixture, args: {name: missing-test-is-reported}}]
+    when: [{term: lint command, args: {}}]
+    then:
+      - {term: lint rejects missing test, args: {}}
+      - {term: state is unchanged, args: {}}
+  - id: status-is-non-mutating
+    title: Status leaves the coordination state unchanged
+    given: [{term: coordination fixture, args: {name: status-is-non-mutating}}]
+    when: [{term: status command, args: {}}]
+    then: [{term: state is unchanged, args: {}}]

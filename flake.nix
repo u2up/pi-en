@@ -16,7 +16,8 @@
       mkBehaviorPython = pkgs:
         let
           python = mkBehaviorPythonEnv pkgs;
-          adapterRuntimePath = pkgs.lib.makeBinPath [ pkgs.bash pkgs.coreutils python ];
+          adapterRuntimePath = pkgs.lib.makeBinPath ([ pkgs.bash pkgs.coreutils pkgs.git python ]
+            ++ builtins.attrValues (mkAgentCoordCommands pkgs));
         in
         pkgs.writeShellScriptBin "pi-en-behavior-python" ''
           export PYTHONPYCACHEPREFIX="''${XDG_CACHE_HOME:-''${HOME}/.cache}/pi-en/python-bytecode"

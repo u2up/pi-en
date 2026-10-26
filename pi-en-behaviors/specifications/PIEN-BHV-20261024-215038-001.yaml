@@ -1,0 +1,25 @@
+schema: v1
+language_version: v1
+id: PIEN-BHV-20261024-215038-001
+group: features/dispatcher
+status: active
+title: Route dispatcher help without changing a fixture
+feature: Command dispatcher
+rule: Help and invalid commands have observable routing outcomes
+satisfies: [PIEN-FRQ-20261024-215014-001]
+tags: [dispatcher, non-mutation]
+scenarios:
+  - id: help-route
+    title: Help exposes the behavior namespace
+    given: [{term: isolated fixture, args: {name: help-route}}]
+    when: [{term: dispatcher command, args: {command: help}}]
+    then:
+      - {term: dispatcher output, args: {contains: 'pien behavior', succeeds: true}}
+      - {term: state is unchanged, args: {}}
+  - id: unknown-command
+    title: Unknown command fails without changing the fixture
+    given: [{term: isolated fixture, args: {name: unknown-command}}]
+    when: [{term: dispatcher command, args: {command: unknown-command}}]
+    then:
+      - {term: dispatcher output, args: {contains: 'pi-en-bwrap:', succeeds: false}}
+      - {term: state is unchanged, args: {}}

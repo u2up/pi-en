@@ -1,0 +1,6 @@
+schema: v1
+repository_id: pi-en
+item_key: PIEN
+glossary: GLOSSARY.yaml
+adapter: ../tests/behaviors/adapter.sh
+compliance: advisory

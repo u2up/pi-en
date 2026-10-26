@@ -1,0 +1,35 @@
+language_version: v1
+groups:
+  - features/dispatcher
+  - features/coordination
+terms:
+  isolated fixture:
+    phase: given
+    args: {name: string}
+  coordination fixture:
+    phase: given
+    args: {name: string}
+  dispatcher command:
+    phase: when
+    args: {command: string}
+  open item command:
+    phase: when
+    args: {title: string}
+  lint command:
+    phase: when
+    args: {}
+  status command:
+    phase: when
+    args: {}
+  dispatcher output:
+    phase: then
+    args: {contains: string, succeeds: boolean}
+  item is listed:
+    phase: then
+    args: {}
+  lint rejects missing test:
+    phase: then
+    args: {}
+  state is unchanged:
+    phase: then
+    args: {}
