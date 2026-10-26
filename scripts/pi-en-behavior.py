@@ -206,8 +206,13 @@ def snapshot(args):
     try:
         revision = subprocess.check_output(
             ["git", "-C", str(coord), "rev-parse", "HEAD"], text=True).strip()
+        dirty = subprocess.check_output(
+            ["git", "-C", str(coord), "status", "--porcelain", "--untracked-files=all"],
+            text=True)
     except (OSError, subprocess.CalledProcessError):
         fail("coordination directory must be a Git checkout")
+    if dirty:
+        fail("coordination directory must be a clean Git checkout")
     requirements = []
     directory = coord / "requirements"
     if not directory.is_dir(): fail("coordination directory has no requirements directory")

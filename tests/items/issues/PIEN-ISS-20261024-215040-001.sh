@@ -110,6 +110,16 @@ grep -Fxq 'unchanged' "$target"
 [ "$(stat -c %h "$project/pi-en-behaviors/requirements.snapshot.yaml")" -eq 1 ]
 grep -Fq 'BHV-ONE' "$project/pi-en-behaviors/requirements.snapshot.yaml"
 
+# A snapshot must identify the exact committed coordination source.  Refuse a
+# dirty checkout rather than recording a HEAD revision for uncommitted content.
+printf '\n# uncommitted requirement change\n' >> "$coord/requirements/EXAMPLE-FRQ-20261024-215040-001.yaml"
+if "$runner" --project-root "$project" requirements snapshot --coord-dir "$coord" --repo-id example > "$tmp/dirty.out" 2>&1; then
+  echo 'snapshot unexpectedly accepted dirty coordination source' >&2
+  exit 1
+fi
+grep -Fq 'must be a clean Git checkout' "$tmp/dirty.out"
+grep -Fq 'BHV-ONE' "$project/pi-en-behaviors/requirements.snapshot.yaml"
+
 "$runner" --project-root "$project" coverage --format json > "$tmp/advisory.json"
 grep -Fq '"passed": true' "$tmp/advisory.json"
 
