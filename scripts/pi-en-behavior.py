@@ -32,6 +32,9 @@ def dump(path, value):
 def group_valid(group):
     return isinstance(group, str) and bool(group) and all(SLUG_RE.fullmatch(x) for x in group.split("/"))
 
+def group_declared(group, groups):
+    return any(group == declared or group.startswith(declared + "/") for declared in groups)
+
 def root(args):
     candidate = Path(args.project_root).resolve() / "pi-en-behaviors"
     if not candidate.is_dir(): fail(f"behavior root not found: {candidate}; run 'pien behavior init'")
@@ -77,7 +80,7 @@ def validate(base):
         if item.get("schema") != VERSION or item.get("language_version") != lex["language_version"]: fail(f"{ident}: unsupported schema or language version")
         if item.get("status") not in ("active", "deprecated", "superseded"): fail(f"{ident}: invalid status")
         if not group_valid(item.get("group")): fail(f"{ident}: invalid group")
-        if not any(item["group"] == group or item["group"].startswith(group + "/") for group in lex["groups"]): fail(f"{ident}: group is not declared by the glossary")
+        if not group_declared(item["group"], lex["groups"]): fail(f"{ident}: group is not declared by the glossary")
         for key in ("title", "feature", "rule"):
             if not isinstance(item.get(key), str) or not item[key]: fail(f"{ident}: requires {key}")
         scenarios = item.get("scenarios")
@@ -140,7 +143,8 @@ def test(args):
         for scenario in item["scenarios"]:
             state = Path(tempfile.mkdtemp(prefix="pien-behavior-"))
             try:
-                env = {"PATH": os.environ.get("PATH", ""), "TZ": "UTC", "LC_ALL": "C", "LANG": "C", "HOME": str(state / "home"), "TMPDIR": str(state / "tmp"), "PYTHONPYCACHEPREFIX": os.environ.get("PYTHONPYCACHEPREFIX") or python_cache_prefix()}
+                # Do not pass caller-controlled PATH or coordination settings to adapters.
+                env = {"PATH": os.defpath, "TZ": "UTC", "LC_ALL": "C", "LANG": "C", "HOME": str(state / "home"), "TMPDIR": str(state / "tmp"), "PYTHONPYCACHEPREFIX": os.environ.get("PYTHONPYCACHEPREFIX") or python_cache_prefix()}
                 (state / "home").mkdir(); (state / "tmp").mkdir()
                 for phase in ("given", "when", "then"):
                     for step in scenario.get(phase, []):
@@ -178,8 +182,9 @@ def snapshot(args):
     print(json.dumps(requirements, indent=2, sort_keys=True))
 
 def new(args):
-    base = root(args); man = manifest(base)
+    base = root(args); man = manifest(base); lex = glossary(base, man)
     if not group_valid(args.group): fail("invalid group")
+    if not group_declared(args.group, lex["groups"]): fail("group is not declared by the glossary")
     ident = args.id
     if not ID_RE.fullmatch(ident) or not ident.startswith(man['item_key'] + '-BHV-'): fail("id must be a local ITEMKEY-BHV timestamp id")
     path = base / "specifications" / (ident + ".yaml")
@@ -188,8 +193,9 @@ def new(args):
     print(path)
 
 def regroup(args):
-    base = root(args); _, _, entries = validate(base)
+    base = root(args); _, lex, entries = validate(base)
     if not group_valid(args.group): fail("invalid group")
+    if not group_declared(args.group, lex["groups"]): fail("group is not declared by the glossary")
     matches = [x for x in entries if x['id'] == args.id]
     if len(matches) != 1: fail(f"unknown BHV id: {args.id}")
     path = matches[0].pop('_path'); matches[0]['group'] = args.group; matches[0].pop('_path', None)

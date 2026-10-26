@@ -32,6 +32,8 @@ cat > "$tmp/pi-en-behaviors/adapter" <<'SH'
 set -euo pipefail
 if [ "$1" = describe ]; then printf '%s\n' '{"terms":{"prepared":{},"invoked":{},"observed":{}}}'; exit 0; fi
 [ -f "$3" ] && [ -d "$4" ]
+[ "$PATH" = '/bin:/usr/bin' ]
+[ -z "${PI_EN_COORD_DIR:-}" ]
 SH
 chmod +x "$tmp/pi-en-behaviors/adapter"
 cat > "$tmp/pi-en-behaviors/specifications/TEST-BHV-20261024-215036-001.yaml" <<'YAML'
@@ -53,11 +55,14 @@ scenarios:
     then: [{term: observed, args: {ok: true}}]
 YAML
 "$runner" --project-root "$tmp" lint
-"$runner" --project-root "$tmp" test --group features
+env PATH=/caller-controlled-path HOME="$HOME" PI_EN_COORD_DIR="$repo_root/.pi-en/coordination" "$(command -v python3)" "$repo_root/scripts/pi-en-behavior.py" --project-root "$tmp" test --group features
 "$runner" --project-root "$tmp" list --group features/demo | grep -Fq 'TEST-BHV-20261024-215036-001'
 "$runner" --project-root "$tmp" index | grep -Fq 'scenario_count'
 "$runner" --project-root "$tmp" regroup TEST-BHV-20261024-215036-001 --group features/demo/renamed
+! "$runner" --project-root "$tmp" regroup TEST-BHV-20261024-215036-001 --group unlisted
+"$runner" --project-root "$tmp" lint
 ! "$runner" --project-root "$tmp" new --id TEST-BHV-20261024-215036-002 --group ../unsafe --title unsafe
+! "$runner" --project-root "$tmp" new --id TEST-BHV-20261024-215036-002 --group unlisted --title unsafe
 cp "$tmp/pi-en-behaviors/specifications/TEST-BHV-20261024-215036-001.yaml" "$tmp/pi-en-behaviors/specifications/TEST-BHV-20261024-215036-003.yaml"
 ! "$runner" --project-root "$tmp" lint
 printf 'pi-en behavior tests passed\n'
