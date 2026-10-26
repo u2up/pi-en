@@ -168,7 +168,7 @@ lint_warn() {
 }
 
 validate_related_behaviors() {
-  local file="$1" value reference
+  local file="$1" value reference list_entries
   if ! grep -q '^related_behaviors:' "$file"; then
     return 0
   fi
@@ -187,12 +187,9 @@ validate_related_behaviors() {
     lint_fail "$file related_behaviors must be a YAML list"
     return
   fi
-  while IFS= read -r reference; do
-    [ -n "$reference" ] || continue
-    if ! printf '%s' "$reference" | grep -Eq '^[A-Z0-9]+-BHV-[0-9]{8}-[0-9]{6}-[0-9]{3}$'; then
-      lint_fail "$file related_behaviors entry has invalid BHV ID shape: $reference"
-    fi
-  done < <(awk '
+  # Do not use process substitution here: its command's nonzero status is
+  # not reflected by the loop, allowing mapping values to bypass validation.
+  if ! list_entries="$(awk '
     /^related_behaviors:[[:space:]]*$/ { active=1; next }
     active && /^[^[:space:]#]/ { active=0 }
     active && /^[[:space:]]*-[[:space:]]*/ {
@@ -200,7 +197,16 @@ validate_related_behaviors() {
     }
     active && NF && !/^[[:space:]]*#/ && !/^[[:space:]]*-[[:space:]]*/ { bad=1 }
     END { if (bad) exit 2 }
-  ' "$file") || lint_fail "$file related_behaviors must contain only list entries"
+  ' "$file")"; then
+    lint_fail "$file related_behaviors must contain only list entries"
+    return
+  fi
+  while IFS= read -r reference; do
+    [ -n "$reference" ] || continue
+    if ! printf '%s' "$reference" | grep -Eq '^[A-Z0-9]+-BHV-[0-9]{8}-[0-9]{6}-[0-9]{3}$'; then
+      lint_fail "$file related_behaviors entry has invalid BHV ID shape: $reference"
+    fi
+  done <<< "$list_entries"
 }
 
 for removed_path in WORKSPACE.md workspace projects; do
