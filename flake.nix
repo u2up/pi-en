@@ -16,9 +16,12 @@
       mkBehaviorPython = pkgs:
         let
           python = mkBehaviorPythonEnv pkgs;
+          adapterRuntimePath = pkgs.lib.makeBinPath [ pkgs.bash pkgs.coreutils python ];
         in
         pkgs.writeShellScriptBin "pi-en-behavior-python" ''
           export PYTHONPYCACHEPREFIX="''${XDG_CACHE_HOME:-''${HOME}/.cache}/pi-en/python-bytecode"
+          # Adapters receive this fixed Nix runtime rather than the caller PATH.
+          export PI_EN_BEHAVIOR_RUNTIME_PATH="${adapterRuntimePath}"
           exec ${python}/bin/python "$@"
         '';
 

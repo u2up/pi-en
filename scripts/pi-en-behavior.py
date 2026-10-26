@@ -128,8 +128,12 @@ def python_cache_prefix():
 
 def adapter_env(work):
     """Return the deterministic, coordination-free adapter environment."""
+    # The packaged interpreter supplies its fixed Nix runtime.  Never inherit
+    # PATH: an adapter may need its pinned Python, but not caller-controlled
+    # commands.  The fallback keeps direct interpreter use deterministic.
+    runtime_path = os.environ.get("PI_EN_BEHAVIOR_RUNTIME_PATH", os.defpath)
     return {
-        "PATH": os.defpath, "TZ": "UTC", "LC_ALL": "C", "LANG": "C",
+        "PATH": runtime_path, "TZ": "UTC", "LC_ALL": "C", "LANG": "C",
         "HOME": str(work / "home"), "TMPDIR": str(work / "tmp"),
         "PYTHONPYCACHEPREFIX": os.environ.get("PYTHONPYCACHEPREFIX") or python_cache_prefix(),
     }

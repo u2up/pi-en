@@ -33,19 +33,31 @@ terms:
   invoked: {phase: when, args: {}}
   observed: {phase: then, args: {ok: boolean}}
 YAML
-cat > "$tmp/pi-en-behaviors/adapter" <<'SH'
+runtime="$tmp/trusted-runtime"
+mkdir "$runtime"
+ln -s "$(command -v bash)" "$runtime/bash"
+cat > "$runtime/python3" <<'SH'
+#!/usr/bin/env bash
+printf 'trusted runtime dependency\n'
+SH
+chmod +x "$runtime/python3"
+cat > "$tmp/pi-en-behaviors/adapter" <<SH
 #!/usr/bin/env bash
 set -euo pipefail
-if [ "$1" = describe ]; then
-  [ -z "${PI_EN_COORD_DIR:-}" ]
-  [ "$PWD" != "${0%/*}" ]
-  printf '%s\n' '{"terms":{"prepared":{},"invoked":{},"observed":{}}}'
+if [ "\$1" = describe ]; then
+  [ -z "\${PI_EN_COORD_DIR:-}" ]
+  [ "\$PWD" != "\${0%/*}" ]
+  printf '%s\\n' '{"terms":{"prepared":{},"invoked":{},"observed":{}}}'
   exit 0
 fi
-[ -f "$3" ] && [ -d "$4" ]
-[ "$PWD" = "$4" ]
-[ "$PATH" = '/bin:/usr/bin' ]
-[ -z "${PI_EN_COORD_DIR:-}" ]
+[ -f "\$3" ] && [ -d "\$4" ]
+[ "\$PWD" = "\$4" ]
+case "\$PATH" in
+  /bin:/usr/bin) ;;
+  "$runtime") [ "\$(python3)" = 'trusted runtime dependency' ] ;;
+  *) exit 1 ;;
+esac
+[ -z "\${PI_EN_COORD_DIR:-}" ]
 SH
 chmod +x "$tmp/pi-en-behaviors/adapter"
 cat > "$tmp/pi-en-behaviors/specifications/TEST-BHV-20261024-215036-001.yaml" <<'YAML'
@@ -67,7 +79,7 @@ scenarios:
     then: [{term: observed, args: {ok: true}}]
 YAML
 "$runner" --project-root "$tmp" lint
-env PATH=/caller-controlled-path HOME="$HOME" PI_EN_COORD_DIR="$repo_root/.pi-en/coordination" "$(command -v python3)" "$repo_root/scripts/pi-en-behavior.py" --project-root "$tmp" test --group features
+env PATH=/caller-controlled-path HOME="$HOME" PI_EN_COORD_DIR="$repo_root/.pi-en/coordination" PI_EN_BEHAVIOR_RUNTIME_PATH="$runtime" "$(command -v python3)" "$repo_root/scripts/pi-en-behavior.py" --project-root "$tmp" test --group features
 "$runner" --project-root "$tmp" list --group features/demo | grep -Fq 'TEST-BHV-20261024-215036-001'
 "$runner" --project-root "$tmp" index | grep -Fq 'scenario_count'
 "$runner" --project-root "$tmp" regroup TEST-BHV-20261024-215036-001 --group features/demo/renamed
