@@ -198,20 +198,91 @@ def index(args):
     _, _, entries = validate(root(args)); out = [{k: x.get(k, [] if k in ('tags','satisfies') else None) for k in ('id','group','title','feature','rule','status','tags','satisfies')} | {"scenario_count": len(x['scenarios'])} for x in entries]
     print(json.dumps(out, indent=2, sort_keys=True))
 
-def coverage(args):
-    _, _, entries = validate(root(args)); covered = {}
-    for item in entries:
-        for requirement in item.get("satisfies", []): covered.setdefault(requirement, []).append(item["id"])
-    print(json.dumps(covered, indent=2, sort_keys=True))
-
 def snapshot(args):
+    # The coordination source is deliberately explicit: snapshots are an opt-in
+    # local traceability artifact, never discovered through the environment.
     coord = Path(args.coord_dir).resolve()
     if not coord.is_dir(): fail(f"coordination directory not found: {coord}")
+    try:
+        revision = subprocess.check_output(
+            ["git", "-C", str(coord), "rev-parse", "HEAD"], text=True).strip()
+    except (OSError, subprocess.CalledProcessError):
+        fail("coordination directory must be a Git checkout")
     requirements = []
-    for path in sorted((coord / "requirements").glob("*.yaml")):
+    directory = coord / "requirements"
+    if not directory.is_dir(): fail("coordination directory has no requirements directory")
+    for path in sorted(directory.glob("*.yaml")):
         item = load(path)
-        requirements.append({key: item.get(key) for key in ("id", "requirement_key", "title", "status")})
-    print(json.dumps(requirements, indent=2, sort_keys=True))
+        applicable = item.get("applicable_repos")
+        if applicable is not None and (not isinstance(applicable, list) or not all(isinstance(x, str) and x for x in applicable)):
+            fail(f"{path}: applicable_repos must be a list of repository IDs")
+        policy = item.get("behavior_coverage", "optional")
+        if policy not in ("required", "optional", "not-applicable"):
+            fail(f"{path}: invalid behavior_coverage policy")
+        if applicable is None or args.repo_id in applicable:
+            requirements.append({
+                "requirement_key": item.get("requirement_key"), "item_id": item.get("id"),
+                "status": item.get("status"), "title": item.get("title"),
+                "body": item.get("body"), "applicable_repos": applicable,
+                "behavior_coverage": policy,
+            })
+    base = root(args)
+    output = base / "requirements.snapshot.yaml"
+    with open(output, "w", encoding="utf-8") as stream:
+        yaml.safe_dump({"schema": VERSION, "source_revision": revision,
+                        "repository_id": args.repo_id, "requirements": requirements}, stream,
+                       sort_keys=False)
+    print(output)
+
+def coverage(args):
+    base = root(args); man, _, entries = validate(base)
+    snapshot_path = base / "requirements.snapshot.yaml"
+    violations = []
+    snapshot_data = None
+    if not snapshot_path.is_file():
+        violations.append("missing requirements snapshot")
+    else:
+        snapshot_data = load(snapshot_path)
+        if snapshot_data.get("schema") != VERSION or snapshot_data.get("repository_id") != man["repository_id"]:
+            violations.append("requirements snapshot does not match this repository")
+    requirements = snapshot_data.get("requirements", []) if isinstance(snapshot_data, dict) else []
+    if not isinstance(requirements, list):
+        violations.append("requirements snapshot has invalid requirements")
+        requirements = []
+    by_reference = {}
+    for requirement in requirements:
+        if not isinstance(requirement, dict):
+            violations.append("requirements snapshot has invalid requirement entry")
+            continue
+        for key in ("requirement_key", "item_id"):
+            if isinstance(requirement.get(key), str): by_reference[requirement[key]] = requirement
+    claims = {}
+    for item in entries:
+        references = item.get("satisfies", [])
+        if not isinstance(references, list) or not all(isinstance(x, str) for x in references):
+            violations.append(f"{item['id']} has invalid satisfies references")
+            continue
+        if item["status"] == "active" and not item.get("scenarios"):
+            violations.append(f"{item['id']} has no executable scenarios")
+        for reference in references:
+            requirement = by_reference.get(reference)
+            if requirement is None:
+                violations.append(f"{item['id']} claims missing snapshot requirement {reference}")
+            elif requirement.get("status") != "active":
+                violations.append(f"{item['id']} claims inactive requirement {reference}")
+            elif item["status"] == "active":
+                claims.setdefault(requirement.get("item_id"), []).append(item["id"])
+    for requirement in requirements:
+        if not isinstance(requirement, dict): continue
+        if requirement.get("status") == "active" and requirement.get("behavior_coverage") == "required" and not claims.get(requirement.get("item_id")):
+            violations.append(f"required requirement {requirement.get('requirement_key')} has no active BHV coverage")
+    report = {"repository_id": man["repository_id"], "compliance": man["compliance"],
+              "passed": not violations, "violations": violations}
+    if args.format == "json": print(json.dumps(report, indent=2, sort_keys=True))
+    else:
+        print("coverage passed" if not violations else "coverage violations:")
+        for violation in violations: print(f"- {violation}")
+    if violations and man["compliance"] == "enforced": sys.exit(1)
 
 def new(args):
     base = root(args); man = manifest(base); lex = glossary(base, man)
@@ -241,10 +312,11 @@ def main():
     for name, func in (("lint",lint),("test",test),("list",list_specs),("index",index),("coverage",coverage)):
         p=sub.add_parser(name); p.set_defaults(func=func)
         if name in ("test","list"): p.add_argument("--group")
+        if name == "coverage": p.add_argument("--format", choices=("text", "json"), default="text")
     p=sub.add_parser("new"); p.add_argument("--id",required=True); p.add_argument("--group",required=True); p.add_argument("--title",required=True); p.set_defaults(func=new)
     p=sub.add_parser("regroup"); p.add_argument("id"); p.add_argument("--group",required=True); p.set_defaults(func=regroup)
     p=sub.add_parser("requirements"); nested=p.add_subparsers(dest="requirements_command", required=True)
-    p=nested.add_parser("snapshot"); p.add_argument("--coord-dir", required=True); p.set_defaults(func=snapshot)
+    p=nested.add_parser("snapshot"); p.add_argument("--coord-dir", required=True); p.add_argument("--repo-id", required=True); p.set_defaults(func=snapshot)
     args=parser.parse_args()
     try: args.func(args)
     except ValueError as exc: print(f"pien behavior: {exc}", file=sys.stderr); sys.exit(2)

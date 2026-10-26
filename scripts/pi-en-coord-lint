@@ -57,6 +57,7 @@ Checks:
   - active FRQ/QRQ/CRQ requirement_key values are present, unique, and not
     generated coordination item IDs;
   - imported FRQ/QRQ/CRQ items have non-empty source_refs;
+  - related_behaviors references have local BHV ID shape only;
   - every tests/items/**/*.sh script matches an existing item ID;
   - design ## Covers entries reference active requirement keys and IDs.
 
@@ -164,6 +165,42 @@ lint_fail() {
 lint_warn() {
   printf 'pi-en-coord-lint: WARN: %s\n' "$*" >&2
   warnings=$((warnings + 1))
+}
+
+validate_related_behaviors() {
+  local file="$1" value reference
+  if ! grep -q '^related_behaviors:' "$file"; then
+    return 0
+  fi
+  value="$(sed -n 's/^related_behaviors:[[:space:]]*//p' "$file" | head -n1)"
+  if [ -n "$value" ] && [ "$value" != '[]' ]; then
+    if [[ "$value" =~ ^\[.*\]$ ]]; then
+      value="${value#[}"; value="${value%]}"
+      while IFS= read -r reference; do
+        reference="$(coord_trim "${reference//\"/}")"
+        if ! printf '%s' "$reference" | grep -Eq '^[A-Z0-9]+-BHV-[0-9]{8}-[0-9]{6}-[0-9]{3}$'; then
+          lint_fail "$file related_behaviors entry has invalid BHV ID shape: $reference"
+        fi
+      done < <(printf '%s' "$value" | tr ',' '\n')
+      return
+    fi
+    lint_fail "$file related_behaviors must be a YAML list"
+    return
+  fi
+  while IFS= read -r reference; do
+    [ -n "$reference" ] || continue
+    if ! printf '%s' "$reference" | grep -Eq '^[A-Z0-9]+-BHV-[0-9]{8}-[0-9]{6}-[0-9]{3}$'; then
+      lint_fail "$file related_behaviors entry has invalid BHV ID shape: $reference"
+    fi
+  done < <(awk '
+    /^related_behaviors:[[:space:]]*$/ { active=1; next }
+    active && /^[^[:space:]#]/ { active=0 }
+    active && /^[[:space:]]*-[[:space:]]*/ {
+      sub(/^[[:space:]]*-[[:space:]]*/, ""); sub(/[[:space:]]+#.*$/, ""); print
+    }
+    active && NF && !/^[[:space:]]*#/ && !/^[[:space:]]*-[[:space:]]*/ { bad=1 }
+    END { if (bad) exit 2 }
+  ' "$file") || lint_fail "$file related_behaviors must contain only list entries"
 }
 
 for removed_path in WORKSPACE.md workspace projects; do
@@ -649,6 +686,7 @@ while IFS= read -r file; do
   if item_has_top_level_field "$file" issue_type; then
     lint_fail "$file uses legacy issue_type metadata; use category"
   fi
+  validate_related_behaviors "$file"
 
   stem="${item_index_stem[$file]}"
   if [ -n "${item_index_duplicate_identity[$file]:-}" ]; then

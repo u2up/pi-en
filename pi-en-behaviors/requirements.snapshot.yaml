@@ -1,0 +1,3951 @@
+schema: v1
+source_revision: a4c1112bcc59794a8849e1846c9a5f959ed28880
+repository_id: pi-en
+requirements:
+- requirement_key: CRQ-001
+  item_id: PIEN-CRQ-20260612-210000-001
+  status: active
+  title: One coordination domain is one bare Git repository
+  body: "#### CRQ-001 \u2014 One coordination domain is one bare Git repository\n\n\
+    - Type: Constraint requirement\n- Requirement kind: architecture boundary\n\n\
+    Git-backed coordination support, when enabled, must keep one bare coordination\
+    \ repository as one coordination domain."
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: CRQ-002
+  item_id: PIEN-CRQ-20260612-210000-002
+  status: active
+  title: Coordination state uses plain Git text files
+  body: "#### CRQ-002 \u2014 Coordination state uses plain Git text files\n\n- Type:\
+    \ Constraint requirement\n- Requirement kind: architecture boundary\n\nCoordination\
+    \ repositories must be plain Git repositories containing Markdown and small metadata\
+    \ blocks. Helper commands must remain thin wrappers around Git and file scaffolding/editing."
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: CRQ-003
+  item_id: PIEN-CRQ-20260612-210000-003
+  status: active
+  title: Default startup must not mutate coordination state
+  body: "#### CRQ-003 \u2014 Default startup must not mutate coordination state\n\n\
+    - Type: Constraint requirement\n- Requirement kind: safety boundary\n- Related\
+    \ workflows: UC-023\n\nDefault `pi-en` startup and `pi-en-bwrap` may only provide\
+    \ safe context,\nreminders, or mounts for coordination repositories. They must\
+    \ not create,\nclaim, mark done, review, verify, close, commit, push, or otherwise\
+    \ mutate\ncoordination state automatically."
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: CRQ-004
+  item_id: PIEN-CRQ-20260612-210000-004
+  status: active
+  title: No hidden synchronization mechanism
+  body: "#### CRQ-004 \u2014 No hidden synchronization mechanism\n\n- Type: Constraint\
+    \ requirement\n- Requirement kind: architecture boundary\n- Related workflows:\
+    \ UC-023\n\nNo daemon, database, background push, force-push, hidden lock service,\
+    \ or non-Git synchronization mechanism may be introduced for coordination state."
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: CRQ-005
+  item_id: PIEN-CRQ-20260612-210000-005
+  status: active
+  title: Coordination requirements are explicit only
+  body: "#### CRQ-005 \u2014 Coordination requirements are explicit only\n\n- Type:\
+    \ Constraint requirement\n- Requirement kind: product boundary\n- Related workflows:\
+    \ UC-023\n\nCoordination behavior becomes mandatory only when a requirement in\
+    \ this document names a concrete command, file, or environment variable."
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: CRQ-006
+  item_id: PIEN-CRQ-20260612-210000-006
+  status: active
+  title: Host secrets are not mounted or imported by default
+  body: "#### CRQ-006 \u2014 Host secrets are not mounted or imported by default\n\
+    \n- Type: Constraint requirement\n- Requirement kind: security boundary\n- Related\
+    \ workflows: UC-004, UC-013, UC-022\n\nGit credential stores, SSH keys, signing\
+    \ keys, cloud credentials, Docker sockets, and the host home directory must not\
+    \ be mounted or imported by default."
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: CRQ-007
+  item_id: PIEN-CRQ-20260612-210000-007
+  status: active
+  title: User-specific common Pi resources are external
+  body: "#### CRQ-007 \u2014 User-specific common Pi resources are external\n\n- Type:\
+    \ Constraint requirement\n- Requirement kind: product boundary\n- Related workflows:\
+    \ UC-010, UC-011\n\n`pi-en` does not ship user-specific common rules, skills,\
+    \ prompts, roles, or extensions. It imports or exposes them from an external user-controlled\
+    \ directory when configured."
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: CRQ-008
+  item_id: PIEN-CRQ-20260612-210000-008
+  status: active
+  title: Bubblewrap network isolation is coarse-grained only
+  body: "#### CRQ-008 \u2014 Bubblewrap network isolation is coarse-grained only\n\
+    \n- Type: Constraint requirement\n- Requirement kind: limitation\n- Related workflows:\
+    \ UC-015, UC-022\n\nBubblewrap does not provide domain-level network allowlisting.\
+    \ Network behavior is limited to sharing or not sharing the host network namespace."
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: CRQ-009
+  item_id: PIEN-CRQ-20260612-210000-009
+  status: active
+  title: Enabled Pi tools are not inherently harmless
+  body: "#### CRQ-009 \u2014 Enabled Pi tools are not inherently harmless\n\n- Type:\
+    \ Constraint requirement\n- Requirement kind: limitation\n- Related workflows:\
+    \ UC-014, UC-022\n\nIf `read` or `bash` tools are enabled, copied auth files,\
+    \ exposed global extensions/packages, and bound project sessions may be readable\
+    \ by commands or tools inside the sandbox. Users should use least-privilege API\
+    \ keys, provider proxies, reduced tool allowlists, or `PI_EN_BWRAP_NET=0` when\
+    \ appropriate."
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: CRQ-010
+  item_id: PIEN-CRQ-20260613-090617-001
+  status: active
+  title: Requirement source of truth precedence
+  body: "#### CRQ-010 \u2014 Requirement source of truth precedence\n\n- Type: Constraint\
+    \ requirement\n- Requirement kind: architecture boundary\n\nRequirement coordination\
+    \ items under root `requirements/` are the preferred\nauthoritative source of\
+    \ truth for functional, quality, and constraint\nrequirements when those items\
+    \ exist. Requirement changes for covered\nareas must be planned and recorded in\
+    \ those items first, including\nstable `requirement_key`, classification, relationships,\
+    \ testability\nmetadata, and renderable Markdown body text.\n\n`REQUIREMENTS.md`\
+    \ is normally a generated, human-readable reference\nrendered from active requirement\
+    \ items. Do not make requirement changes by\nediting `REQUIREMENTS.md` first when\
+    \ a corresponding requirement item exists.\nUpdate the source requirement item\
+    \ first, then regenerate `REQUIREMENTS.md`\nwith the requirements generator. When\
+    \ requirement coordination items do not\nyet exist for a project or requirement\
+    \ area, `REQUIREMENTS.md` may serve as\nthe secondary source of truth until corresponding\
+    \ coordination items are\ncreated. Once items exist, any generated documentation\
+    \ drift must be resolved\nby correcting the relevant coordination items or the\
+    \ requirements generator,\nthen regenerating the document."
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: CRQ-011
+  item_id: PIEN-CRQ-20260613-183419-001
+  status: active
+  title: Keep pi-en launcher as a thin bootstrapper
+  body: "#### CRQ-011 pi-en launcher layering constraint\n\nThe `pi-en` launcher must\
+    \ remain a thin runtime/bootstrapper and must not\nduplicate sandbox policy. It\
+    \ may own default Pi startup policy so the separate\n`pi-start` command can be\
+    \ removed.\n\nRequired layering:\n\n```text\npi-en       = direct/project-integrated\
+    \ UX entrypoint, Nix bootstrap,\n               and default Pi invocation policy\n\
+    pi-en-shell = shell-oriented UX entrypoint using the same runtime selection\n\
+    pi-en-bwrap     = sandbox boundary and custom Pi argument passthrough\n```\n\n\
+    Consequences:\n\n- `pi-en` must implement default startup policy by adding the\
+    \ default tool\n  allowlist, `--continue`, role-manager default loading, and caller-provided\n\
+    \  Pi arguments before delegating to `pi-en-bwrap`.\n- `pi-en --raw` must delegate\
+    \ custom runs to `pi-en-bwrap`.\n- `pi-en-shell` must delegate shell runs to `pi-en-bwrap\
+    \ --shell`.\n- Project root mapping, sandbox mounts, auth/session import, and\
+    \ environment\n  policy must remain owned by `pi-en-bwrap`.\n- `pi-en` must not\
+    \ create, claim, mark done, review, verify, close,\n  commit, push, or otherwise\
+    \ mutate coordination state automatically.\n- `pi-en` must preserve the caller's\
+    \ working directory instead of\n  changing into the `pi-en` checkout, so target-project\
+    \ detection stays\n  correct."
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: CRQ-012
+  item_id: PIEN-CRQ-20260614-180308-001
+  status: active
+  title: Only expose explicit Nix-store extra PATH entries
+  body: '#### CRQ-012 Extra PATH entries are explicit Nix-store paths
+
+
+    `pi-en-bwrap` must not discover project build tools by scanning all of
+
+    `/nix/store`, inheriting the host `PATH`, or mounting host `/bin` or
+
+    `/usr/bin` read-only.
+
+
+    Extra command directories admitted into the sandbox `PATH` must come from
+
+    an explicit pi-en input such as `PI_EN_BWRAP_EXTRA_PATH` or from
+
+    `mkPiShell`-derived `extraPackages`. Each admitted path must be
+
+    canonicalized and constrained to `/nix/store` by default. Empty path
+
+    components may be ignored, but unsafe path components such as `/home/*`,
+
+    `/tmp/*`, project-writable directories, host `/bin`, host `/usr/bin`, or
+
+    relative paths must be rejected rather than silently accepted.
+
+
+    This constraint preserves the pi-en security and reproducibility model:
+
+    project-specific tools may be made available, but only as explicit,
+
+    immutable Nix-store tool paths already covered by the read-only
+
+    `/nix/store` mount.'
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: CRQ-013
+  item_id: PIEN-CRQ-20260615-175840-001
+  status: active
+  title: Single-clone serial execution boundary
+  body: '#### CRQ-013 Single-clone serial execution boundary
+
+
+    The first automation implementation must operate serially over one project
+
+    working tree and one coordination working tree. It must not introduce
+
+    parallel role execution, tmux orchestration, reviewer/tester leases, or
+
+    shared-clone concurrent Git operations.
+
+
+    The implementation must fail closed when the project working tree is dirty
+
+    before polling or when either working tree is dirty after a role job. During
+
+    idle pre-selection polling only, a dirty coordination checkout may be treated
+
+    as a temporary busy condition, but the implementation must not pull, inspect,
+
+    select, claim, auto-reset, auto-stash, force-push, rewrite coordination
+
+    history, or hide uncommitted source changes in order to keep polling.
+
+
+    Later parallel automation must be designed as a separate phase using
+
+    separate clones or worktrees and explicit coordination leases where needed.'
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: CRQ-014
+  item_id: PIEN-CRQ-20260701-110520-001
+  status: active
+  title: Host runtime disclosure boundary
+  body: '#### CRQ-014 Host runtime disclosure boundary
+
+
+    Host runtime mode trades reproducible Nix-pinned tools for lower startup
+
+    friction. Documentation and diagnostics must not describe host runtime as
+
+    reproducible or version-pinned by pi-en.
+
+
+    The product messaging must distinguish three properties:
+
+
+    - Bubblewrap sandboxing remains enabled by default.
+
+    - Host runtime mode uses unpinned host tools and dependencies.
+
+    - Nix runtime mode provides the pinned reproducible toolset.
+
+
+    Host runtime support must not weaken the default no-host-home and no-secret
+
+    mount guarantees. Any opt-in that admits host paths under `$HOME`, custom
+
+    language-manager installations, or other sensitive locations must be
+
+    explicit and documented as a broader trust decision.'
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: CRQ-015
+  item_id: PIEN-CRQ-20260711-092100-001
+  status: active
+  title: Keep pi-en internal state names stable
+  body: '#### CRQ-015 Stable internal pi-en state and environment names
+
+
+    Introducing the `pien` user-facing command namespace must not rename or
+
+    migrate existing `.pi-en/` operational state paths, coordination attachment
+
+    files, support-file layout under `share/pi-en`, or `PI_EN_*` environment
+
+    variables.
+
+
+    The low-level command rename to `pi-en-*` names is a binary, package,
+
+    and documentation migration only. Any later proposal to rename internal
+
+    state paths, environment variables, support-file layout, package metadata,
+
+    or repository naming must be handled as a separate compatibility and
+
+    migration decision.
+
+
+    Documentation for the new command namespace must continue to describe
+
+    `.pi-en/` and `PI_EN_*` names accurately where they are the actual storage
+
+    paths or configuration interfaces.'
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: UC-001
+  item_id: PIEN-FRQ-20260612-210000-001
+  status: active
+  title: Run Pi in the current repository
+  body: "#### UC-001 \u2014 Run Pi in the current repository\n\n- Type: Functional\
+    \ requirement\n- Requirement kind: workflow\n- Related requirements: FLAKE-006,\
+    \ CMD-003, CMD-005, CMD-018, PATH-001, PATH-004, PATH-005, AGENT-011\n\nA user\
+    \ must be able to enter the `pi-en` development shell and run Pi for the current\
+    \ repository:\n\n```bash\nnix develop\npi-en\n```\n\nDefault `pi-en` startup must\
+    \ start Pi through Bubblewrap with the default built-in tool allowlist:\n\n```text\n\
+    read,bash,edit,write,grep,find,ls\n```\n\nDefault `pi-en` startup must run Pi\
+    \ with `--continue` so existing scoped sessions for the current project can be\
+    \ resumed."
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: UC-002
+  item_id: PIEN-FRQ-20260612-210000-002
+  status: active
+  title: Run Pi with custom arguments
+  body: "#### UC-002 \u2014 Run Pi with custom arguments\n\n- Type: Functional requirement\n\
+    - Requirement kind: workflow\n- Related requirements: CMD-001, CMD-004, CMD-006,\
+    \ CMD-007\n\nA user must be able to invoke `pi-en-bwrap` directly when they want\
+    \ to pass custom Pi arguments instead of the default startup arguments:\n\n```bash\n\
+    pi-en-bwrap -- --model anthropic/claude-sonnet-4-5 \"Inspect this repo\"\n```\n\
+    \nIf no arguments are supplied, `pi-en-bwrap` must default to the invocation in\
+    \ CMD-004. `pi-en-bwrap --help` must show launcher help. `pi-en-bwrap -- --help`\
+    \ must pass `--help` to Pi itself."
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: UC-003
+  item_id: PIEN-FRQ-20260612-210000-003
+  status: active
+  title: Use a reproducible Pi runtime shell
+  body: "#### UC-003 \u2014 Use a reproducible Pi runtime shell\n\n- Type: Functional\
+    \ requirement\n- Requirement kind: workflow\n- Related requirements: FLAKE-006,\
+    \ RUNTIME-001, RUNTIME-002\n\nInside `nix develop`, `pi-en` must provide a reproducible\
+    \ toolset on `PATH`, including Bash and core GNU utilities, Bubblewrap, Git, Node.js,\
+    \ ripgrep, fd, jq, tar, gzip, find, grep, sed, awk, and CA certificates."
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: UC-004
+  item_id: PIEN-FRQ-20260612-210000-004
+  status: active
+  title: Run Pi inside a filesystem sandbox
+  body: "#### UC-004 \u2014 Run Pi inside a filesystem sandbox\n\n- Type: Functional\
+    \ requirement\n- Requirement kind: workflow\n- Related requirements: PATH-004,\
+    \ FS-001, FS-007, FS-008, FS-010, ENV-001, ENV-003, NET-001\n\nA user must be\
+    \ able to run Pi with access to the current project but without exposing the whole\
+    \ host home directory. By default the sandbox mounts the selected project read-write\
+    \ at `/workspace`, uses an isolated sandbox home at `/home/pi`, mounts `/nix/store`\
+    \ read-only, exposes global npm Pi install paths read-only when present, avoids\
+    \ sensitive host mounts, clears the environment, and shares the host network unless\
+    \ disabled."
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: UC-005
+  item_id: PIEN-FRQ-20260612-210000-005
+  status: active
+  title: Select what project Pi can see
+  body: "#### UC-005 \u2014 Select what project Pi can see\n\n- Type: Functional requirement\n\
+    - Requirement kind: workflow\n- Related requirements: PATH-001, PATH-002, PATH-003,\
+    \ PATH-004, PATH-005\n\nA user must be able to control which project root is exposed\
+    \ in the sandbox. The default selection is the Git repository root when detected,\
+    \ falling back to the current working directory. Users must be able to disable\
+    \ Git-root detection with `PI_EN_BWRAP_USE_GIT_ROOT=0` and provide an explicit\
+    \ project root with `PI_EN_BWRAP_PROJECT_ROOT=/path/to/repo`."
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: UC-006
+  item_id: PIEN-FRQ-20260612-210000-006
+  status: active
+  title: Keep per-project sandbox state
+  body: "#### UC-006 \u2014 Keep per-project sandbox state\n\n- Type: Functional requirement\n\
+    - Requirement kind: workflow\n- Related requirements: FS-002, FS-003, FS-005,\
+    \ FS-006\n\nBy default, `pi-en` must store persistent sandbox state outside the\n\
+    project under `$XDG_STATE_HOME/pi-en/<project-hash>` or\n`$HOME/.local/state/pi-en/<project-hash>`\
+    \ because that state may contain\ncopied model auth, sandbox Pi settings, sessions,\
+    \ imported common agent\nresources, and caches. Users must be able to override\
+    \ the state directory\nwith `PI_EN_BWRAP_STATE_DIR=/path/to/state`, including\
+    \ an explicit opt-in\nproject-local value such as `PI_EN_BWRAP_STATE_DIR=$PWD/.pi-en/state`."
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: UC-007
+  item_id: PIEN-FRQ-20260612-210000-007
+  status: active
+  title: Run with an ephemeral sandbox home
+  body: "#### UC-007 \u2014 Run with an ephemeral sandbox home\n\n- Type: Functional\
+    \ requirement\n- Requirement kind: workflow\n- Related requirements: FS-004, AGENT-011,\
+    \ AGENT-012\n\nA user must be able to request disposable sandbox state with `PI_EN_BWRAP_EPHEMERAL_HOME=1`.\
+    \ Project session import must be disabled by default for ephemeral homes unless\
+    \ explicitly enabled."
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: UC-008
+  item_id: PIEN-FRQ-20260612-210000-008
+  status: active
+  title: Import Pi model authentication into the sandbox
+  body: "#### UC-008 \u2014 Import Pi model authentication into the sandbox\n\n- Type:\
+    \ Functional requirement\n- Requirement kind: workflow\n- Related requirements:\
+    \ AGENT-002, AGENT-007, AGENT-008, AGENT-009, FS-006\n\nBy default, `pi-en-bwrap`\
+    \ must copy only selected Pi auth/model files from the host Pi agent directory\
+    \ into sandbox state: `auth.json` and `models.json`. Users must be able to disable\
+    \ this behavior with `PI_EN_BWRAP_IMPORT_AUTH=0` and copy only missing files with\
+    \ `PI_EN_BWRAP_AUTH_SYNC=missing`."
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: UC-009
+  item_id: PIEN-FRQ-20260612-210000-009
+  status: active
+  title: Resume only the current project's Pi sessions
+  body: "#### UC-009 \u2014 Resume only the current project's Pi sessions\n\n- Type:\
+    \ Functional requirement\n- Requirement kind: workflow\n- Related requirements:\
+    \ AGENT-011, AGENT-012, AGENT-013, AGENT-014, AGENT-015\n\nFor persistent homes,\
+    \ `pi-en` must bind-mount only the Pi session directory corresponding to the current\
+    \ working directory/project path. Users must be able to disable session import\
+    \ with `PI_EN_BWRAP_IMPORT_SESSIONS=0` and enable it explicitly, including for\
+    \ ephemeral homes, with `PI_EN_BWRAP_IMPORT_SESSIONS=1`."
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: UC-010
+  item_id: PIEN-FRQ-20260612-210000-010
+  status: active
+  title: Use common Pi rules, skills, prompts, and roles
+  body: "#### UC-010 \u2014 Use common Pi rules, skills, prompts, and roles\n\n- Type:\
+    \ Functional requirement\n- Requirement kind: workflow\n- Related requirements:\
+    \ AGENT-002, AGENT-003, AGENT-004, AGENT-005, AGENT-006\n\n`pi-en` must support\
+    \ importing common user-owned Pi resources into the sandbox agent directory. Only\
+    \ `AGENTS.md`, `CLAUDE.md`, `SYSTEM.md`, `APPEND_SYSTEM.md`, `skills/`, `prompts/`,\
+    \ and `roles/` may be imported as common resources. Users must be able to set\
+    \ `PI_EN_BWRAP_COMMON_AGENT_DIR`, disable import with `PI_EN_BWRAP_IMPORT_COMMON=0`,\
+    \ and use `PI_EN_BWRAP_COMMON_SYNC=missing`."
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: UC-011
+  item_id: PIEN-FRQ-20260612-210000-011
+  status: active
+  title: Combine common and project-specific Pi behavior
+  body: "#### UC-011 \u2014 Combine common and project-specific Pi behavior\n\n- Type:\
+    \ Functional requirement\n- Requirement kind: workflow\n- Related requirements:\
+    \ PATH-004, AGENT-004, AGENT-010, AGENT-010a\n\nA user must be able to combine\
+    \ common personal/team rules, skills, prompts, and roles outside the project with\
+    \ project-specific Pi resources committed inside the project. Pi must be able\
+    \ to load imported common/global resources from `/home/pi/.pi/agent` and discover\
+    \ project-specific resources from `/workspace`."
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: UC-012
+  item_id: PIEN-FRQ-20260612-210000-012
+  status: active
+  title: Use Pi extensions and packages
+  body: "#### UC-012 \u2014 Use Pi extensions and packages\n\n- Type: Functional requirement\n\
+    - Requirement kind: workflow\n- Related requirements: AGENT-010, AGENT-010a, AGENT-010b,\
+    \ CMD-003, CMD-004, CMD-005\n\nProject-local extensions and project-installed\
+    \ packages under `.pi/` must be available through `/workspace`. Global Pi extensions\
+    \ and globally installed Pi packages from the host Pi agent directory must be\
+    \ exposed by default according to AGENT-010. Users must be able to disable global\
+    \ extension/package import with `PI_EN_BWRAP_IMPORT_EXTENSIONS=0`."
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: UC-013
+  item_id: PIEN-FRQ-20260612-210000-013
+  status: active
+  title: Use host Git preferences without exposing credentials
+  body: "#### UC-013 \u2014 Use host Git preferences without exposing credentials\n\
+    \n- Type: Functional requirement\n- Requirement kind: workflow\n- Related requirements:\
+    \ GIT-001, GIT-002, GIT-003, GIT-004, GIT-005, GIT-006, GIT-007, GIT-008\n\n`pi-en`\
+    \ must copy host Git configuration into the sandbox by default so Git commands\
+    \ use normal identity, aliases, default branch names, and diff preferences. Git\
+    \ credentials, SSH keys, signing keys, credential-helper stores, and referenced\
+    \ secret files must not be imported automatically. Users must be able to disable\
+    \ Git config import and override config source paths."
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: UC-014
+  item_id: PIEN-FRQ-20260612-210000-014
+  status: active
+  title: Customize Pi tool access
+  body: "#### UC-014 \u2014 Customize Pi tool access\n\n- Type: Functional requirement\n\
+    - Requirement kind: workflow\n- Related requirements: CMD-003, CMD-004, CMD-005\n\
+    \nA user must be able to override the default Pi tool allowlist with `PI_EN_BWRAP_DEFAULT_TOOLS`,\
+    \ for least-privilege runs, tool experiments, or extension/custom tools registered\
+    \ with Pi."
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: UC-015
+  item_id: PIEN-FRQ-20260612-210000-015
+  status: active
+  title: Control network and environment exposure
+  body: "#### UC-015 \u2014 Control network and environment exposure\n\n- Type: Functional\
+    \ requirement\n- Requirement kind: workflow\n- Related requirements: ENV-001,\
+    \ ENV-002, ENV-003, ENV-004, ENV-005, NET-001, NET-002\n\nThe sandbox must share\
+    \ host networking by default for model provider access, allow users to disable\
+    \ network sharing with `PI_EN_BWRAP_NET=0`, and allow selected extra environment\
+    \ variables through `PI_EN_BWRAP_PASS_ENV`."
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: UC-016
+  item_id: PIEN-FRQ-20260612-210000-016
+  status: active
+  title: Use with a globally installed Pi CLI
+  body: "#### UC-016 \u2014 Use with a globally installed Pi CLI\n\n- Type: Functional\
+    \ requirement\n- Requirement kind: workflow\n- Related requirements: FS-008, RUNTIME-002\n\
+    \nIf Pi is installed globally via npm, `pi-en-bwrap` must be able to run it by\
+    \ mounting `/usr/local/bin` and `/usr/local/lib/node_modules/@earendil-works/pi-coding-agent`\
+    \ read-only when present."
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: UC-017
+  item_id: PIEN-FRQ-20260612-210000-017
+  status: active
+  title: Reuse `pi-en` from a new project flake
+  body: "#### UC-017 \u2014 Reuse `pi-en` from a new project flake\n\n- Type: Functional\
+    \ requirement\n- Requirement kind: workflow\n- Related requirements: FLAKE-001,\
+    \ FLAKE-002, FLAKE-003, FLAKE-006\n\nA project without an existing flake must\
+    \ be able to add `pi-en` as an input and use `mkPiShell`, then run `nix develop`\
+    \ and `pi-en`."
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: UC-018
+  item_id: PIEN-FRQ-20260612-210000-018
+  status: active
+  title: Add Pi wrappers to an existing project devshell
+  body: "#### UC-018 \u2014 Add Pi wrappers to an existing project devshell\n\n- Type:\
+    \ Functional requirement\n- Requirement kind: workflow\n- Related requirements:\
+    \ FLAKE-004, CMD-001, CMD-018\n\nA project that already has a flake/devshell must\
+    \ be able to keep its existing shell and add the `pi-en`, `pi-en-shell`, and `pi-en-bwrap`\
+    \ wrapper packages."
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: UC-019
+  item_id: PIEN-FRQ-20260612-210000-019
+  status: active
+  title: Use `pi-en` as a flake package or app
+  body: "#### UC-019 \u2014 Use `pi-en` as a flake package or app\n\n- Type: Functional\
+    \ requirement\n- Requirement kind: workflow\n- Related requirements: FLAKE-004,\
+    \ FLAKE-005\n\nUsers must be able to use exposed packages and apps such as `default`,\n\
+    `pi-en`, `pi-en-shell`, `pi-en-bwrap`, `pi-core`,\n`pi-en-coordination`, and the\
+    \ compatibility `pi-runtime` bundle through\ncommands like `nix run .#pi-en --\
+    \ ...`,\n`nix run .#pi-en-bwrap -- ...`, `nix build .#pi-core`, and\n`nix build\
+    \ .#pi-runtime`."
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: UC-020
+  item_id: PIEN-FRQ-20260612-210000-020
+  status: active
+  title: Use the library API in other flakes
+  body: "#### UC-020 \u2014 Use the library API in other flakes\n\n- Type: Functional\
+    \ requirement\n- Requirement kind: workflow\n- Related requirements: FLAKE-003\n\
+    \nOther flakes must be able to use the `pi-en` library API to construct project-specific\
+    \ shells, packages, or wrappers while reusing the same runtime and Bubblewrap\
+    \ behavior."
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: UC-021
+  item_id: PIEN-FRQ-20260612-210000-021
+  status: active
+  title: Test or validate the environment
+  body: "#### UC-021 \u2014 Test or validate the environment\n\n- Type: Functional\
+    \ requirement\n- Requirement kind: workflow\n- Related requirements: TEST-001\
+    \ through TEST-031\n\nA user must be able to validate `pi-en` through blackbox-style\
+    \ checks including `nix flake show`, package builds, coordination helper tests,\
+    \ role-manager smoke tests, and fake-`pi` sandbox inspections."
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: UC-022
+  item_id: PIEN-FRQ-20260612-210000-022
+  status: active
+  title: Safer code-review and automation workflows
+  body: "#### UC-022 \u2014 Safer code-review and automation workflows\n\n- Type:\
+    \ Functional requirement\n- Requirement kind: workflow\n- Related requirements:\
+    \ UC-004, UC-007, UC-014, UC-015, FS-010, GIT-007, NET-002\n\nThe isolated launcher\
+    \ must support safer workflows such as reviewing unfamiliar repositories, limiting\
+    \ Pi to the selected project root mounted at `/workspace`, avoiding accidental\
+    \ access to host secrets, using reduced tool allowlists, disabling network, using\
+    \ ephemeral state, and importing only the auth/session/config needed for the current\
+    \ project."
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: UC-023
+  item_id: PIEN-FRQ-20260612-210000-023
+  status: active
+  title: Coordinate multiple agents with Git
+  body: "#### UC-023 \u2014 Coordinate multiple agents with Git\n\n- Type: Functional\
+    \ requirement\n- Requirement kind: workflow\n- Related requirements: CMD-009 through\
+    \ CMD-015, ENV-006, FS-010\n\nFor projects where several agents coordinate through\
+    \ separate clones,\n`pi-en` must optionally help establish and maintain a dedicated\
+    \ Git-backed\nproject coordination repository. Fresh project-local operational\
+    \ artifacts\nfor this workflow, including the coordination working clone and local\
+    \ bare\nremotes, must live under `.pi-en/` by default. Agents synchronize only\
+    \ by\nnormal Git pull/commit/push operations. This use case remains opt-in, and\n\
+    default `pi-en` startup behavior must not mutate coordination state automatically.\n\
+    A coordination domain can cover multiple implementation repositories, but\neach\
+    \ pi-en invocation remains attached to one selected implementation repo.\nThe\
+    \ coordination clone contains root `PROJECT.md`, shared `requirements/`,\n`todos/`,\
+    \ `decisions/`, and `notes/` entries, plus repo-scoped issue\nnamespaces under\
+    \ `repos/<repo_id>/issues/<status>`. Each issue belongs to\nexactly one implementation\
+    \ repo by path; cross-repo work should use one issue\nper repo linked by stable\
+    \ item IDs. Each `repos/<repo_id>/REPO.md` may define\ndomain-wide generated files\
+    \ that are committed by that implementation\nrepository, using repo-root relative\
+    \ paths such as `REQUIREMENTS.md` or\n`REQUIREMENTS_COVERAGE.md`. More than one\
+    \ active implementation repo may\nlist the same generated path when multiple committed\
+    \ copies are useful."
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: FLAKE-001
+  item_id: PIEN-FRQ-20260612-210000-024
+  status: active
+  title: Inputs
+  body: '#### FLAKE-001 Inputs
+
+
+    The flake must declare only these normal inputs:
+
+
+    - `nixpkgs` pointing at `github:NixOS/nixpkgs/nixos-25.05`
+
+    - `flake-utils` pointing at `github:numtide/flake-utils`
+
+
+    It must not require a local `common-nix-runtime` or other machine-specific flake
+    input.'
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: FLAKE-002
+  item_id: PIEN-FRQ-20260612-210000-025
+  status: active
+  title: Systems
+  body: '#### FLAKE-002 Systems
+
+
+    The flake must use `flake-utils.lib.eachDefaultSystem` to expose packages, apps,
+    and devshells for default systems.'
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: FLAKE-003
+  item_id: PIEN-FRQ-20260612-210000-026
+  status: active
+  title: Library API
+  body: '#### FLAKE-003 Library API
+
+
+    The flake must expose `lib` attributes:
+
+
+    - `defaultTools`
+
+    - `mkRuntime`
+
+    - `mkPiBwrap`
+
+    - `mkPiEn`
+
+    - `mkPiEnShell`
+
+    - `mkPiShell`
+
+    - `mkRoleManagerPackage`
+
+
+    `mkPiShell` must accept `includeCoordinationHelpers` with a compatibility
+
+    default of `true`; setting it to `false` must omit the optional
+
+    coordination helper commands from the shell.'
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: FLAKE-004
+  item_id: PIEN-FRQ-20260612-210000-027
+  status: active
+  title: Packages
+  body: "#### FLAKE-004 Packages\n\nFor each supported system the flake must expose\
+    \ packages:\n\n- `default` equal to `pi-en`\n- `pi-en`\n- `pi-en-shell`\n- `pi-en-bwrap`\n\
+    - `pi-core` for core runtime commands and tools only\n- `pi-en-coordination` for\
+    \ the optional Git-backed coordination helpers\n- `pi-runtime` as a combined bundle\
+    \ containing `pi-core` plus\n  `pi-en-coordination`\n- `pi-role-manager`\n- `pi-en-bootstrap-coordination`\n\
+    - `pi-en-coord-init`\n- `pi-en-coord-clone`\n- `pi-en-coord-new`\n- `pi-en-coord-status`\n\
+    - `pi-en-coord-list`\n- `pi-en-coord-cat`\n- `pi-en-coord-lint`\n- `pi-en-coord-pull`\n\
+    - `pi-en-coord-push`\n- `pi-en-coord-claim`\n- `pi-en-coord-done`\n- `pi-en-coord-review`\n\
+    - `pi-en-coord-verify`\n- `pi-en-coord-close`\n- `pi-en-coord-generate-requirements`\n\
+    - `pi-en-coord-generate-requirements-coverage`\n- `pi-en-coord-upgrade-rules`\n\
+    - `pi-en-serial-roles`"
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: FLAKE-005
+  item_id: PIEN-FRQ-20260612-210000-028
+  status: active
+  title: Apps
+  body: '#### FLAKE-005 Apps
+
+
+    For each supported system the flake must expose apps:
+
+
+    - `default` running `pi-en`
+
+    - `pi-en`
+
+    - `pi-en-shell`
+
+    - `pi-en-bwrap`'
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: FLAKE-006
+  item_id: PIEN-FRQ-20260612-210000-029
+  status: active
+  title: Devshell
+  body: '#### FLAKE-006 Devshell
+
+
+    The default devshell must include the runtime packages, wrappers, and
+
+    coordination helpers, and must print a helpful startup message unless
+
+    `PI_EN_QUIET` is set. The reusable `mkPiShell` must keep that default for
+
+    compatibility while allowing `includeCoordinationHelpers = false` to omit the
+
+    optional coordination helper commands from consuming project shells.
+
+
+    The shell prompt must be prefixed with `(nix-dev)`. The shell must export
+
+    `PI_EN_ROLE_MANAGER_PACKAGE` to the Nix-built role-manager Pi package path.'
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: RUNTIME-001
+  item_id: PIEN-FRQ-20260612-210000-030
+  status: active
+  title: Included tools
+  body: '#### RUNTIME-001 Included tools
+
+
+    `mkRuntime` must include at least:
+
+
+    - `bash`
+
+    - `bubblewrap`
+
+    - `cacert`
+
+    - `coreutils`
+
+    - `fd`
+
+    - `findutils`
+
+    - `gawk`
+
+    - `git`
+
+    - `gnugrep`
+
+    - `gnused`
+
+    - `gnutar`
+
+    - `gzip`
+
+    - `jq`
+
+    - `nodejs`
+
+    - `ripgrep`
+
+    - `which`'
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: RUNTIME-002
+  item_id: PIEN-FRQ-20260612-210000-031
+  status: active
+  title: Path construction
+  body: '#### RUNTIME-002 Path construction
+
+
+    `pi-en-bwrap` must prepend the runtime package bin path to the host `PATH` before
+    checking for `pi`.'
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: CMD-001
+  item_id: PIEN-FRQ-20260612-210000-032
+  status: active
+  title: '`pi-en-bwrap` existence'
+  body: '#### CMD-001 `pi-en-bwrap` existence
+
+
+    The package `pi-en-bwrap` must install an executable named `pi-en-bwrap`.'
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: CMD-002
+  item_id: PIEN-FRQ-20260612-210000-033
+  status: active
+  title: '`pi-start` removal'
+  body: '#### CMD-002 `pi-start` removal
+
+
+    The project must not expose `pi-start` as a package, app, installed
+
+    executable, devshell command, or direct-checkout wrapper. Default Pi startup
+
+    must be available through `pi-en`; shell startup must be available through
+
+    `pi-en-shell`; low-level sandbox/custom Pi invocation must remain available
+
+    through `pi-en-bwrap`.'
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: CMD-003
+  item_id: PIEN-FRQ-20260612-210000-034
+  status: active
+  title: Default tool allowlist
+  body: '#### CMD-003 Default tool allowlist clarification
+
+
+    This requirement defines the canonical global default Pi tool list only.
+
+    Role-specific tool allowlists are distinct active-role runtime settings
+
+    and are covered by `PIEN-FRQ-20260612-210000-047`.'
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: CMD-004
+  item_id: PIEN-FRQ-20260612-210000-035
+  status: active
+  title: '`pi-en-bwrap` default invocation'
+  body: '#### CMD-004 `pi-en-bwrap` default invocation
+
+
+    When called without Pi arguments, `pi-en-bwrap` must run Pi with:
+
+
+    ```bash
+
+    pi --tools read,bash,edit,write,grep,find,ls --continue
+
+    ```
+
+
+    or with the same structure but replacing the tool list with `PI_EN_BWRAP_DEFAULT_TOOLS`
+    when set.'
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: CMD-005
+  item_id: PIEN-FRQ-20260612-210000-036
+  status: active
+  title: Default `pi-en` invocation
+  body: '#### CMD-005 Default `pi-en` invocation
+
+
+    Default `pi-en` startup must run `pi-en-bwrap` with:
+
+
+    ```bash
+
+    --tools "$tools" --continue "$@"
+
+    ```
+
+
+    where `$tools` is the default tool list or `PI_EN_BWRAP_DEFAULT_TOOLS`
+
+    when set. This behavior must be implemented without a separate `pi-start`
+
+    command.'
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: CMD-006
+  item_id: PIEN-FRQ-20260612-210000-037
+  status: active
+  title: Argument separator
+  body: '#### CMD-006 Argument separator
+
+
+    `pi-en-bwrap -- <args>` must strip the separator and pass `<args>` to Pi.'
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: CMD-007
+  item_id: PIEN-FRQ-20260612-210000-038
+  status: active
+  title: Help
+  body: '#### CMD-007 Help
+
+
+    `pi-en-bwrap -h` and `pi-en-bwrap --help` must print launcher help and exit successfully
+    without entering Bubblewrap.'
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: CMD-008
+  item_id: PIEN-FRQ-20260612-210000-039
+  status: active
+  title: Missing Pi executable
+  body: '#### CMD-008 Missing Pi executable
+
+
+    If `pi` is not found on `PATH` before sandbox entry, `pi-en-bwrap` must exit with
+    code `127` and print an actionable error.'
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: CMD-009
+  item_id: PIEN-FRQ-20260612-210000-040
+  status: active
+  title: Coordination helper commands
+  body: '#### CMD-009 Coordination helper commands
+
+
+    The flake/devshell must provide these opt-in coordination commands:
+
+
+    - `pi-en-bootstrap-coordination`
+
+    - `pi-en-coord-init`
+
+    - `pi-en-coord-clone`
+
+    - `pi-en-coord-status`
+
+    - `pi-en-coord-list`
+
+    - `pi-en-coord-pull`
+
+    - `pi-en-coord-push`
+
+    - `pi-en-coord-new`
+
+    - `pi-en-coord-claim`
+
+    - `pi-en-coord-done`
+
+    - `pi-en-coord-review`
+
+    - `pi-en-coord-verify`
+
+    - `pi-en-coord-close`
+
+    - `pi-en-coord-lint`
+
+    - `pi-en-coord-upgrade-rules`
+
+
+    `pi-en-bootstrap-coordination` must provide the high-level setup path for
+
+    attaching an implementation repository to a coordination domain. By default
+
+    it prints the inferred `PI_EN_COORD_*` settings and the corresponding
+
+    initialization command, records the selected remote as
+
+    `.pi-en-coordination.yaml` `coordination_remote` on real bootstraps, then
+
+    initializes or clones with those explicit values unless `--print-only` or
+
+    `--dry-run` is used. When project values are unset, it must infer useful
+
+    domain defaults from `PI_EN_COORD_PROJECT`, the Git origin repository name,
+
+    the Git root basename, or the current directory basename, in that order. It
+
+    must support `--project-root DIR` to infer and initialize relative to another
+
+    project directory; when doing so, stale context values from
+
+    `PI_EN_COORD_DIR`, `PI_EN_COORD_PROJECT`, and `PI_EN_COORD_PROJECT_KEY`
+
+    must not override the target directory''s inferred defaults unless explicit
+
+    options are supplied. If the selected coordination clone already exists but
+
+    the planned local bare remote is missing or does not contain the clone''s
+
+    current branch, it must restore that bare remote from committed clone
+
+    history, adding `origin` when absent and updating `origin` only when it
+
+    points to a missing local path.
+
+
+    Bootstrap must distinguish domain-level options from implementation-repo
+
+    options. `--project` names the coordination domain and `--project-key`
+
+    selects the domain-level item ID prefix stored in root `PROJECT.md`; neither
+
+    option identifies the implementation repository namespace. A separate
+
+    implementation `repo_id` must identify the current implementation repo.
+
+    Repeatable `--domain-generated-file PATH` options must populate the resolved
+
+    implementation repo manifest''s `domain_generated_files` list in first-seen
+
+    order without duplicates. The `--generated-requirements-docs` convenience
+
+    alias must expand to `--domain-generated-file REQUIREMENTS.md` and
+
+    `--domain-generated-file REQUIREMENTS_COVERAGE.md`; it must compose with
+
+    explicit generated-file options using the same first-seen de-duplication, and
+
+    must not imply registration or alter project/project-key semantics. Paths must
+
+    be implementation-repo-root-relative; empty paths, absolute paths, and `..`
+
+    traversal components are invalid. `--print-only` and `--dry-run` plans must
+
+    show the requested generated-file settings without mutating coordination
+
+    state.
+
+
+    For existing coordination domains, bootstrap should support an explicit
+
+    registration mode that attaches the current implementation repo and, only
+
+    when requested, mutates shared coordination state. A real bootstrap may write
+
+    `.pi-en-coordination.yaml` `repo_id` for the implementation repo. When an
+
+    explicit registration option is provided, it may create the missing
+
+    `repos/<repo_id>/REPO.md` manifest and issue-status directories, including any
+
+    provided `domain_generated_files`, then commit and push that coordination-domain
+
+    registry change. Existing registered repo manifests may be explicitly updated
+
+    with a provided `domain_generated_files` list during bootstrap, committing and
+
+    pushing when that manifest changes. Without the explicit registration option,
+
+    bootstrap must not silently add a repo namespace; it should report that the repo
+
+    id is unregistered and tell the user how to register it.
+
+
+    `--print-only`/`--dry-run` must not create, restore, register, commit, push,
+
+    or otherwise mutate anything. Default `pi-en` startup and non-registration
+
+    bootstrap paths must not claim, mark done, review, verify, close, or
+
+    otherwise mutate item state automatically.'
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: CMD-010
+  item_id: PIEN-FRQ-20260612-210000-041
+  status: active
+  title: '`pi-en-coord-init`'
+  body: '#### CMD-010 `pi-en-coord-init`
+
+
+    `pi-en-coord-init` must create a local bare coordination remote and, unless
+
+    `--bare-only` is used, clone and scaffold a working coordination repository.
+
+    It must install the rule/protocol templates into:
+
+
+    - `AGENTS.md`
+
+    - `docs/SYNC_PROTOCOL.md`
+
+    - `docs/ITEM_FORMAT.md`
+
+    - `.pi/skills/agent-coordination/SKILL.md`
+
+
+    It must also create the standard coordination-domain skeleton: top-level
+
+    `PROJECT.md` item-key metadata; shared `requirements`, `decisions`, `notes`,
+
+    and `agents` directories; and an initial implementation namespace at
+
+    `repos/<repo_id>/issues/open`, `repos/<repo_id>/issues/blocked`,
+
+    `repos/<repo_id>/issues/done`, and `repos/<repo_id>/issues/closed` with a
+
+    `repos/<repo_id>/REPO.md` registry manifest. The clone must be configured
+
+    with `pull.rebase=true` and `rebase.autoStash=true`.
+
+
+    Fresh project-local coordination bootstraps must place the working clone at
+
+    `<project-root>/.pi-en/coordination`, visible inside the sandbox as
+
+    `/workspace/.pi-en/coordination` when the selected project is mounted there.
+
+    Explicit `--dir` or `PI_EN_COORD_DIR` values for the coordination working
+
+    clone must resolve to that same project-local path; automatic Pi-en workflows
+
+    must reject external coordination clone directories with a diagnostic that
+
+    points users at `<project-root>/.pi-en/coordination`.
+
+
+    When no explicit/configured coordination remote is selected and `--root` and
+
+    `--root` are omitted, coordination helpers must use a project-visible
+
+    `.pi-en/agent-remotes` directory instead of the isolated sandbox `$HOME`. If
+
+    `/workspace` resolves to the current project root, the default root must be
+
+    `/workspace/.pi-en/agent-remotes`; otherwise it must be
+
+    `<project-root>/.pi-en/agent-remotes`.'
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: CMD-011
+  item_id: PIEN-FRQ-20260612-210000-042
+  status: active
+  title: '`pi-en-coord-clone`'
+  body: '#### CMD-011 `pi-en-coord-clone`
+
+
+    `pi-en-coord-clone` must clone a coordination remote into the selected
+
+    project-local coordination clone directory and configure the clone with
+
+    `pull.rebase=true` and `rebase.autoStash=true`. The clone target must be
+
+    `<project-root>/.pi-en/coordination`. Explicit `--dir` or `PI_EN_COORD_DIR`
+
+    values must resolve to that same project-local path; automatic Pi-en
+
+    workflows must reject external coordination clone directories with a clear
+
+    diagnostic that points users at `<project-root>/.pi-en/coordination`.'
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: CMD-012
+  item_id: PIEN-FRQ-20260612-210000-043
+  status: active
+  title: '`pi-en-coord-new`'
+  body: '#### CMD-012 `pi-en-coord-new`
+
+
+    `pi-en-coord-new` must create a YAML item with a type-coded timestamp ID,
+
+    top-level current-state fields, `done: null`, `closed: null`,
+
+    `reviewed: false`, `verified: false`, `testable: yes|no`, title,
+
+    acceptance-criteria placeholder, chronological `events`, and linked Markdown
+
+    `messages`. It must not commit or push automatically.
+
+
+    For issue items, `pi-en-coord-new` must accept optional `--category CATEGORY`
+
+    metadata. Supported built-in categories should include `bug`,
+
+    `feature-request`, `task`, `question`, and `improvement`; project-specific
+
+    slugs may be accepted for local categorization. New issue items must write
+
+    the category as a top-level `category:` field and must not write the legacy
+
+    `issue_type:` field. Because there are no external coordination repositories
+
+    requiring compatibility, `--issue-type` must not remain as a compatibility
+
+    alias. `task` and `tasks` must not be accepted as structural
+
+    `--type` aliases; task-category work must be created as
+
+    `--type issue --category task`.
+
+
+    The generated item ID prefix must resolve in this order:
+
+
+    1. explicit `--project-key`;
+
+    2. stored `item_key` metadata in root `PROJECT.md`;
+
+    3. `PI_EN_COORD_PROJECT_KEY` when no stored key exists;
+
+    4. derived `--project` / `PI_EN_COORD_PROJECT` for project items;
+
+    5. derived coordination clone directory name when no project name is set.
+
+
+    Derived keys must be uppercased with delimiters, whitespace, pipes,
+
+    slashes, backslashes, and other non-alphanumeric characters removed. Unless
+
+    `--id` is provided, generated IDs must use:
+
+
+    ```text
+
+    <PROJECTKEY>-<TYPECODE>-<YYYYMMDD-HHMMSS>-<NNN>
+
+    ```
+
+
+    Built-in type codes must include `ISS` for `issue`, `FRQ` for
+
+    `functional-requirement`, `QRQ` for `quality-requirement`, `CRQ` for
+
+    `constraint-requirement`, `TODO` for `todo`, `DEC` for `decision`, and `NOTE`
+
+    for `note`. The `NNN` suffix must start
+
+    at `001` for each timestamp and increment to avoid collisions in the local
+
+    coordination checkout. Filenames for new generated items must use the item ID
+
+    only. `--id` must override the whole item ID.
+
+
+    Domain item keys must be stored in top-level `PROJECT.md` as `item_key`.
+
+    Repo-scoped issue keys may come from `repos/<repo_id>/REPO.md`. When
+
+    `--project` is omitted in a coordination-domain clone, domain-common item
+
+    paths must be used even if `PI_EN_COORD_PROJECT` is set for domain selection.
+
+    Issue items must be created under `repos/<repo_id>/issues/open`, resolving
+
+    the repo id from `--repo-id`, `PI_EN_COORD_REPO_ID`, `.pi-en-coordination.yaml`,
+
+    or registry remote metadata. Functional, quality, constraint, and legacy
+
+    generic requirement items must be created under the root-level
+
+    `requirements/` directory while preserving FRQ, QRQ, and CRQ item-ID type
+
+    codes. Decision, note, and custom item types must be created under semantic
+
+    type directories by default. Existing historical items must not be silently
+
+    renumbered or rewritten only to satisfy newer naming conventions.'
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: CMD-013
+  item_id: PIEN-FRQ-20260612-210000-044
+  status: active
+  title: Coordination lifecycle helpers
+  body: "#### CMD-013 Coordination lifecycle helpers\n\nThe lifecycle helpers must\
+    \ remain thin wrappers around Git and YAML item\nfile edits:\n\n- `pi-en-coord-status`\
+    \ shows Git status and open/blocked/done item summaries;\n- `pi-en-coord-list`\
+    \ lists issue, TODO, note, decision, legacy requirement,\n  or requirement-class\
+    \ IDs, statuses, and titles, optionally filtered by\n  status, appends done-issue\
+    \ review/verification sub-status after the title,\n  and supports issue category\
+    \ filtering/grouping with `--category`,\n  `--show-category`, and `--group-by-category`;\n\
+    - `pi-en-coord-pull` runs `git pull --rebase --autostash`;\n- `pi-en-coord-push`\
+    \ commits staged/all changes and pushes;\n- coordination commands that create\
+    \ item events or commits accept\n  `--role ROLE`, read `PI_EN_COORD_ROLE`, store\
+    \ actor ID/role metadata in\n  events, and use per-command Git identity overrides\
+    \ for coordination\n  commits;\n- `pi-en-coord-claim` pulls, sets `status: claimed`,\
+    \ sets `owner:`, updates\n  `current:`, appends a `claimed` event/message, commits,\
+    \ and pushes unless\n  disabled by options;\n- `pi-en-coord-done` pulls, moves\
+    \ issue items to `done/`, sets\n  `status: done`, `done: <timestamp>`, `closed:\
+    \ null`, `reviewed: false`,\n  and `verified: false`, appends a `done` event/message\
+    \ with optional\n  structured implementation refs (`repo`, `branch`, full `commit`),\
+    \ commits,\n  and pushes unless disabled by options. Its `--implementation-ref`\
+    \ option may\n  accept `repo:branch@full-commit` as a compact CLI input format;\n\
+    - `pi-en-coord-review` pulls, marks done items reviewed on pass, or moves\n  them\
+    \ back to `open/` with `reviewed: false`, `verified: false`, and a\n  `review_failed`\
+    \ event on failure, then commits and pushes unless disabled\n  by options;\n-\
+    \ `pi-en-coord-verify` pulls, marks done items verified on pass, or moves\n  them\
+    \ back to `open/` with `reviewed: false`, `verified: false`, and a\n  `verification_failed`\
+    \ event on failure, then commits and pushes unless\n  disabled by options;\n-\
+    \ `pi-en-coord-close` pulls, requires `status: done`, `reviewed: true`, and\n\
+    \  `verified: true` unless forced, moves issue items to `closed/`, sets closed\n\
+    \  YAML current-state fields, appends a `closed` event/message, commits, and\n\
+    \  pushes unless disabled by options.\n\nIn coordination domains that use repo-scoped\
+    \ issue layout under\n`repos/<repo_id>/issues/...`, issue lifecycle operations\
+    \ that mutate state\nmust resolve the current implementation repo from `--repo-id`,\n\
+    `PI_EN_COORD_REPO_ID`, `.pi-en-coordination.yaml`, or implementation remote\n\
+    registry metadata, and must reject issue IDs or paths outside that repo scope\n\
+    by default. This protection applies to claim, done, review, verify, and close\n\
+    operations, must not be bypassed by lifecycle `--force` options, and includes\n\
+    rejecting root `issues/...` items when a repo registry/layout exists. Legacy\n\
+    root-only coordination domains without a `repos/` layout retain root issue\nlifecycle\
+    \ behavior. Read-only issue inspection may still provide explicit\nall-repository\
+    \ views, for example `--all-repos` list/status overviews.\n\nCommands that create\
+    \ commits must reject subject lines longer than 72\ncharacters."
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: CMD-014
+  item_id: PIEN-FRQ-20260612-210000-045
+  status: active
+  title: '`pi-en-coord-lint`'
+  body: '#### CMD-014 `pi-en-coord-lint`
+
+
+    `pi-en-coord-lint` must inspect coordination items and item-matched tests. It
+
+    must check issue status-directory consistency, closed issue review and
+
+    verification flags, new-format item ID/type-code consistency, item filename
+
+    stems for new-format IDs, `testable: yes|no`, required `testability_note` for
+
+    `testable: no`, required executable test scripts for `testable: yes`, and
+
+    orphan scripts under `tests/items`. Its `--require-done-or-closed` option
+
+    must fail when any issue item is not `done` or `closed`.
+
+
+    Item-matched tests must live in the project repository under paths such as
+
+    `tests/items/issues/<item-id>.sh` and
+
+    `tests/items/requirements/<item-id>.sh`; they must not mirror issue status
+
+    directories.
+
+
+    Lint implementations should build and reuse per-run item metadata for item
+
+    lookup, duplicate detection, type/status checks, and test-script matching so
+
+    validation remains scalable. Optional caching may skip repeated parsing of
+
+    unchanged inputs, but full lint remains authoritative and caches must be
+
+    invalidated by content and linter-version changes rather than item-local
+
+    `linted` flags.'
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: CMD-015
+  item_id: PIEN-FRQ-20260612-210000-046
+  status: active
+  title: '`pi-en-coord-upgrade-rules`'
+  body: '#### CMD-015 `pi-en-coord-upgrade-rules`
+
+
+    `pi-en-coord-upgrade-rules --preview` must show template diffs without
+
+    changing files. Without `--preview`, it must require a clean worktree, copy
+
+    bundled coordination rule templates into their installed locations, and
+
+    commit the changes when any template differs. It must not push unless
+
+    `--push` is used.'
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: CMD-016
+  item_id: PIEN-FRQ-20260612-210000-047
+  status: active
+  title: Role-manager package
+  body: '#### CMD-016 Built-in role tool allowlists
+
+
+    The role-manager package must preserve bundled role metadata, including
+
+    role-specific tool allowlists, when loaded from this repository or as an
+
+    external Pi package. Activating a bundled role must request its declared
+
+    tool set from the host Pi runtime and warn with the missing tool names
+
+    when any requested tool is not registered.
+
+
+    The bundled `architect` role must include `read`, `grep`, `find`, `ls`,
+
+    `bash`, `edit`, and `write` so architecture work can inspect files,
+
+    create/edit Markdown or YAML documents, and run coordination or Git
+
+    commands.'
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: PATH-001
+  item_id: PIEN-FRQ-20260612-210000-048
+  status: active
+  title: Project root detection
+  body: '#### PATH-001 Project root detection
+
+
+    Unless `PI_EN_BWRAP_PROJECT_ROOT` is set, `pi-en-bwrap` must use `git rev-parse
+    --show-toplevel` when `PI_EN_BWRAP_USE_GIT_ROOT` is unset or `1`.
+
+
+    If git-root detection fails or is disabled, it must use `$PWD`.'
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: PATH-002
+  item_id: PIEN-FRQ-20260612-210000-049
+  status: active
+  title: Project root override
+  body: '#### PATH-002 Project root override
+
+
+    `PI_EN_BWRAP_PROJECT_ROOT=/path` must force the mounted project root.'
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: PATH-003
+  item_id: PIEN-FRQ-20260612-210000-050
+  status: active
+  title: Existing project root
+  body: '#### PATH-003 Existing project root
+
+
+    If the resolved project root is not a directory, `pi-en-bwrap` must exit with
+    code `2`.'
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: PATH-004
+  item_id: PIEN-FRQ-20260612-210000-051
+  status: active
+  title: Project mount at `/workspace`
+  body: '#### PATH-004 Project mount at `/workspace`
+
+
+    The selected project root must be mounted read-write at `/workspace`. The path
+    name is fixed inside the sandbox and does not imply that pi-en manages a host-side
+    multi-project workspace.'
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: PATH-005
+  item_id: PIEN-FRQ-20260612-210000-052
+  status: active
+  title: Sandbox cwd mapping
+  body: '#### PATH-005 Sandbox cwd mapping
+
+
+    If the host cwd is inside the project root, the sandbox cwd must be the corresponding
+    path under `/workspace`. Otherwise, the sandbox cwd must be `/workspace`.'
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: FS-001
+  item_id: PIEN-FRQ-20260612-210000-053
+  status: active
+  title: Home isolation
+  body: '#### FS-001 Home isolation
+
+
+    The sandbox `HOME` must be `/home/pi`; the host home directory must not be mounted
+    wholesale.'
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: FS-002
+  item_id: PIEN-FRQ-20260612-210000-054
+  status: active
+  title: State directory
+  body: '#### FS-002 State directory
+
+
+    By default, persistent sandbox state must be stored outside the project under:
+
+
+    ```text
+
+    $XDG_STATE_HOME/pi-en/<project-hash>
+
+    ```
+
+
+    or `$HOME/.local/state/pi-en/<project-hash>` when `XDG_STATE_HOME` is unset.
+
+
+    `<project-hash>` must be a deterministic hash of the resolved project root, truncated
+    to 16 hex characters.'
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: FS-003
+  item_id: PIEN-FRQ-20260612-210000-055
+  status: active
+  title: Explicit state directory
+  body: '#### FS-003 Explicit state directory
+
+
+    `PI_EN_BWRAP_STATE_DIR=/path` must override the persistent state directory.
+
+    Project-local sandbox state must remain opt-in because it may contain copied
+
+    auth, sessions, settings, common agent resources, or caches; users may choose
+
+    `.pi-en/state` explicitly when they accept that locality and ignore policy.'
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: FS-004
+  item_id: PIEN-FRQ-20260612-210000-056
+  status: active
+  title: Ephemeral home
+  body: '#### FS-004 Ephemeral home
+
+
+    `PI_EN_BWRAP_EPHEMERAL_HOME=1` must use a temporary state directory and remove
+    it when the launcher exits.'
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: FS-005
+  item_id: PIEN-FRQ-20260612-210000-057
+  status: active
+  title: State layout
+  body: '#### FS-005 State layout
+
+
+    The launcher must create these directories as needed:
+
+
+    - `$state_base/home/.pi/agent`
+
+    - `$state_base/home/.cache`
+
+    - `$state_base/home/.config/git`
+
+    - `$state_base/agent/sessions`
+
+    - `$state_base/cache`'
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: FS-006
+  item_id: PIEN-FRQ-20260612-210000-058
+  status: active
+  title: State permissions
+  body: '#### FS-006 State permissions
+
+
+    Best-effort permissions for private state directories must be `0700`; copied auth
+    and git config files must be best-effort `0600`.'
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: FS-007
+  item_id: PIEN-FRQ-20260612-210000-059
+  status: active
+  title: Nix store
+  body: '#### FS-007 Nix store
+
+
+    `/nix/store` must be mounted read-only so Nix-provided runtime tools work inside
+    the sandbox.'
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: FS-008
+  item_id: PIEN-FRQ-20260612-210000-060
+  status: active
+  title: Global Pi install support
+  body: '#### FS-008 Global Pi install support
+
+
+    When present, `/usr/local/bin` and `/usr/local/lib/node_modules/@earendil-works/pi-coding-agent`
+    must be mounted read-only so a global npm-installed `pi` can run.'
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: FS-009
+  item_id: PIEN-FRQ-20260612-210000-061
+  status: active
+  title: System support files
+  body: '#### FS-009 System support files
+
+
+    The sandbox must make reasonable read-only host support files available when present,
+    including passwd/group, nsswitch, hosts, resolver config, and certificate locations.'
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: FS-010
+  item_id: PIEN-FRQ-20260612-210000-062
+  status: active
+  title: No sensitive host mounts
+  body: '#### FS-010 No sensitive host mounts
+
+
+    The launcher must not mount host `~/.ssh`, cloud credential directories, Docker
+    sockets, or the host home directory by default.'
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: AGENT-001
+  item_id: PIEN-FRQ-20260612-210000-063
+  status: active
+  title: Agent dir inside sandbox
+  body: '#### AGENT-001 Agent dir inside sandbox
+
+
+    Inside the sandbox:
+
+
+    - `PI_CODING_AGENT_DIR` must be `/home/pi/.pi/agent`
+
+    - `PI_CODING_AGENT_SESSION_DIR` must be `/home/pi/.pi/agent/sessions`'
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: AGENT-002
+  item_id: PIEN-FRQ-20260612-210000-064
+  status: active
+  title: Host agent directory detection
+  body: '#### AGENT-002 Host agent directory detection
+
+
+    The host Pi agent directory must be selected in this order:
+
+
+    1. `PI_EN_BWRAP_HOST_AGENT_DIR`
+
+    2. `PI_CODING_AGENT_DIR`
+
+    3. `$HOME/.pi/agent`'
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: AGENT-003
+  item_id: PIEN-FRQ-20260612-210000-065
+  status: active
+  title: Common agent resource directory
+  body: '#### AGENT-003 Common agent resource directory
+
+
+    The common resource directory must default to the selected host agent directory
+    and be overridable with `PI_EN_BWRAP_COMMON_AGENT_DIR`.'
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: AGENT-004
+  item_id: PIEN-FRQ-20260612-210000-066
+  status: active
+  title: Common resources imported
+  body: '#### AGENT-004 Common resources imported
+
+
+    When common import is enabled and the common directory exists, the launcher must
+    import only:
+
+
+    - `AGENTS.md`
+
+    - `CLAUDE.md`
+
+    - `SYSTEM.md`
+
+    - `APPEND_SYSTEM.md`
+
+    - `skills/`
+
+    - `prompts/`
+
+    - `roles/`'
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: AGENT-005
+  item_id: PIEN-FRQ-20260612-210000-067
+  status: active
+  title: Common import disable
+  body: '#### AGENT-005 Common import disable
+
+
+    `PI_EN_BWRAP_IMPORT_COMMON=0` must disable common resource import.'
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: AGENT-006
+  item_id: PIEN-FRQ-20260612-210000-068
+  status: active
+  title: Common sync policy
+  body: '#### AGENT-006 Common sync policy
+
+
+    `PI_EN_BWRAP_COMMON_SYNC=always` or unset must refresh common resources each run.
+
+
+    `PI_EN_BWRAP_COMMON_SYNC=missing` must copy only resources that are absent in
+    sandbox state.'
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: AGENT-007
+  item_id: PIEN-FRQ-20260612-210000-069
+  status: active
+  title: Auth files imported
+  body: '#### AGENT-007 Auth files imported
+
+
+    When auth import is enabled and the host agent directory exists, the launcher
+    must copy only these auth/model files:
+
+
+    - `auth.json`
+
+    - `models.json`'
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: AGENT-008
+  item_id: PIEN-FRQ-20260612-210000-070
+  status: active
+  title: Auth import disable
+  body: '#### AGENT-008 Auth import disable
+
+
+    `PI_EN_BWRAP_IMPORT_AUTH=0` must prevent copying `auth.json` and `models.json`.'
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: AGENT-009
+  item_id: PIEN-FRQ-20260612-210000-071
+  status: active
+  title: Auth sync policy
+  body: '#### AGENT-009 Auth sync policy
+
+
+    `PI_EN_BWRAP_AUTH_SYNC=always` or unset must refresh auth/model files each run.
+
+
+    `PI_EN_BWRAP_AUTH_SYNC=missing` must copy only absent auth/model files.'
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: AGENT-010
+  item_id: PIEN-FRQ-20260612-210000-072
+  status: active
+  title: Global extensions and packages
+  body: '#### AGENT-010 Global extensions and packages
+
+
+    When extension import is enabled and the host agent directory exists, the launcher
+    must make globally available Pi extensions and installed Pi packages usable inside
+    the sandbox:
+
+
+    - copy `settings.json` into the sandbox agent directory;
+
+    - expose `extensions/`, `npm/`, and `git/` from the host agent directory read-only
+    when present.
+
+
+    Project-local `.pi/extensions`, `.pi/settings.json`, `.pi/npm`, and `.pi/git`
+    are available through the `/workspace` project mount.'
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: AGENT-010a
+  item_id: PIEN-FRQ-20260612-210000-073
+  status: active
+  title: Extension import disable
+  body: '#### AGENT-010a Extension import disable
+
+
+    `PI_EN_BWRAP_IMPORT_EXTENSIONS=0` must prevent copying `settings.json` and exposing
+    host global `extensions/`, `npm/`, and `git/` directories.'
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: AGENT-010b
+  item_id: PIEN-FRQ-20260612-210000-074
+  status: active
+  title: Extension sync policy
+  body: '#### AGENT-010b Extension sync policy
+
+
+    `PI_EN_BWRAP_EXTENSIONS_SYNC=always` or unset must refresh the sandbox copy of
+    `settings.json` each run.
+
+
+    `PI_EN_BWRAP_EXTENSIONS_SYNC=missing` must copy `settings.json` only when it is
+    absent in sandbox state.'
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: AGENT-011
+  item_id: PIEN-FRQ-20260612-210000-075
+  status: active
+  title: Sessions default
+  body: '#### AGENT-011 Sessions default
+
+
+    Project sessions must be imported/bind-mounted by default for persistent homes,
+    and disabled by default for ephemeral homes.'
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: AGENT-012
+  item_id: PIEN-FRQ-20260612-210000-076
+  status: active
+  title: Sessions override
+  body: '#### AGENT-012 Sessions override
+
+
+    `PI_EN_BWRAP_IMPORT_SESSIONS=0` must disable session bind mounting.
+
+
+    `PI_EN_BWRAP_IMPORT_SESSIONS=1` must enable session bind mounting, including with
+    ephemeral homes.'
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: AGENT-013
+  item_id: PIEN-FRQ-20260612-210000-077
+  status: active
+  title: Session scope
+  body: '#### AGENT-013 Session scope
+
+
+    The launcher must bind only the host Pi session directory corresponding to the
+    current host cwd into the sandbox session directory corresponding to the mapped
+    sandbox cwd.
+
+
+    It must not mount all host Pi sessions.'
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: AGENT-014
+  item_id: PIEN-FRQ-20260612-210000-078
+  status: active
+  title: Session naming
+  body: '#### AGENT-014 Session naming
+
+
+    Session directory names must be derived by normalizing the path, stripping the
+    leading slash, replacing `/` and `:` with `-`, and surrounding the result with
+    `--`.'
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: AGENT-015
+  item_id: PIEN-FRQ-20260612-210000-079
+  status: active
+  title: Session migration
+  body: '#### AGENT-015 Session migration
+
+
+    Before bind-mounting host sessions, the launcher may copy existing sandbox session
+    `*.jsonl` files into the host project session directory without overwriting existing
+    files.'
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: GIT-001
+  item_id: PIEN-FRQ-20260612-210000-080
+  status: active
+  title: Git config import default
+  body: '#### GIT-001 Git config import default
+
+
+    Host Git configuration import must be enabled by default.'
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: GIT-002
+  item_id: PIEN-FRQ-20260612-210000-081
+  status: active
+  title: Global git config source
+  body: '#### GIT-002 Global git config source
+
+
+    The global Git config source must default to `$HOME/.gitconfig` and be overridable
+    with `PI_EN_BWRAP_HOST_GITCONFIG`.'
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: GIT-003
+  item_id: PIEN-FRQ-20260612-210000-082
+  status: active
+  title: XDG git config source
+  body: '#### GIT-003 XDG git config source
+
+
+    The XDG Git config source must default to `$XDG_CONFIG_HOME/git/config` when `XDG_CONFIG_HOME`
+    is set, otherwise `$HOME/.config/git/config`, and be overridable with `PI_EN_BWRAP_HOST_XDG_GIT_CONFIG`.'
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: GIT-004
+  item_id: PIEN-FRQ-20260612-210000-083
+  status: active
+  title: Git config targets
+  body: '#### GIT-004 Git config targets
+
+
+    Copied Git config files must appear inside the sandbox as:
+
+
+    - `/home/pi/.gitconfig`
+
+    - `/home/pi/.config/git/config`'
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: GIT-005
+  item_id: PIEN-FRQ-20260612-210000-084
+  status: active
+  title: Git config disable
+  body: '#### GIT-005 Git config disable
+
+
+    `PI_EN_BWRAP_IMPORT_GIT_CONFIG=0` must prevent importing Git config.'
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: GIT-006
+  item_id: PIEN-FRQ-20260612-210000-085
+  status: active
+  title: Git config sync policy
+  body: '#### GIT-006 Git config sync policy
+
+
+    `PI_EN_BWRAP_GIT_CONFIG_SYNC=always` or unset must refresh copied Git config each
+    run.
+
+
+    `PI_EN_BWRAP_GIT_CONFIG_SYNC=missing` must preserve existing sandbox copies.'
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: GIT-007
+  item_id: PIEN-FRQ-20260612-210000-086
+  status: active
+  title: No credential import
+  body: '#### GIT-007 No credential import
+
+
+    Git credentials, SSH keys, signing keys, credential helper backing stores, and
+    other referenced files must not be imported automatically.'
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: GIT-008
+  item_id: PIEN-FRQ-20260612-210000-087
+  status: active
+  title: System Git config
+  body: '#### GIT-008 System Git config
+
+
+    The sandbox must set `GIT_CONFIG_NOSYSTEM=1`.'
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: ENV-001
+  item_id: PIEN-FRQ-20260612-210000-088
+  status: active
+  title: Clear environment
+  body: '#### ENV-001 Clear environment
+
+
+    Bubblewrap must be invoked with `--clearenv`.'
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: ENV-002
+  item_id: PIEN-FRQ-20260612-210000-089
+  status: active
+  title: Basic terminal variables
+  body: '#### ENV-002 Basic terminal variables
+
+
+    The launcher must set or pass through terminal-related variables:
+
+
+    - set `TERM`, defaulting to `xterm-256color`
+
+    - pass `COLORTERM` when set and non-empty
+
+    - pass `NO_COLOR` when set and non-empty
+
+    - pass `FORCE_COLOR` when set and non-empty'
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: ENV-003
+  item_id: PIEN-FRQ-20260612-210000-090
+  status: active
+  title: Provider credentials
+  body: '#### ENV-003 Provider credentials
+
+
+    The launcher may pass selected LLM provider variables, including API keys and
+    base URLs listed in `flake.nix`. No arbitrary host environment variable may be
+    passed unless explicitly requested.'
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: ENV-004
+  item_id: PIEN-FRQ-20260612-210000-091
+  status: active
+  title: Extra environment pass-through
+  body: '#### ENV-004 Extra environment pass-through
+
+
+    `PI_EN_BWRAP_PASS_ENV` must accept extra environment variable names separated
+    by spaces, commas, or colons and pass through only those names when set and non-empty.'
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: ENV-005
+  item_id: PIEN-FRQ-20260612-210000-092
+  status: active
+  title: Sandbox identity/env
+  body: '#### ENV-005 Sandbox identity/env
+
+
+    Inside the sandbox the launcher must set:
+
+
+    - `HOME=/home/pi`
+
+    - `SHELL=/bin/bash`
+
+    - `USER=pi`
+
+    - `LOGNAME=pi`
+
+    - `PWD` to the mapped sandbox cwd
+
+    - `XDG_CACHE_HOME=/home/pi/.cache`
+
+    - `TMPDIR=/tmp`
+
+    - `PATH` to include the Nix runtime path, `/usr/local/bin`, `/usr/bin`, and `/bin`
+
+    - `SSL_CERT_FILE` and `NIX_SSL_CERT_FILE` to Nix `cacert`
+
+    - `PI_SKIP_VERSION_CHECK`, defaulting to `1`
+
+    - `PI_TELEMETRY`, defaulting to `0`'
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: ENV-006
+  item_id: PIEN-FRQ-20260612-210000-093
+  status: active
+  title: Coordination context
+  body: '#### ENV-006 Coordination context
+
+
+    When set or declared in `.pi-en-coordination.yaml`, the launcher must pass
+
+    safe coordination context into the sandbox:
+
+
+    - `PI_EN_COORD_REMOTE`
+
+    - `--root`
+
+    - `PI_EN_COORD_PROJECT`
+
+    - `PI_EN_COORD_AGENT_ID`
+
+    - `PI_EN_COORD_PROJECT_KEY`
+
+    - `PI_EN_COORD_ROLE`
+
+
+    If `PI_EN_COORD_REMOTE` points inside the selected project, or is read as a
+
+    project-local `coordination_remote`, the launcher must pass it into the
+
+    sandbox as the corresponding `/workspace/...` path. If explicit
+
+    `PI_EN_COORD_REMOTE` points to an existing local path outside the selected
+
+    project, the launcher must bind its parent directory read-write and pass the
+
+    sandbox-visible remote path. External local paths read only from project
+
+    configuration must not trigger host-path binds unless the user also opts in
+
+    with explicit environment context such as `PI_EN_COORD_REMOTE` or
+
+    `--root`.
+
+
+    If legacy `--root` points inside the selected project, the launcher
+
+    must pass it into the sandbox as the corresponding `/workspace/...` path.
+
+    Project-local `.pi-en/agent-remotes` is the default for local bare remotes.
+
+
+    If a coordination clone is detected under the selected project at
+
+    `.pi-en/coordination`, or selected with
+
+    `PI_EN_COORD_DIR`/`PI_EN_BWRAP_COORDINATION_DIR`, the selected path must
+
+    resolve to the project-local `.pi-en/coordination` checkout. The launcher
+
+    must set `PI_EN_COORD_DIR` inside the sandbox to the sandbox-visible
+
+    `/workspace/.pi-en/coordination` path.
+
+
+    `PI_EN_BWRAP_COORDINATION_DIR` must not bind an external coordination clone
+
+    at `/coordination`. Automatic Pi-en workflows must reject external
+
+    `PI_EN_COORD_DIR` or `PI_EN_BWRAP_COORDINATION_DIR` clone paths with a clear
+
+    diagnostic that points users at `<project-root>/.pi-en/coordination`. The
+
+    launcher may print a reminder when a coordination repository is available,
+
+    but it must not mutate coordination state.'
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: NET-001
+  item_id: PIEN-FRQ-20260612-210000-094
+  status: active
+  title: Default network
+  body: '#### NET-001 Default network
+
+
+    The sandbox must share the host network by default so Pi can reach model providers.'
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: NET-002
+  item_id: PIEN-FRQ-20260612-210000-095
+  status: active
+  title: Disable network
+  body: '#### NET-002 Disable network
+
+
+    `PI_EN_BWRAP_NET=0` must avoid adding Bubblewrap `--share-net`.'
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: CMD-017
+  item_id: PIEN-FRQ-20260613-090608-001
+  status: active
+  title: Built-in role tool allowlists
+  body: '#### CMD-017 Built-in role tool allowlists
+
+
+    The role-manager package must preserve bundled role metadata, including
+
+    role-specific tool allowlists, when loaded from this repository or as an
+
+    external Pi package. Activating a bundled role must request its declared
+
+    tool set from the host Pi runtime and warn with the missing tool names
+
+    when any requested tool is not registered.
+
+
+    Bundled base roles must declare these tool allowlists:
+
+
+    - `architect`: `read`, `grep`, `find`, `ls`, `bash`, `edit`, `write`
+
+    - `developer`: `read`, `grep`, `find`, `ls`, `edit`, `write`, `bash`
+
+    - `builder`: `read`, `grep`, `find`, `ls`, `bash`, `edit`
+
+    - `tester`: `read`, `grep`, `find`, `ls`, `bash`, `edit`, `write`
+
+    - `reviewer`: `read`, `grep`, `find`, `ls`, `bash`
+
+
+    Custom user roles may declare their own allowlists and must not be
+
+    forced to match bundled role policy.'
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: CMD-018
+  item_id: PIEN-FRQ-20260613-183404-001
+  status: active
+  title: Provide a pi-en top-level launcher
+  body: "#### CMD-018 pi-en top-level launcher\n\n`pi-en` must provide the top-level\
+    \ entrypoint for starting Pi from any\ntarget project while reusing `pi-en-bwrap`\
+    \ for sandbox construction.\n\nDefault invocation from a target project must be\
+    \ equivalent in behavior\nto entering the selected `pi-en` Nix devshell and running\
+    \ `pi-en`:\n\n```bash\ncd /path/to/project\npi-en\n```\n\nThe launcher must preserve\
+    \ the caller's current working directory so\n`pi-en-bwrap` project-root detection\
+    \ continues to mount the target project\nat `/workspace`.\n\nThe launcher must\
+    \ support these direct-use controls:\n\n- `pi-en [args...]` applies the default\
+    \ startup policy itself after\n  entering the selected devshell, then delegates\
+    \ to `pi-en-bwrap`.\n- `pi-en --raw -- [pi args...]` delegates to `pi-en-bwrap\
+    \ -- [pi args...]`\n  for fully custom Pi argument forwarding.\n- `pi-en --flake\
+    \ REF ...` or `PI_EN_FLAKE=REF pi-en ...` selects the\n  `pi-en` flake to enter\
+    \ for direct use.\n\nThe flake must also expose a Nix-provided `pi-en` package/app\
+    \ and include\nit in the default devshell so project-integrated users can run\
+    \ `pi-en`\nafter `nix develop` without a separate checkout script."
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: CMD-019
+  item_id: PIEN-FRQ-20260613-183411-001
+  status: active
+  title: Auto-load role-manager during default startup
+  body: "#### CMD-019 Default role-manager startup integration\n\nDefault `pi-en`\
+    \ startup must load the pi-en role-manager package by\ndefault when the package\
+    \ is available, without requiring users to remember\nan explicit `-e \"$PI_EN_ROLE_MANAGER_PACKAGE\"\
+    ` argument for normal\nstartup.\n\nThe default integration must:\n\n- load the\
+    \ role-manager as a per-run Pi package/extension, not by\n  mutating global or\
+    \ project Pi settings;\n- preserve the existing default tool allowlist behavior,\
+    \ `--continue`,\n  and caller-supplied Pi arguments;\n- use `PI_EN_ROLE_MANAGER_PACKAGE`\
+    \ when set, otherwise use the Nix-built\n  role-manager package path known to\
+    \ `pi-en`;\n- skip role-manager loading gracefully when no package path is available\n\
+    \  or the path does not exist;\n- allow opt-out with `PI_EN_ROLE_MANAGER_AUTO=0`;\n\
+    - avoid duplicate command/tool registration surprises when the package is\n  also\
+    \ installed through Pi settings, either through extension\n  idempotency or by\
+    \ documenting the opt-out path.\n\nRole-manager loading must not activate a role\
+    \ by itself. Role activation\nremains controlled by stored session role state,\
+    \ `/role`, `/role-cycle`,\n`/role-new`, or explicit role environment variables\
+    \ supported by the\nrole-manager extension."
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: RUNTIME-003
+  item_id: PIEN-FRQ-20260614-180306-001
+  status: active
+  title: Expose project-declared Nix tools in sandbox PATH
+  body: '#### RUNTIME-003 Project-declared Nix tool PATH exposure
+
+
+    `pi-en` must let projects that consume `pi-en.lib.mkPiShell` expose
+
+    their declared Nix `extraPackages` command directories inside the
+
+    Bubblewrap sandbox without expanding host filesystem access.
+
+
+    `mkPiShell` must derive the executable search path for `extraPackages`
+
+    from Nix package outputs, using the package `bin` directories normally
+
+    produced by Nix path construction, and export that list through a
+
+    dedicated pi-en environment variable for `pi-en-bwrap`.
+
+
+    `pi-en-bwrap` must add the validated extra command directories to the
+
+    sandbox `PATH` after the core pi-en runtime path and before host/global
+
+    fallback locations such as `/usr/local/bin`, `/usr/bin`, and `/bin`.
+
+    The core pi-en runtime must therefore keep precedence for launcher
+
+    dependencies, while project-declared tools such as `make`, `gcc`,
+
+    `pkg-config`, or `cmake` become discoverable to Pi tool commands.
+
+
+    Direct `nix run github:u2up/pi-en` usage is not required to infer a
+
+    target project''s build tools automatically. Projects that need build or
+
+    test tools inside the sandbox should either integrate pi-en through a
+
+    project flake/devshell or use an explicit, documented extra-path opt-in.'
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: UC-024
+  item_id: PIEN-FRQ-20260615-175835-001
+  status: active
+  title: Serial role automation workflow
+  body: "#### UC-024 Serial role automation workflow\n\nA user must be able to run\
+    \ one serial automation loop over a single\nproject checkout and one coordination\
+    \ checkout. The loop polls the\ncoordination repository, selects one eligible\
+    \ issue, runs exactly one\ndeveloper, reviewer, or tester Pi job for that issue,\
+    \ waits for the job to\nfinish, and then returns to polling.\n\nThe serial workflow\
+    \ must avoid concurrent writes to the project and\ncoordination working trees.\
+    \ Its generated operational artifacts, such as\nlocal locks and optional logs,\
+    \ must live under `.pi-en/` by default. It is\nthe first automation step before\
+    \ any future tmux, multi-clone, or parallel\nworker design.\n\nAcceptance criteria:\n\
+    \n- The documented workflow uses one orchestrator process rather than three\n\
+    \  parallel terminals.\n- The orchestrator prefers downstream work before new\
+    \ development:\n  tester-eligible items, then reviewer-eligible items, then open\
+    \ developer\n  items.\n- Each selected issue is handled in a fresh Pi session,\
+    \ not by continuing\n  a previous role session.\n- The design explains that tmux\
+    \ and per-role clone locking are deferred\n  until a later parallel-worker phase."
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: CMD-020
+  item_id: PIEN-FRQ-20260615-175837-001
+  status: active
+  title: Serial automation command
+  body: "#### CMD-020 Serial role automation command\n\npi-en should provide a serial\
+    \ automation command or script that can be\nrun from a project checkout containing,\
+    \ or configured with, a coordination\ncheckout. The command must own the polling\
+    \ loop outside Pi and invoke Pi\nonly for a concrete selected issue.\n\nThe command\
+    \ must:\n\n- acquire a local lockfile under `.pi-en/locks/` before polling so\
+    \ two\n  serial orchestrators do not accidentally operate in the same clone;\n\
+    - pull/rebase coordination before selecting work when the coordination\n  checkout\
+    \ is clean;\n- treat a dirty coordination checkout during idle pre-selection polling\
+    \ as\n  a temporary busy condition without pulling, inspecting, selecting,\n \
+    \ claiming, stashing, resetting, or discarding;\n- stop rather than discard or\
+    \ auto-stash unexpected project changes;\n- select tester work from done issues\
+    \ with `reviewed: true` and\n  `verified: false`;\n- select reviewer work from\
+    \ done issues with `reviewed: false`;\n- select developer work from open issues\
+    \ and claim it before launching the\n  developer job;\n- optionally limit selection\
+    \ to a caller-provided ordered batch of explicit\n  issue IDs while preserving\
+    \ tester, reviewer, then developer priority;\n- reject unknown explicit issue\
+    \ IDs, duplicate explicit issue IDs, and\n  explicit IDs that resolve to non-issue\
+    \ items before running a Pi job;\n- sleep and poll again when no eligible issue\
+    \ exists in default queue mode;\n- exit successfully when an explicit requested\
+    \ issue batch has no currently\n  eligible work;\n- allow a bounded or dry-run\
+    \ mode suitable for automated tests.\n\nThe command must not require tmux for\
+    \ the serial mode."
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: AGENT-016
+  item_id: PIEN-FRQ-20260615-175838-001
+  status: active
+  title: Fresh role session per serial job
+  body: "#### AGENT-016 Fresh role session per serial job\n\nEach serial automation\
+    \ job must start a fresh Pi session for exactly one\ncoordination issue and one\
+    \ active role. The automation must not use\n`--continue` for issue jobs and must\
+    \ not let a developer, reviewer, or\ntester job select additional work after the\
+    \ named item is complete.\n\nThe job invocation must provide role context for\
+    \ developer, reviewer, and\ntester runs. If environment-based role activation\
+    \ is used through the\nBubblewrap launcher, the command must pass the relevant\
+    \ role activation\nvariable explicitly with `PI_EN_BWRAP_PASS_ENV`, because the\
+    \ sandbox clears the\nambient host environment by default.\n\nRole prompts must\
+    \ instruct jobs to update coordination through the\nappropriate helpers:\n\n-\
+    \ developer jobs claim open work and mark it done with implementation refs;\n\
+    - reviewer jobs pass or fail review with `pi-en-coord-review`;\n- tester jobs\
+    \ pass or fail verification with `pi-en-coord-verify`;\n- final close is optional\
+    \ and must only happen after done, reviewed, and\n  verified states are all present."
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: UC-025
+  item_id: PIEN-FRQ-20260701-110508-001
+  status: active
+  title: Host runtime sandbox default workflow
+  body: "#### UC-025 Host runtime sandbox default workflow\n\nA user must be able\
+    \ to run `pi-en` from a normal checkout without first\nentering `nix develop`\
+    \ and without `pi-en` automatically invoking Nix.\nThe default direct-launch behavior\
+    \ should run Pi inside the Bubblewrap\nworkspace sandbox using a conservative,\
+    \ allowlisted host runtime.\n\nNix remains a first-class reproducible runtime.\
+    \ Users must be able to opt\ninto the Nix-backed runtime explicitly, and invocations\
+    \ that already enter\nthrough Nix package, app, profile, or development-shell\
+    \ outputs may continue\nto use the Nix-backed runtime by default.\n\nAcceptance\
+    \ criteria:\n\n- Direct checkout `pi-en` starts in host runtime mode unless the\
+    \ caller\n  requests another runtime.\n- `pi-en --runtime host` and `PI_EN_RUNTIME=host`\
+    \ select host runtime\n  mode explicitly.\n- `pi-en --runtime nix` and `PI_EN_RUNTIME=nix`\
+    \ select the existing\n  pinned Nix runtime behavior.\n- The command output or\
+    \ diagnostics make the selected runtime mode clear\n  when reporting missing tools\
+    \ or startup failures.\n- Bubblewrap sandboxing, isolated HOME, filtered environment,\
+    \ and the\n  `/workspace` project mount remain the default in both runtime modes."
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: RUNTIME-004
+  item_id: PIEN-FRQ-20260701-110510-001
+  status: active
+  title: Runtime mode selection
+  body: '#### RUNTIME-004 Runtime mode selection
+
+
+    The launcher stack must support explicit runtime modes named `host` and
+
+    `nix`. Runtime mode may be selected by a command-line option such as
+
+    `--runtime host|nix|auto` or by `PI_EN_RUNTIME=host|nix|auto`, with the
+
+    command-line option taking precedence over the environment variable.
+
+
+    Direct checkout use should default to host runtime mode. Nix-provided
+
+    package, app, profile, and development-shell entrypoints should keep using
+
+    Nix-backed paths unless the implementation explicitly documents and tests a
+
+    safe host-mode override for those entrypoints.
+
+
+    Runtime mode selection must be resolved before any fallback that would
+
+    invoke `nix develop`. If host mode is selected and required host tools are
+
+    missing, the launcher must fail with host-mode diagnostics rather than
+
+    silently entering Nix.'
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: RUNTIME-005
+  item_id: PIEN-FRQ-20260701-110512-001
+  status: active
+  title: Host runtime dependency preflight
+  body: '#### RUNTIME-005 Host runtime dependency preflight
+
+
+    Host runtime mode must validate required host commands before constructing
+
+    the Bubblewrap command. At minimum, host mode must check for the commands
+
+    needed by the launcher itself, Bubblewrap, project-root detection, state
+
+    preparation, and Pi startup.
+
+
+    Missing dependency diagnostics must:
+
+
+    - identify that the selected runtime is `host`;
+
+    - list the missing command names;
+
+    - explain that host runtime tools are not pinned by pi-en;
+
+    - suggest installing missing host packages or retrying with the Nix runtime.
+
+
+    The implementation may treat some commands as optional when the feature that
+
+    needs them is disabled, but optionality must be documented and tested.'
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: PATH-006
+  item_id: PIEN-FRQ-20260701-110514-001
+  status: active
+  title: Conservative host tool path exposure
+  body: '#### PATH-006 Conservative host tool path exposure
+
+
+    Host runtime mode must not blindly inherit the caller''s full host `PATH`.
+
+    It must construct the sandbox `PATH` from a documented allowlist of host
+
+    command directories, defaulting to common system locations such as
+
+    `/usr/local/bin`, `/usr/bin`, and `/bin` when they exist.
+
+
+    Additional host command directories may be admitted only through an explicit
+
+    host-runtime opt-in variable or option. Each admitted directory must be
+
+    absolute, canonicalized, exist on the host, and be mounted read-only into
+
+    the sandbox. Paths under the host home directory should be rejected by
+
+    default or require a separate, clearly documented explicit opt-in.
+
+
+    Nix-mode `PI_EN_BWRAP_EXTRA_PATH` semantics must remain constrained to
+
+    validated `/nix/store` paths. Host-mode extra path semantics must be kept
+
+    separate or guarded by explicit runtime-mode checks so Nix safety guarantees
+
+    are not weakened accidentally.'
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: FS-011
+  item_id: PIEN-FRQ-20260701-110516-001
+  status: active
+  title: Host runtime support mounts
+  body: '#### FS-011 Host runtime support mounts
+
+
+    Host runtime mode must mount only the host filesystem locations needed to
+
+    execute the admitted host tools, Pi, and documented support files. Command
+
+    directories and support directories admitted for host runtime must be
+
+    read-only unless a requirement explicitly states otherwise.
+
+
+    Host runtime mode may mount common system runtime locations needed by
+
+    dynamically linked host binaries, such as system library, loader, share,
+
+    certificate, and alternatives directories, when present. It must still avoid
+
+    mounting the host home directory, SSH keys, cloud credentials, Docker
+
+    sockets, or unrelated project trees by default.
+
+
+    Nix mode must retain the existing read-only `/nix/store` behavior. Host
+
+    mode should mount `/nix/store` only when explicitly needed for admitted host
+
+    paths or when the selected runtime is Nix-backed.'
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: AGENT-017
+  item_id: PIEN-FRQ-20260701-110518-001
+  status: active
+  title: Host Pi and role-manager source policy
+  body: '#### AGENT-017 Host Pi and role-manager source policy
+
+
+    Host runtime mode must define how the sandbox reaches the host `pi` command
+
+    and optional role-manager package without mounting the host home directory
+
+    by default.
+
+
+    The default policy should support system or globally installed Pi paths that
+
+    are already covered by host runtime read-only mounts. If `pi` resolves to a
+
+    path under the host home directory or another unmounted custom location,
+
+    pi-en must fail with an actionable diagnostic or require an explicit
+
+    read-only bind opt-in.
+
+
+    Role-manager auto-loading must continue to work in host mode when a safe
+
+    package path is available from the pi-en checkout, an installed package, or
+
+    an explicit environment variable. Paths outside the project and outside
+
+    already mounted runtime locations must be bound read-only and rewritten to
+
+    their in-sandbox locations before being passed to Pi.'
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: INSTALL-001
+  item_id: PIEN-FRQ-20260701-182129-001
+  status: active
+  title: Support non-Nix installation
+  body: "#### INSTALL-001 Non-Nix installation support\n\npi-en should provide a supported\
+    \ non-Nix installation path for users who\nwant the host-runtime workflow without\
+    \ entering a Nix development shell or\nconsuming a flake output. The non-Nix installer\
+    \ must install the pi-en\ncommand wrappers and support files that Nix packages\
+    \ normally place on\n`PATH` or expose through environment variables.\n\nThe installation\
+    \ path should, at minimum, support a user-local prefix such as\n`~/.local` and\
+    \ should be adaptable to a system prefix such as `/usr/local`\nwhen run with appropriate\
+    \ permissions. Installed commands must be able to\nlocate their support files\
+    \ without requiring the user to keep running from a\nsource checkout.\n\nInstallation\
+    \ and deinstallation should not require cloning the full pi-en\nrepository. The\
+    \ project may support direct checkout installation as a\ncontributor convenience,\
+    \ but end-user install and uninstall flows should work\nfrom a published release\
+    \ artifact, downloaded installer, or already installed\nmanifest/uninstall command.\n\
+    \nInstalled support files must include the coordination helper library,\ncoordination\
+    \ templates, and role-manager package data needed by:\n\n- `pi-en`, `pi-en-shell`,\
+    \ and `pi-en-bwrap`;\n- `pi-en-bootstrap-coordination`;\n- `pi-en-coord-*` helper\
+    \ commands;\n- `pi-en-serial-roles`.\n\nThe non-Nix installer may rely on host-provided\
+    \ runtime tools such as Bash,\nBubblewrap, Git, jq, ripgrep, fd, Node, and the\
+    \ host `pi` command. It must\nnot describe those tools as pinned or reproducible\
+    \ by pi-en. User-facing\noutput and documentation must clearly state that Nix\
+    \ remains the\nreproducible pinned runtime while the non-Nix install uses host\
+    \ tools.\n\nAcceptance criteria:\n\n- A non-Nix user can install pi-en commands\
+    \ and support files under a chosen\n  prefix without invoking Nix or cloning the\
+    \ full pi-en repository.\n- Installed command wrappers set or otherwise resolve\
+    \ the equivalent support\n  paths for `PI_EN_COORD_LIB`, `PI_EN_COORD_TEMPLATE_DIR`,\
+    \ and\n  `PI_EN_ROLE_MANAGER_PACKAGE`.\n- The installer checks or documents required\
+    \ host dependencies and reports\n  missing dependencies with host-runtime wording.\n\
+    - An uninstall or cleanup path is documented or provided for files installed\n\
+    \  by the non-Nix installer, and it can run without access to the original\n \
+    \ source checkout.\n- README installation guidance distinguishes direct checkout,\
+    \ non-Nix\n  installed host runtime, and Nix-backed reproducible runtime workflows.\n\
+    - Existing direct-checkout and Nix flake/devshell workflows remain\n  compatible."
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: INSTALL-002
+  item_id: PIEN-FRQ-20260702-064100-001
+  status: active
+  title: Support explicit main-branch non-Nix bootstrap installation
+  body: "#### INSTALL-002 Remote-ref non-Nix installer bootstrap\n\nThe non-Nix installer\
+    \ should be able to run as a small bootstrap script when\nthe full pi-en payload\
+    \ is not already present locally. In bootstrap mode, it\nmust fetch an explicit\
+    \ pi-en source artifact, unpack it to a temporary\ndirectory, and continue installation\
+    \ from that artifact using the same\ninstalled file layout as local payload installs.\n\
+    \nThe bootstrap interface must support installing from the upstream `main`\nbranch\
+    \ when the user explicitly requests that ref. Main-branch installation is\nmutable\
+    \ and not reproducible, so it must be documented as a development or\nlatest channel\
+    \ rather than the recommended stable path. Tagged release refs or\nrelease artifacts\
+    \ should remain the preferred stable installation channel.\n\nThe installer should\
+    \ record origin information in installed state or the\ninstall manifest when available,\
+    \ including the repository, ref or version,\nartifact URL, and checksum if one\
+    \ was verified. Future upgrade and uninstall\nbehavior may use this origin metadata,\
+    \ but uninstall must not require network\naccess or the original source checkout.\n\
+    \nAcceptance criteria:\n\n- A user can bootstrap installation without cloning\
+    \ the full repository by\n  running the installer script and passing an explicit\
+    \ remote ref such as\n  `--ref main`.\n- `--ref main` fetches the GitHub branch\
+    \ archive or equivalent artifact for\n  the configured repository, then installs\
+    \ from the fetched payload.\n- Stable documentation prefers tagged releases or\
+    \ release artifacts and labels\n  `main` installation as mutable, development/latest,\
+    \ and not reproducible.\n- The installer supports configurable origin inputs such\
+    \ as repository and/or\n  artifact URL while preserving safe defaults for the\
+    \ upstream pi-en repo.\n- The installer records origin metadata in the install\
+    \ manifest or adjacent\n  installed state when the install came from a remote\
+    \ artifact.\n- Bootstrap downloads use a temporary directory and clean it up after\
+    \ success\n  or failure where practical.\n- Uninstall continues to work from installed\
+    \ state without network access,\n  the original source checkout, or the downloaded\
+    \ temporary artifact.\n- Existing local payload installation from a checkout or\
+    \ release archive\n  remains compatible."
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: CMD-021
+  item_id: PIEN-FRQ-20260706-202632-001
+  status: active
+  title: pi-en-bwrap shell mode
+  body: '#### CMD-021 `pi-en-bwrap` shell mode
+
+
+    `pi-en-bwrap` must provide a shell mode that constructs the same Bubblewrap
+
+    sandbox, mounts, working directory, sanitized environment, runtime tool path,
+
+    Pi state exposure, extension/session/resource binds, and coordination path
+
+    rewrites as normal Pi coding-agent execution, but execs Bash instead of
+
+    `pi` as the final process.
+
+
+    Shell mode must be reachable through a wrapper-owned interface, such as
+
+    `pi-en-bwrap --shell`, and may also be exposed as `pi-en-bwrap-shell`. In normal
+
+    Pi mode, existing argument behavior must remain unchanged, including
+
+    `pi-en-bwrap -- <args>` passing arguments to Pi.
+
+
+    Shell mode must not inject Pi default arguments, must not treat shell-mode
+
+    arguments as Pi arguments, and must exit with the shell process status.'
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: CMD-022
+  item_id: PIEN-FRQ-20260706-202634-001
+  status: active
+  title: pi-en-shell runtime launcher
+  body: '#### CMD-022 `pi-en-shell` runtime launcher
+
+
+    `pi-en` must expose a user-facing `pi-en-shell` command that enters a
+
+    Bash shell inside the same sandbox profile used by the Pi coding agent while
+
+    preserving the existing `pi-en` runtime selection contract.
+
+
+    `pi-en-shell` must accept the same runtime-selection inputs as `pi-en`,
+
+    including `--runtime host|nix|auto`, `PI_EN_RUNTIME`, and `--flake REF`.
+
+    Host, Nix, and auto modes must resolve through the existing launcher layer
+
+    and then delegate to `pi-en-bwrap` shell mode instead of duplicating sandbox
+
+    policy.
+
+
+    When the Nix runtime is requested and the Nix-provided commands are not
+
+    already wired into the current process, `pi-en-shell` must enter
+
+    `nix develop` for the selected flake and run the Nix-provided
+
+    `pi-en-shell`, preserving the requested shell-mode arguments.
+
+
+    Existing `pi-en` and `pi-en-bwrap` Pi-agent behavior must remain unchanged,
+
+    except that `pi-start` is intentionally removed and its default startup
+
+    behavior moves into `pi-en`.'
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: CMD-023
+  item_id: PIEN-FRQ-20260711-092100-001
+  status: active
+  title: pien command namespace
+  body: "#### CMD-023 `pien` command namespace\n\npi-en must provide a canonical `pien`\
+    \ command namespace that covers the\ncurrent command surface without changing\
+    \ existing `.pi-en/` operational\nstate paths or `PI_EN_*` environment variables.\
+    \ Lower-level behavior-source\ncommands must use the `pi-en-*` names required\
+    \ by CMD-026.\n\n`pien` without a subcommand must behave like the current default\
+    \ `pi-en`\nlauncher, and `pien run` must be an explicit alias for the same behavior.\n\
+    The namespace must expose these leaf commands:\n\n- `pien raw -- [pi args...]`\
+    \ for current `pi-en --raw -- [pi args...]`;\n- `pien shell [shell args...]` for\
+    \ current `pi-en-shell`;\n- `pien sandbox [pi args...]` for `pi-en-bwrap`;\n-\
+    \ `pien sandbox shell [shell args...]` for `pi-en-bwrap --shell`;\n- `pien coord\
+    \ bootstrap` for `pi-en-bootstrap-coordination`;\n- `pien coord init`, `clone`,\
+    \ `status`, `list`, `show`, `new`, `claim`,\n  `done`, `review`, `verify`, `close`,\
+    \ `pull`, `push`, `lint`, and `repo`\n  for the corresponding `pi-en-coord-*`\
+    \ helpers, with `show` mapping to\n  `pi-en-coord-cat`;\n- `pien coord rules upgrade`\
+    \ for `pi-en-coord-upgrade-rules`;\n- `pien coord requirements generate` for\n\
+    \  `pi-en-coord-generate-requirements`;\n- `pien coord requirements coverage`\
+    \ for\n  `pi-en-coord-generate-requirements-coverage`;\n- `pien roles serial`\
+    \ for `pi-en-serial-roles`;\n- `pien install` and `pien uninstall` for supported\
+    \ non-Nix install and\n  uninstall flows backed by `pi-en-install-non-nix` and\
+    \ `pi-en-uninstall`;\n- `pien completion bash` for portable Bash completion setup.\n\
+    \nThe command namespace must be available from direct checkout use,\nhost-runtime\
+    \ non-Nix installation, Nix devshells, and flake app/package\noutputs."
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: CMD-024
+  item_id: PIEN-FRQ-20260711-092100-002
+  status: active
+  title: pien behavioral parity
+  body: '#### CMD-024 `pien` behavioral parity
+
+
+    Each `pien` replacement command must preserve the parameter handling and
+
+    behavior of the renamed `pi-en-*` low-level command it dispatches to after
+
+    the new subcommand path is consumed. Parity includes accepted options,
+
+    positional arguments, argument
+
+    ordering, exit status, stdout/stderr behavior, working-directory behavior,
+
+    environment-variable handling, support-file resolution, and help behavior.
+
+
+    The implementation should remain a thin dispatcher rather than a rewrite of
+
+    launcher, sandbox, coordination, role-automation, or installer behavior. Leaf
+
+    commands should `exec` the renamed low-level implementation command with
+
+    unchanged remaining arguments. For example:
+
+
+    ```bash
+
+    pien coord status --repo-id pi-en
+
+    # equivalent to: pi-en-coord-status --repo-id pi-en
+
+
+    pien shell --runtime nix
+
+    # equivalent to: pi-en-shell --runtime nix
+
+
+    pien sandbox shell -- -l
+
+    # equivalent to: pi-en-bwrap --shell -- -l
+
+    ```
+
+
+    Because top-level `pien` subcommand names are reserved, users must be able
+
+    to use `pien -- ...` when they need to pass a first Pi argument that looks
+
+    like a `pien` subcommand.
+
+
+    Parity must be verified in both host and Nix runtime contexts, including
+
+    direct checkout, non-Nix installed host runtime, Nix devshell, and flake app
+
+    or package execution where those contexts are supported by the current
+
+    command.'
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: CMD-025
+  item_id: PIEN-FRQ-20260711-092100-003
+  status: active
+  title: pien help and Bash completion
+  body: '#### CMD-025 `pien` help and Bash completion
+
+
+    The `pien` namespace must provide discoverable command help and Bash
+
+    completion for the nested command hierarchy.
+
+
+    Help must support, at minimum:
+
+
+    ```bash
+
+    pien help
+
+    pien help coord
+
+    pien help coord status
+
+    pien coord status --help
+
+    ```
+
+
+    Leaf help may delegate to the mapped existing command''s `--help` output.
+
+    Group help should list available subcommands and the existing command that
+
+    each subcommand maps to.
+
+
+    Bash completion must be available as an installed completion file where the
+
+    packaging environment supports Bash completion and as a portable command:
+
+
+    ```bash
+
+    pien completion bash
+
+    source <(pien completion bash)
+
+    ```
+
+
+    Completion must suggest top-level commands, nested `sandbox`, `coord`,
+
+    `coord rules`, `coord requirements`, `roles`, and `completion` subcommands,
+
+    and known options for leaf commands. Path-valued options should keep path
+
+    completion. The completion implementation should not require Nix-only tools;
+
+    it must work in host-runtime installations as well as Nix-provided shells.'
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: CMD-026
+  item_id: PIEN-FRQ-20260711-170000-001
+  status: active
+  title: pi-en-prefixed low-level commands
+  body: "#### CMD-026 pi-en-prefixed low-level commands\n\nAll lower-level commands\
+    \ that are called by the `pien` command collection\nmust use `pi-en-*` names,\
+    \ without compatibility shims for the old names.\nThe supported low-level command\
+    \ names are:\n\n- `pi-en`, `pi-en-shell`, `pi-en-bwrap`;\n- `pi-en-bootstrap-coordination`;\n\
+    - `pi-en-coord-init`, `pi-en-coord-clone`, `pi-en-coord-status`,\n  `pi-en-coord-list`,\
+    \ `pi-en-coord-cat`, `pi-en-coord-new`,\n  `pi-en-coord-claim`, `pi-en-coord-done`,\
+    \ `pi-en-coord-review`,\n  `pi-en-coord-verify`, `pi-en-coord-close`, `pi-en-coord-pull`,\n\
+    \  `pi-en-coord-push`, `pi-en-coord-lint`, `pi-en-coord-repo`,\n  `pi-en-coord-upgrade-rules`,\
+    \ `pi-en-coord-generate-requirements`, and\n  `pi-en-coord-generate-requirements-coverage`;\n\
+    - `pi-en-serial-roles`;\n- `pi-en-install-non-nix` and `pi-en-uninstall`.\n\n\
+    Installed Nix packages, flake apps, non-Nix installations, direct-checkout\ndocumentation,\
+    \ tests, and `pien` help/completion output must use the new\nnames. The old lower-level\
+    \ commands `pi-bwrap`, `bootstrap-coordination`,\n`agent-coord-*`, `pi-serial-roles`,\
+    \ and `install-non-nix` must not remain\nsupported command entrypoints after the\
+    \ rename."
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: CMD-027
+  item_id: PIEN-FRQ-20260720-091901-001
+  status: active
+  title: Canonical flake agent shell integration recipe
+  body: "#### CMD-027 \u2014 Canonical flake agent shell integration recipe\n\npi-en\
+    \ must provide a deterministic user-facing recipe for adding an\nagent-oriented\
+    \ devshell to an external project flake.\n\nThe recipe must make the pi-en-specific\
+    \ intent explicit: add `pi-en` as a\nflake input, include it in `outputs`, preserve\
+    \ existing project devshells,\nand add an agent shell with `pi-en.lib.mkPiShell`\
+    \ rather than creating a\nproject-native shell that only happens to be named `agent`.\n\
+    \nThe recipe may start as a print-only helper, but its output must be stable\n\
+    enough for humans and agents to copy into common existing-flake shapes. It\nmust\
+    \ document when to choose `includeCoordinationHelpers = true` and where to\ndeclare\
+    \ project-specific sandbox tools with `extraPackages`.\n\nThe recipe should recommend\
+    \ that pi-en-integrated projects provide the\n`.#agent` selector consistently.\
+    \ If the default shell is already pi-en-aware,\nthe recipe may show `agent` as\
+    \ an alias of that normal `nix develop` shell;\notherwise it should show a separate\
+    \ `pi-en.lib.mkPiShell` agent shell."
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: AGENT-018
+  item_id: PIEN-FRQ-20260720-091904-001
+  status: active
+  title: Packaged flake integration skill
+  body: "#### AGENT-018 \u2014 Packaged flake integration skill\n\npi-en must provide\
+    \ agent-facing guidance for modifying external flakes to\nadd pi-en-aware development\
+    \ shells.\n\nThe skill must teach agents that a request such as \"make `nix develop\n\
+    .#agent` work for pi-en\" means adding the pi-en flake input and using\n`pi-en.lib.mkPiShell`,\
+    \ unless the user explicitly asks for a normal\nproject-native shell. It must\
+    \ instruct agents to preserve existing flake\nstructure, existing devshells, project\
+    \ package outputs, and project-specific\nshell policy.\n\nThe skill must prefer\
+    \ the canonical recipe helper from CMD-027 when\navailable, and must warn against\
+    \ satisfying the request by creating an\nunrelated `agentProfile` or `devShells.agent`\
+    \ that lacks `pien` and the\npi-en sandbox/runtime wiring.\n\nThe skill must also\
+    \ teach `.#agent` as the preferred shell selector for\npi-en-integrated projects,\
+    \ including the compatibility pattern where\n`agent` aliases the normal default\
+    \ shell when that shell is already\npi-en-aware."
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: RUNTIME-006
+  item_id: PIEN-FRQ-20260720-094621-001
+  status: active
+  title: Nix runtime agent devshell selection
+  body: "#### RUNTIME-006 \u2014 Nix runtime agent devshell selection\n\nWhen `pien\
+    \ --runtime nix`, `pi-en --runtime nix`, or `pi-en-shell\n--runtime nix` enters\
+    \ a target project flake, pi-en should prefer a\npi-en-aware agent devshell when\
+    \ the project provides one.\n\nThe preferred convention is `devShells.<system>.agent`,\
+    \ selected by the flake\nreference fragment `.#agent`. If that shell exists, Nix\
+    \ runtime startup should\nenter it instead of the default devshell so `pien` uses\
+    \ the project-declared\nagent shell, runtime wiring, extra packages, and optional\
+    \ coordination\nhelpers.\n\nFor backward compatibility, projects may define `.#agent`\
+    \ as an alias of\ntheir normal default shell when no separate agent policy is\
+    \ needed. pi-en\nmust not require the alias for older flakes: if no agent devshell\
+    \ exists, Nix\nruntime startup must continue to use the existing default `nix\
+    \ develop`\nbehavior.\n\npi-en must not silently fall back to the default devshell\
+    \ when an explicitly\nselected or discovered `.#agent` shell exists but fails\
+    \ to evaluate or build;\nthat failure is actionable project configuration feedback\
+    \ and should be\nreported.\n\nThe runtime should also provide an explicit selector\
+    \ override, such as a\n`--devshell NAME` command-line option and `PI_EN_NIX_DEVSHELL=NAME`,\
+    \ so\nusers can force `agent`, `default`, or another project shell without relying\n\
+    on automatic discovery. Command-line selection must take precedence over the\n\
+    environment variable."
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: CMD-028
+  item_id: PIEN-FRQ-20260725-125507-001
+  status: active
+  title: Sandbox-aware pien command surface
+  body: "#### CMD-028 \u2014 Sandbox-aware pien command surface\n\npi-en should expose\
+    \ a small, sandbox-aware `pien` command surface inside\nPi sessions so humans\
+    \ and agents can discover and run coordination and\ndiagnostic helpers from the\
+    \ same working directory and with the same command\nnames.\n\nThe in-Pi command\
+    \ surface must preserve the runtime boundary: commands that\nselect or enter runtimes,\
+    \ start Pi, open nested sandbox shells, or install and\nuninstall pi-en remain\
+    \ outer-launcher operations. Inside Pi they should fail\nwith a clear diagnostic\
+    \ that explains the command is terminal-only and shows\nthe equivalent command\
+    \ to run outside Pi when practical.\n\nThe supported in-Pi subset should include\
+    \ non-launcher diagnostics and\ndocumentation helpers, such as help/version/recipe\
+    \ commands, and coordination\nhelpers that operate on the mounted implementation\
+    \ checkout and coordination\nclone. Coordination commands may remain subject to\
+    \ the existing sandbox\nfilesystem, network, and authentication policy; failures\
+    \ caused by missing\nSSH keys or host home credentials should be explicit and\
+    \ documented rather\nthan worked around by broadening sandbox mounts.\n\npi-en\
+    \ should detect the in-sandbox context through an explicit marker set by\nthe\
+    \ sandbox layer, not by guessing from paths. The marker lets the canonical\n`pien`\
+    \ namespace apply a safe allow/block policy while preserving current\nbehavior\
+    \ in outer terminals, Nix devshells, direct checkouts, and profile or\nnon-Nix\
+    \ installs."
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: INSTALL-003
+  item_id: PIEN-FRQ-20260809-181859-001
+  status: active
+  title: Support Git URL non-Nix install and update
+  body: "#### INSTALL-003 Git URL install and update support\n\nThe non-Nix installer\
+    \ should support explicit installation from arbitrary\nlocal or remote Git repositories,\
+    \ not only GitHub codeload archives. Users\nshould be able to pass `--url URL\
+    \ --ref REF` where `URL` is a local checkout\npath, `file://` URL, HTTPS Git URL,\
+    \ SSH Git URL, or scp-like Git remote, and\n`REF` names one of these forms:\n\n\
+    - a branch name, such as `main`;\n- a tag name, such as `v0.2.0`;\n- a pinned\
+    \ commit constrained to a branch, expressed as `COMMIT@BRANCH`.\n\nBranch and\
+    \ tag names are mutable unless governed externally, so the installer\nmust record\
+    \ the requested ref and the resolved commit in installed origin\nmetadata. For\
+    \ `COMMIT@BRANCH`, the installer should verify that the commit is\nreachable from\
+    \ the named branch before installing. If an unqualified `REF`\nresolves to both\
+    \ a branch and a tag, the installer should fail with an\nambiguity diagnostic\
+    \ rather than guessing.\n\nExplicit Git source inputs should take precedence over\
+    \ local payload\ndiscovery. This allows an installed `pi-en-update` wrapper, which\
+    \ runs from\n`$PREFIX/share/pi-en/scripts`, to fetch the stored origin instead\
+    \ of\naccidentally reinstalling the already-installed payload as if it were a\
+    \ local\nsource checkout.\n\nThe installer should keep the existing archive/bootstrap\
+    \ path for backwards\ncompatibility, including `--repo OWNER/REPO` and `--artifact-url\
+    \ URL`, but\n`--url URL --ref REF` should be the preferred future interface for\
+    \ arbitrary\nrepositories and updater-driven installs.\n\nInstalled state should\
+    \ include enough origin data for a generated\n`pi-en-update` wrapper to rerun\
+    \ the installer without requiring the user to\nremember the original URL and ref.\
+    \ The wrapper should reuse stored values\nwhen the caller does not pass replacements\
+    \ and should allow explicit\n`--url`, `--ref`, or archive override options for\
+    \ one-off migrations.\n\nAcceptance criteria:\n\n- `pi-en-install-non-nix --url\
+    \ URL --ref REF --prefix PREFIX` installs from\n  local Git repositories and from\
+    \ remote Git URLs using a temporary clone or\n  worktree when needed.\n- Plain\
+    \ `REF` values resolve safely as branch or tag names, with ambiguous\n  branch/tag\
+    \ names rejected unless the user chooses a non-ambiguous input.\n- `COMMIT@BRANCH`\
+    \ installs exactly the requested commit only after verifying\n  it is reachable\
+    \ from the requested branch.\n- Installed origin metadata records source type,\
+    \ normalized URL, requested\n  ref, resolved ref type, resolved commit, and any\
+    \ compatibility archive\n  inputs that were used.\n- Re-running installation through\
+    \ `pi-en-update` reuses stored URL/ref values\n  when the caller does not pass\
+    \ replacements and writes refreshed origin\n  metadata after a successful install.\n\
+    - The install manifest lists origin metadata and the generated update wrapper\n\
+    \  so uninstall removes both from installed state.\n- Documentation distinguishes\
+    \ trusted-code installation, mutable branch\n  updates, pinned `COMMIT@BRANCH`\
+    \ installs, archive compatibility, and the\n  host-runtime/non-pinned nature of\
+    \ non-Nix installs.\n- Existing direct-checkout local installs, GitHub archive\
+    \ bootstrap installs,\n  manifest-backed uninstall, and Nix workflows remain compatible."
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: RUNTIME-007
+  item_id: PIEN-FRQ-20260810-165351-001
+  status: active
+  title: Support Nix-shell Pi-en flake input updates
+  body: "#### RUNTIME-007 Nix-shell Pi-en flake input update support\n\nPi-en-enabled\
+    \ Nix shells created with `pi-en.lib.mkPiShell` should provide a\nshell-local\
+    \ `pi-en-update` command for updating the consuming project's\n`pi-en` flake input.\
+    \ This command is distinct from the non-Nix installed\nupdater even though it\
+    \ intentionally uses the same command name: normal Nix\nshell `PATH` precedence\
+    \ should make the Nix-store command available inside\nthe shell, while locally\
+    \ installed prefixes continue to provide the non-Nix\nupdater outside the shell.\n\
+    \nThe Nix-shell updater should accept only source selector options:\n\n- `--url\
+    \ URL` to replace or set the base `pi-en` flake input URL;\n- `--ref REF` to select\
+    \ a branch, tag, or `COMMIT@BRANCH` pin;\n- `-h` / `--help` for command help.\n\
+    \nIt must not accept non-Nix installer options such as `--prefix`, `--repo`,\n\
+    `--artifact-url`, or `--check-deps`. Omitted source parts must remain\nunchanged:\
+    \ without `--url`, keep the existing base URL; without `--ref`, keep\nthe existing\
+    \ ref/rev selector when present. When neither `--url` nor `--ref`\nis supplied,\
+    \ the command should leave `flake.nix` unchanged and refresh the\ncurrent `pi-en`\
+    \ lock input. When at least one source option is supplied, the\ncommand should\
+    \ also refresh the `pi-en` lock input even if the computed flake\nURL is unchanged,\
+    \ because mutable branch or repository inputs may need to\nadvance to a newer\
+    \ commit. Updating tag or commit-pinned inputs may be\nredundant but is harmless.\n\
+    \nThe command should run only from an active Pi-en-enabled Nix shell. The shell\n\
+    should export an explicit marker, such as `PI_EN_NIX_SHELL=1`, plus the input\n\
+    name to update, defaulting to `pi-en`. If invoked without that marker, the\nNix-store\
+    \ updater should fail clearly instead of editing arbitrary projects.\n\nFor common\
+    \ flakes, the updater should locate the project root containing\n`flake.nix`,\
+    \ inspect the current `pi-en` input, update that input when\n`--url` or `--ref`\
+    \ changes the requested source, and refresh `flake.lock` for\nthat input. Supported\
+    \ textual forms should include at least direct input URL\nassignments such as\
+    \ `pi-en.url = \"...\";`, `inputs.pi-en.url = \"...\";`, and\n`\"pi-en\".url =\
+    \ \"...\";`. Complex or dynamically generated inputs should fail\nsafely with\
+    \ manual-edit guidance rather than guessed rewrites.\n\nRef handling should match\
+    \ the Git-source installer mental model. A plain\nbranch or tag ref may be represented\
+    \ with a Nix flake URL form appropriate to\nthe base URL. A `COMMIT@BRANCH` ref\
+    \ should become a Nix Git URL containing\nboth the branch and revision, for example\n\
+    `git+https://github.com/u2up/pi-en.git?ref=BRANCH&rev=COMMIT`, so the user\ngets\
+    \ the same URL/ref CLI semantics across Nix-shell and non-Nix update\nworkflows\
+    \ while Nix receives a reproducible pinned revision.\n\n`pien update` should use\
+    \ the context-appropriate updater. Inside a\nPi-en-enabled Nix shell, it should\
+    \ resolve and run the Nix-shell\n`pi-en-update` from `PATH`. Outside that shell,\
+    \ it should continue to use the\nnon-Nix installed updater or the existing direct-checkout\
+    \ fallback behavior.\nThe sandbox policy should remain unchanged: mutating update\
+    \ commands are for\nthe outer terminal or devshell, not Pi's Bubblewrap sandbox.\n\
+    \nAcceptance criteria:\n\n- `pi-en.lib.mkPiShell` exposes a Nix-store `pi-en-update`\
+    \ only in\n  Pi-en-enabled Nix shells and marks the shell so the tool can detect\
+    \ its\n  intended context.\n- Nix-shell `pi-en-update --help` documents only `--url`,\
+    \ `--ref`, and help\n  options, and rejects non-Nix installer options.\n- The\
+    \ updater locates the consuming project flake, rewrites supported\n  `pi-en` input\
+    \ URL assignment forms when `--url` or `--ref` changes the\n  requested source,\
+    \ and fails safely for unsupported dynamic forms.\n- `COMMIT@BRANCH` refs are\
+    \ converted to Nix Git flake URLs with both\n  `ref=BRANCH` and `rev=COMMIT`.\n\
+    - With no source options, after any required `flake.nix` edit, or after an\n \
+    \ explicit source option computes to the current URL, the updater refreshes\n\
+    \  only the `pi-en` input lock using the supported Nix command for the\n  project's\
+    \ Nix version.\n- `pien update` delegates to the Nix-shell updater inside `mkPiShell`\
+    \ and to\n  the non-Nix installed updater outside Nix shell contexts.\n- Documentation\
+    \ explains the two context-specific `pi-en-update` meanings,\n  PATH precedence,\
+    \ supported flake forms, `COMMIT@BRANCH` mapping, and the\n  trusted-source/pinning\
+    \ implications."
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: BHV-001
+  item_id: PIEN-FRQ-20261024-215014-001
+  status: active
+  title: Project-owned behavior command and file contracts
+  body: "#### BHV-001 \u2014 Project-owned behavior command and file contracts\n\n\
+    pi-en must provide project-owned Behavior Specifications (BHVs) as tracked\nsource\
+    \ artifacts. The canonical behavior root is\n`pi-en-behaviors/`, which is separate\
+    \ from ignored mutable `.pi-en/` state\nand must not be added to coordination\
+    \ item directories or coordination\nlifecycle commands.\n\nThe behavior namespace\
+    \ is a sibling of `pien coord` and exposes `init`,\n`new`, `list`, `regroup`,\
+    \ `index`, `lint`, `test`, `coverage`, and\n`requirements snapshot`. The generic\
+    \ tooling must resolve its manifest from\nan explicit or discovered project\n\
+    root and support ordinary project CI without a coordination checkout.\n\n`MANIFEST.yaml`\
+    \ must declare the v1 schema, repository ID, local item key,\nglossary, project\
+    \ adapter, optional requirements snapshot, and advisory or\nenforced compliance\
+    \ mode. Local BHV IDs use\n`<ITEMKEY>-BHV-<YYYYMMDD-HHMMSS>-<NNN>` and are not\
+    \ coordination item IDs.\n\nCoordination requirements and issues may reference\
+    \ BHV IDs, but\ncoordination stores neither BHV bodies nor their lifecycle.\n\n\
+    `init` must be additive and non-destructive: it must not rewrite an existing\n\
+    manifest, glossary, or BHV. An implementation repository commits and owns\nits\
+    \ BHVs, adapter, fixtures, and CI configuration; it may pin the pi-en\nrunner\
+    \ version for reproducible CI. BHV execution needs no coordination\ncheckout.\
+    \ A runner must either support a BHV's declared schema and glossary\nlanguage\
+    \ version or fail clearly and locally with an upgrade/migration\nindication; it\
+    \ must not guess or silently reinterpret the specification."
+  applicable_repos:
+  - pi-en
+  behavior_coverage: required
+- requirement_key: BHV-002
+  item_id: PIEN-FRQ-20261024-215016-001
+  status: active
+  title: Versioned behavior DSL and adapter model
+  body: "#### BHV-002 \u2014 Versioned behavior DSL and adapter model\n\nBHVs, manifests,\
+    \ and glossaries use versioned YAML schemas parsed by a real\nYAML parser bundled\
+    \ with or explicitly verified by the behavior command.\nComplex scenario data\
+    \ must not be parsed with grep or awk, and DSL values\nmust never be evaluated\
+    \ as shell syntax.\n\nEach repository owns a versioned domain glossary that declares\
+    \ its nouns,\nvalue types, given/when/then terms, accepted argument shapes, logical\
+    \ BHV\ngroup taxonomy, and any\ndeprecated aliases in domain language. A BHV declares\
+    \ its glossary version,\nactive/deprecated/superseded status, `satisfies` requirement\
+    \ keys, and one or\nmore contrasting scenarios. It must not contain shell snippets\
+    \ or\nimplementation-private assertions.\n\nThe generic runner invokes the manifest's\
+    \ executable project adapter as\n`given`, `when`, or `then`, passing a term, JSON\
+    \ input file, and state\ndirectory. The adapter must implement `describe`; lint\
+    \ compares that output\nwith the glossary so every declared executable term is\
+    \ implemented and term\narguments are validated before execution.\n\nBHVs are\
+    \ executable acceptance examples: their feature, rule, and scenario\nlanguage\
+    \ must describe public domain or user-visible outcomes rather than\nimplementation\
+    \ structure. They define conformance only for their stated\nobservables; they\
+    \ do not prove complete behavioral equivalence or replace\nunit, security, property,\
+    \ performance, or other appropriate tests. A\nscaffold or recorded interaction\
+    \ may assist authoring, but it is not an\naccepted BHV until a human reviews its\
+    \ domain meaning and intended outcome."
+  applicable_repos:
+  - pi-en
+  behavior_coverage: required
+- requirement_key: BHV-005
+  item_id: PIEN-FRQ-20261025-054332-001
+  status: active
+  title: Project-local BDD adoption and interpretation
+  body: "#### BHV-005 \u2014 Project-local BDD adoption and interpretation\n\npi-en\
+    \ must document BHVs as project-local, executable acceptance examples.\nAn implementation\
+    \ repository owns and commits its behavior root, glossary,\nadapter, fixtures,\
+    \ and pin or integration of the behavior runner. Git\nhistory preserves changed\
+    \ and removed specifications; current BHV status\nonly determines what is normative\
+    \ in the checked-out suite.\n\nThe adoption workflow must be additive: initialize\
+    \ a behavior root, define\ndomain terms and logical groups, implement a public-interface\
+    \ adapter, add a\nsmall reviewed\nbehavior slice, and run lint/test in ordinary\
+    \ CI. Requirements snapshots and\ncoverage are optional rather than prerequisites.\
+    \ Existing projects may begin\nwith characterization examples derived from known-good\
+    \ observable behavior,\nbut those examples must be reviewed before being treated\
+    \ as intended\nacceptance behavior.\n\nDocumentation must distinguish this limited\
+    \ behavioral contract from proof\nof complete reimplementation equivalence and\
+    \ explain that complementary test\ntechniques remain necessary."
+  applicable_repos:
+  - pi-en
+  behavior_coverage: not-applicable
+- requirement_key: BHV-006
+  item_id: PIEN-FRQ-20261025-072024-001
+  status: active
+  title: Logical behavior grouping and catalog discovery
+  body: "#### BHV-006 \u2014 Logical behavior grouping and catalog discovery\n\nA\
+    \ behavior root keeps reserved control files at its top level and stores BHV\n\
+    files as ID-named regular YAML files directly in `specifications/`. The\nrunner\
+    \ discovers only that collection, rejects unexpected YAML files there,\nand rejects\
+    \ duplicate BHV IDs across active, deprecated, and superseded\nspecifications.\
+    \ Filesystem layout is deliberately not a behavior taxonomy.\n\nEach BHV must\
+    \ declare one normalized slash-separated logical `group` such as\n`features/coordination/item-lifecycle`,\
+    \ plus its title, feature, rule, and\noptional secondary tags. Group segments\
+    \ must be non-empty portable slugs and\nmust reject leading/trailing slashes,\
+    \ `.`, `..`, and path traversal. Groups\ndescribe externally meaningful capabilities\
+    \ rather than implementation\nmodules. The immutable BHV ID remains the only cross-file\
+    \ and\ncross-repository reference identity.\n\n`pien behavior list --group GROUP`\
+    \ and `test --group GROUP` must support\nsegment-aware descendant selection; `new\
+    \ --group GROUP` scaffolds the\nmetadata; and `regroup` changes only group metadata,\
+    \ never IDs or references.\n`pien behavior index` generates a catalog containing\
+    \ ID, group, title,\nfeature, rule, status, tags, requirements, and scenario count.\
+    \ The catalog\nis derived output, not a hand-maintained source of truth."
+  applicable_repos:
+  - pi-en
+  behavior_coverage: required
+- requirement_key: DOC-000
+  item_id: PIEN-QRQ-20260612-210000-001
+  status: active
+  title: Design documents
+  body: '#### DOC-000 Design documents
+
+
+    Design proposals that are not yet mandatory runtime behavior must be documented
+    separately from requirements/use-case documentation. Implemented coordination
+    behavior is limited to explicit requirements for concrete commands, files, and
+    environment variables in this document.'
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: DOC-001
+  item_id: PIEN-QRQ-20260612-210000-002
+  status: active
+  title: README coverage
+  body: '#### DOC-001 README coverage
+
+
+    `README.md` must document:
+
+
+    - project purpose
+
+    - `pi-en`, `pi-en-shell`, and `pi-en-bwrap` commands
+
+    - default tool list
+
+    - Bubblewrap safety defaults
+
+    - environment knobs
+
+    - reuse from another project with and without an existing flake
+
+    - common vs project-specific rules, skills, prompts, and roles
+
+    - optional role-manager package setup, role sources, commands, and tool allowlists
+
+    - Git config import behavior
+
+    - opt-in coordination helper basics
+
+    - safe coordination context/mount behavior
+
+    - security notes and limitations'
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: TEST-001
+  item_id: PIEN-QRQ-20260612-210000-003
+  status: active
+  title: Flake metadata
+  body: "#### TEST-001 Flake metadata\n\nCommand:\n\n```bash\nnix flake show\n```\n\
+    \nExpected:\n\n- packages include `default`, `pi-en`, `pi-en-shell`, `pi-en-bwrap`,\n\
+    \  `pi-core`, `pi-en-coordination`, `pi-runtime`, `pi-role-manager`, and\n  the\
+    \ coordination helper command packages\n- apps include `pi-en`, `pi-en-shell`,\
+    \ `pi-en-bwrap`, and `default`\n- checks include core-only and coordination-included\
+    \ package smoke tests\n- `devShells.default` exists"
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: TEST-002
+  item_id: PIEN-QRQ-20260612-210000-004
+  status: active
+  title: Flake builds
+  body: '#### TEST-002 Flake builds
+
+
+    Commands:
+
+
+    ```bash
+
+    nix build .#pi-en
+
+    nix build .#pi-en-shell
+
+    nix build .#pi-en-bwrap
+
+    nix build .#pi-core
+
+    nix build .#pi-en-coordination
+
+    nix build .#pi-runtime
+
+    nix build .#pi-role-manager
+
+    nix build .#pi-en-coord-init
+
+    nix build .#pi-en-coord-clone
+
+    nix build .#pi-en-coord-new
+
+    nix build .#pi-en-coord-status
+
+    nix build .#pi-en-coord-list
+
+    nix build .#pi-en-coord-cat
+
+    nix build .#pi-en-coord-pull
+
+    nix build .#pi-en-coord-push
+
+    nix build .#pi-en-coord-claim
+
+    nix build .#pi-en-coord-done
+
+    nix build .#pi-en-coord-review
+
+    nix build .#pi-en-coord-verify
+
+    nix build .#pi-en-coord-close
+
+    nix build .#pi-en-coord-lint
+
+    nix build .#pi-en-coord-generate-requirements
+
+    nix build .#pi-en-coord-generate-requirements-coverage
+
+    nix build .#pi-en-coord-upgrade-rules
+
+    nix build .#pi-en-serial-roles
+
+    nix build .#checks.x86_64-linux.pi-core-smoke
+
+    nix build .#checks.x86_64-linux.pi-runtime-compat-smoke
+
+    nix build .#checks.x86_64-linux.pi-en-coordination-smoke
+
+    ```
+
+
+    Expected: all builds succeed.'
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: TEST-003
+  item_id: PIEN-QRQ-20260612-210000-005
+  status: active
+  title: Help does not require Pi
+  body: '#### TEST-003 Help does not require Pi
+
+
+    Command with `PATH` excluding real/fake `pi`:
+
+
+    ```bash
+
+    nix run .#pi-en-bwrap -- --help
+
+    ```
+
+
+    Expected: help text is printed and exit code is `0`.'
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: TEST-004
+  item_id: PIEN-QRQ-20260612-210000-006
+  status: active
+  title: Missing Pi
+  body: '#### TEST-004 Missing Pi
+
+
+    Run `pi-en-bwrap` where no `pi` executable is on `PATH`.
+
+
+    Expected:
+
+
+    - exit code `127`
+
+    - stderr says `pi was not found on PATH before entering the sandbox`'
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: TEST-005
+  item_id: PIEN-QRQ-20260612-210000-007
+  status: active
+  title: Default Pi arguments
+  body: '#### TEST-005 Default Pi arguments
+
+
+    With fake `pi` on `PATH`, run:
+
+
+    ```bash
+
+    pi-en-bwrap
+
+    ```
+
+
+    Expected fake Pi sees:
+
+
+    ```text
+
+    --tools read,bash,edit,write,grep,find,ls --continue
+
+    ```'
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: TEST-006
+  item_id: PIEN-QRQ-20260612-210000-008
+  status: active
+  title: Argument separator
+  body: '#### TEST-006 Argument separator
+
+
+    With fake `pi`, run:
+
+
+    ```bash
+
+    pi-en-bwrap -- --model test/model "hello"
+
+    ```
+
+
+    Expected fake Pi sees exactly:
+
+
+    ```text
+
+    --model test/model hello
+
+    ```'
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: TEST-007
+  item_id: PIEN-QRQ-20260612-210000-009
+  status: active
+  title: '`pi-en` preserves extra args'
+  body: '#### TEST-007 `pi-en` preserves extra args
+
+
+    With fake `pi`, run:
+
+
+    ```bash
+
+    pi-en --model test/model
+
+    ```
+
+
+    Expected fake Pi sees `--tools <default-tools> --continue --model test/model`.'
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: TEST-008
+  item_id: PIEN-QRQ-20260612-210000-010
+  status: active
+  title: Default tools override
+  body: '#### TEST-008 Default tools override
+
+
+    With fake `pi`, run:
+
+
+    ```bash
+
+    PI_EN_BWRAP_DEFAULT_TOOLS=read,grep pi-en
+
+    ```
+
+
+    Expected fake Pi sees `--tools read,grep --continue`.'
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: TEST-009
+  item_id: PIEN-QRQ-20260612-210000-011
+  status: active
+  title: Project root is mounted at `/workspace`
+  body: '#### TEST-009 Project root is mounted at `/workspace`
+
+
+    Create a git repo with a subdirectory, run from the subdirectory, and have fake
+    Pi record cwd.
+
+
+    Expected:
+
+
+    - cwd inside sandbox is `/workspace/<subdir>`
+
+    - files from git root are visible under `/workspace`'
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: TEST-010
+  item_id: PIEN-QRQ-20260612-210000-012
+  status: active
+  title: Disable git-root detection
+  body: '#### TEST-010 Disable git-root detection
+
+
+    From a subdirectory in a git repo, run:
+
+
+    ```bash
+
+    PI_EN_BWRAP_USE_GIT_ROOT=0 pi-en-bwrap -- <fake args>
+
+    ```
+
+
+    Expected `/workspace` corresponds to the subdirectory, not the git root.'
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: TEST-011
+  item_id: PIEN-QRQ-20260612-210000-013
+  status: active
+  title: Project root override
+  body: '#### TEST-011 Project root override
+
+
+    Run with:
+
+
+    ```bash
+
+    PI_EN_BWRAP_PROJECT_ROOT=/tmp/other-project pi-en-bwrap
+
+    ```
+
+
+    Expected `/workspace` contains `/tmp/other-project`.'
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: TEST-012
+  item_id: PIEN-QRQ-20260612-210000-014
+  status: active
+  title: Missing project root
+  body: '#### TEST-012 Missing project root
+
+
+    Run with a nonexistent `PI_EN_BWRAP_PROJECT_ROOT`.
+
+
+    Expected exit code `2`.'
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: TEST-013
+  item_id: PIEN-QRQ-20260612-210000-015
+  status: active
+  title: Persistent state location
+  body: '#### TEST-013 Persistent state location
+
+
+    With temporary `HOME` and `XDG_STATE_HOME`, run `pi-en-bwrap`.
+
+
+    Expected a deterministic directory is created under `$XDG_STATE_HOME/pi-en/<16-char-hash>`
+    with the required state layout.'
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: TEST-014
+  item_id: PIEN-QRQ-20260612-210000-016
+  status: active
+  title: Explicit state location
+  body: '#### TEST-014 Explicit state location
+
+
+    Run with `PI_EN_BWRAP_STATE_DIR=/tmp/pi-state`.
+
+
+    Expected state is created under `/tmp/pi-state` and not under the default state
+    parent.'
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: TEST-015
+  item_id: PIEN-QRQ-20260612-210000-017
+  status: active
+  title: Ephemeral state cleanup
+  body: '#### TEST-015 Ephemeral state cleanup
+
+
+    Run with `PI_EN_BWRAP_EPHEMERAL_HOME=1` and have fake Pi record `$HOME` and create
+    a marker in it.
+
+
+    Expected:
+
+
+    - inside sandbox `HOME=/home/pi`
+
+    - temporary state directory is removed after exit
+
+    - project session import defaults to disabled'
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: TEST-016
+  item_id: PIEN-QRQ-20260612-210000-018
+  status: active
+  title: Common resource import
+  body: '#### TEST-016 Common resource import
+
+
+    Create host common dir containing all supported common files plus unsupported
+    files.
+
+
+    Run with `PI_EN_BWRAP_COMMON_AGENT_DIR=<dir>`.
+
+
+    Expected inside `/home/pi/.pi/agent`:
+
+
+    - supported files/dirs are present
+
+    - unsupported files are absent'
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: TEST-017
+  item_id: PIEN-QRQ-20260612-210000-019
+  status: active
+  title: Common import disabled
+  body: '#### TEST-017 Common import disabled
+
+
+    Run with `PI_EN_BWRAP_IMPORT_COMMON=0`.
+
+
+    Expected no common resources are copied into sandbox state.'
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: TEST-018
+  item_id: PIEN-QRQ-20260612-210000-020
+  status: active
+  title: Common sync missing
+  body: '#### TEST-018 Common sync missing
+
+
+    Pre-create a sandbox common file, then run with `PI_EN_BWRAP_COMMON_SYNC=missing`
+    and a different host version.
+
+
+    Expected the existing sandbox file is not overwritten.'
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: TEST-019
+  item_id: PIEN-QRQ-20260612-210000-021
+  status: active
+  title: Auth import
+  body: '#### TEST-019 Auth import
+
+
+    Create host `auth.json` and `models.json` plus unrelated files.
+
+
+    Expected only `auth.json` and `models.json` are copied to the sandbox agent state,
+    mode best-effort `0600`.'
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: TEST-020
+  item_id: PIEN-QRQ-20260612-210000-022
+  status: active
+  title: Auth import disabled
+  body: '#### TEST-020 Auth import disabled
+
+
+    Run with `PI_EN_BWRAP_IMPORT_AUTH=0`.
+
+
+    Expected no auth/model files are copied.'
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: TEST-021
+  item_id: PIEN-QRQ-20260612-210000-023
+  status: active
+  title: Session scope
+  body: '#### TEST-021 Session scope
+
+
+    Create several host session directories, including one for the current cwd and
+    one unrelated.
+
+
+    Expected inside sandbox only the mapped current-cwd session directory is visible/bound;
+    unrelated sessions are not visible.'
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: TEST-022
+  item_id: PIEN-QRQ-20260612-210000-024
+  status: active
+  title: Session import disabled
+  body: '#### TEST-022 Session import disabled
+
+
+    Run with `PI_EN_BWRAP_IMPORT_SESSIONS=0`.
+
+
+    Expected no host session directory is bind-mounted.'
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: TEST-023
+  item_id: PIEN-QRQ-20260612-210000-025
+  status: active
+  title: Git config import
+  body: '#### TEST-023 Git config import
+
+
+    Create temporary host `.gitconfig` and `.config/git/config`.
+
+
+    Expected inside sandbox:
+
+
+    - `/home/pi/.gitconfig` exists with same content
+
+    - `/home/pi/.config/git/config` exists with same content
+
+    - `GIT_CONFIG_NOSYSTEM=1`'
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: TEST-024
+  item_id: PIEN-QRQ-20260612-210000-026
+  status: active
+  title: Git config import disabled
+  body: '#### TEST-024 Git config import disabled
+
+
+    Run with `PI_EN_BWRAP_IMPORT_GIT_CONFIG=0`.
+
+
+    Expected git config files are absent unless already present from prior state.'
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: TEST-025
+  item_id: PIEN-QRQ-20260612-210000-027
+  status: active
+  title: Git config sync missing
+  body: '#### TEST-025 Git config sync missing
+
+
+    Pre-create sandbox Git config, run with `PI_EN_BWRAP_GIT_CONFIG_SYNC=missing`
+    and different host config.
+
+
+    Expected sandbox config is preserved.'
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: TEST-026
+  item_id: PIEN-QRQ-20260612-210000-028
+  status: active
+  title: Environment clearing
+  body: '#### TEST-026 Environment clearing
+
+
+    Set arbitrary host variables and selected pass-through variables.
+
+
+    Expected:
+
+
+    - arbitrary unlisted variable is absent inside sandbox
+
+    - selected provider variables are present when non-empty
+
+    - `PI_EN_BWRAP_PASS_ENV` variables are present when non-empty'
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: TEST-027
+  item_id: PIEN-QRQ-20260612-210000-029
+  status: active
+  title: Network flag default and disable
+  body: '#### TEST-027 Network flag default and disable
+
+
+    Use a fake `bwrap` wrapper or inspect behavior in an environment where Bubblewrap
+    invocation can be recorded.
+
+
+    Expected:
+
+
+    - default invocation includes `--share-net`
+
+    - `PI_EN_BWRAP_NET=0` invocation does not include `--share-net`'
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: TEST-028
+  item_id: PIEN-QRQ-20260612-210000-030
+  status: active
+  title: Sensitive host filesystem isolation
+  body: '#### TEST-028 Sensitive host filesystem isolation
+
+
+    With fake Pi, attempt to read host-only files such as host home markers, `.ssh`,
+    and Docker socket path.
+
+
+    Expected they are not visible unless they are inside the selected project root
+    or explicitly copied by supported import behavior.'
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: TEST-029
+  item_id: PIEN-QRQ-20260612-210000-031
+  status: active
+  title: Coordination MVP helpers
+  body: "#### TEST-029 Coordination MVP helpers\n\nRun `tests/pi-en-coord-blackbox.sh`\
+    \ from the repository root.\n\nExpected:\n\n- `pi-en-coord-init` creates a bare\
+    \ remote and scaffolded clone;\n- generated rules, docs, Pi skill files, and key\
+    \ metadata files exist;\n- clone Git settings enable rebase and autostash;\n-\
+    \ `pi-en-coord-clone` can clone the same domain;\n- `pi-en-coord-new` creates\
+    \ a type-coded timestamp-ID YAML item;\n- `pi-en-coord-lint` checks item metadata\
+    \ and item-matched test linkage;\n- status, push, claim, done, review, verify,\
+    \ and close helpers perform the\n  expected file and Git state transitions;\n\
+    - repo-layout lifecycle helpers reject cross-repo issue mutation by default\n\
+    \  while explicit read-only all-repository issue inspection remains available;\n\
+    - rule upgrade preview runs without mutating coordination state."
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: TEST-030
+  item_id: PIEN-QRQ-20260612-210000-032
+  status: active
+  title: Coordination conflict hardening
+  body: "#### TEST-030 Coordination conflict hardening\n\nRun `tests/pi-en-coord-concurrency.sh`\
+    \ from the repository root.\n\nExpected:\n\n- a stale no-pull claim cannot push\
+    \ over another agent's claim;\n- a pulled clone refuses to claim or mark done\
+    \ an item owned by another\n  agent;\n- a done item cannot be final-closed before\
+    \ both review and verification\n  pass;\n- reviewers/testers can record pass/fail\
+    \ evidence and other clones can pull\n  the final closed result;\n- helper-generated\
+    \ commit subjects longer than 72 characters are rejected."
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: TEST-031
+  item_id: PIEN-QRQ-20260612-210000-033
+  status: active
+  title: Role-manager package and commands
+  body: "#### TEST-031 Role-manager package and commands\n\nRun the role-manager smoke\
+    \ tests from the repository root:\n\n```bash\ntests/role-manager-package.sh\n\
+    tests/role-manager-schema.sh\ntests/role-manager-loader.sh\ntests/role-manager-commands.sh\n\
+    ```\n\nExpected:\n\n- the role-manager manifest is a Pi package with the expected\
+    \ extension;\n- the flake exposes `pi-role-manager` and the devshell package path;\n\
+    - common-resource handling includes `roles/` directories;\n- bundled and example\
+    \ project roles validate;\n- loader precedence, active-role prompt injection,\
+    \ command behavior,\n  one-cycle termination, UI setup, and role-aware coordination\
+    \ environment\n  behavior pass."
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: DOC-002
+  item_id: PIEN-QRQ-20260613-183457-001
+  status: active
+  title: Document direct and project-integrated getting started workflows
+  body: '#### DOC-002 Getting started workflows
+
+
+    The main `README.md` must include a concise `Getting started` section near
+
+    the top that explains both supported `pi-en` use modes.
+
+
+    The direct-use subsection must show how to start from an arbitrary target
+
+    project without editing that project:
+
+
+    ```bash
+
+    cd /path/to/project
+
+    /path/to/pi-en/pi-en
+
+    ```
+
+
+    It must also include examples for passing a prompt and for raw custom Pi
+
+    arguments through `pi-en --raw -- ...`.
+
+
+    The project-integrated subsection must describe when to wire `pi-en` into
+
+    a target project''s flake, including pinned `pi-en` inputs, shared team
+
+    setup, project-specific Nix dependencies, and running from inside the
+
+    project devshell:
+
+
+    ```bash
+
+    nix develop
+
+    pi-en
+
+    ```
+
+
+    The getting-started text must also mention that default `pi-en` startup
+
+    loads the role-manager package when available, while
+
+    `PI_EN_ROLE_MANAGER_AUTO=0` disables that behavior.'
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: DOC-003
+  item_id: PIEN-QRQ-20260614-180310-001
+  status: active
+  title: Document project-specific sandbox tools
+  body: '#### DOC-003 Project-specific sandbox tool documentation
+
+
+    The README must explain that pi-en intentionally keeps its default
+
+    runtime small and does not include every compiler, build system, or
+
+    project test dependency by default.
+
+
+    Documentation must show the recommended way to make project-specific
+
+    development tools available inside the sandbox: declare them as Nix
+
+    packages in a consuming project''s `mkPiShell { extraPackages = ...; }`
+
+    configuration, then run `pi-en` from that project devshell.
+
+
+    Documentation must also describe the security boundary for this feature:
+
+    extra command directories are explicit Nix-store paths, `/nix/store` is
+
+    mounted read-only, host `/bin` and `/usr/bin` are not mounted as the tool
+
+    source, and direct `nix run` examples are suitable for inspection but may
+
+    lack project build/test tools unless the project integrates pi-en or an
+
+    explicit extra path is provided.'
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: TEST-032
+  item_id: PIEN-QRQ-20260615-175842-001
+  status: active
+  title: Serial automation verification coverage
+  body: "#### TEST-032 Serial automation smoke coverage\n\nThe serial automation implementation\
+    \ must have automated coverage that\nexercises work selection and command construction\
+    \ without contacting a real\nmodel provider.\n\nVerification should use temporary\
+    \ project and coordination repositories and\na fake `pi` executable or dry-run\
+    \ mode to assert that:\n\n- tester-eligible done/reviewed/unverified work is selected\
+    \ before reviewer\n  or developer work;\n- reviewer-eligible done/unreviewed work\
+    \ is selected before developer work;\n- open developer work is claimed before\
+    \ the developer Pi job is launched;\n- no job is launched when all queues are\
+    \ empty;\n- each Pi invocation omits `--continue` and names exactly one coordination\n\
+    \  item;\n- the serial lock prevents two orchestrators from running in the same\n\
+    \  checkout;\n- unexpected dirty project state stops the loop instead of being\
+    \ discarded;\n- dirty coordination state during idle pre-selection is treated\
+    \ as a busy\n  checkout without pulling, selecting, claiming, stashing, resetting,\
+    \ or\n  discarding."
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: TEST-033
+  item_id: PIEN-QRQ-20260701-110522-001
+  status: active
+  title: Host runtime blackbox coverage
+  body: "#### TEST-033 Host runtime blackbox coverage\n\nThe host runtime implementation\
+    \ must have blackbox-style tests that do not\ncontact a real model provider and\
+    \ can inspect launcher behavior with fake\n`pi` and/or fake `bwrap` commands.\n\
+    \nCoverage must verify that:\n\n- direct checkout `pi-en` in default mode does\
+    \ not invoke `nix develop`;\n- explicit Nix runtime selection preserves the existing\
+    \ Nix-backed path;\n- explicit host runtime selection fails before Bubblewrap\
+    \ when required\n  host dependencies are missing;\n- host-mode sandbox `PATH`\
+    \ is constructed from documented allowlisted host\n  paths rather than arbitrary\
+    \ caller `PATH` inheritance;\n- admitted host command and support paths are mounted\
+    \ read-only;\n- host `$HOME`, SSH keys, cloud credentials, Docker sockets, and\
+    \ unrelated\n  project trees are not mounted by default;\n- a `pi` path under\
+    \ host `$HOME` fails closed or requires an explicit\n  documented opt-in;\n- role-manager\
+    \ and coordination helper behavior either works in host mode\n  or fails with\
+    \ clear diagnostics."
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: DOC-004
+  item_id: PIEN-QRQ-20260701-110524-001
+  status: active
+  title: Host runtime documentation coverage
+  body: "#### DOC-004 Host default and Nix opt-in documentation\n\nUser-facing documentation\
+    \ must describe host runtime mode as the normal\ndirect-start path and Nix runtime\
+    \ mode as the reproducible pinned opt-in.\n\nDocumentation updates must include:\n\
+    \n- revised host prerequisites that make Nix optional for direct host-runtime\n\
+    \  use;\n- examples for direct host-default startup, explicit `--runtime host`,\
+    \ and\n  explicit `--runtime nix`;\n- clear statements that host runtime tools\
+    \ are unpinned and supplied by the\n  host operating system or user installation;\n\
+    - conservative host path and mount policy, including how to admit additional\n\
+    \  host tool directories;\n- guidance for users whose `pi` command or language-manager\
+    \ tools live\n  under the host home directory;\n- confirmation that `nix run`,\
+    \ `nix develop`, and flake integration remain\n  supported for reproducible team\
+    \ workflows."
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: DOC-005
+  item_id: PIEN-QRQ-20260720-091907-001
+  status: active
+  title: Document pi-en flake integration guidance
+  body: "#### DOC-005 \u2014 Document pi-en flake integration guidance\n\npi-en documentation\
+    \ must distinguish between a generic project devshell named\n`agent` and a pi-en-aware\
+    \ agent shell built with `pi-en.lib.mkPiShell`.\n\nThe documentation must show\
+    \ the canonical external-flake edit pattern:\nadding the pi-en flake input, adding\
+    \ it to the `outputs` argument set,\npreserving existing `devShells`, and merging\
+    \ an `agent` shell that exposes\n`pien` and the pi-en runtime. It must also explain\
+    \ that copied or\nagent-generated flake changes should not replace project-specific\
+    \ FHS,\ncontainer, build, or test shell policy unless explicitly requested.\n\n\
+    Documentation for the helper and skill must include copyable prompts or\ncommands\
+    \ for users who ask Pi to perform the flake integration from inside an\nexternal\
+    \ project.\n\nDocumentation must also explain the runtime selector convention:\
+    \ Nix runtime\nstartup should prefer `.#agent` when present, fall back to the\
+    \ default shell\nonly when the selector is absent, and fail visibly rather than\
+    \ hiding an\nexisting but broken `.#agent` shell."
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: PERF-001
+  item_id: PIEN-QRQ-20260926-164321-001
+  status: active
+  title: Keep coordination lint scalable as coordination history grows
+  body: "#### PERF-001 \u2014 Keep coordination lint scalable as coordination history\
+    \ grows\n\n`pi-en-coord-lint` must remain practical to run as a routine coordination\n\
+    guard after the coordination domain accumulates many closed items,\nrequirements,\
+    \ and item-matched tests.\n\nFull lint must avoid repeated full item-tree rescans\
+    \ for checks that can be\nanswered from one per-run item metadata index. In particular,\
+    \ matching\n`tests/items/**/*.sh` scripts back to coordination items must use\
+    \ indexed item\nIDs or filename stems rather than scanning every item for each\
+    \ test script.\n\nAny incremental or cached lint mode must be derived from content-addressed\n\
+    inputs such as item file content or Git blob hashes, relevant repo manifest\n\
+    content, linter version, and relevant item-test content. It must not rely on a\n\
+    mutable `linted` flag stored inside coordination item YAML.\n\nA full lint mode\
+    \ must remain the authoritative validation path and must still\nrun global checks\
+    \ such as duplicate item IDs, duplicate active requirement\nkeys, orphan test\
+    \ scripts, repo manifest consistency, and design coverage\nvalidation."
+  applicable_repos: null
+  behavior_coverage: optional
+- requirement_key: BHV-003
+  item_id: PIEN-QRQ-20261024-215018-001
+  status: active
+  title: Isolated deterministic behavior execution
+  body: "#### BHV-003 \u2014 Isolated deterministic behavior execution\n\nThe behavior\
+    \ runner must execute every scenario in a fresh temporary state\ndirectory and\
+    \ remove that state after the result is reported. It must set a\ndeterministic\
+    \ baseline including `TZ=UTC`, a fixed locale, isolated `HOME`,\nand explicit\
+    \ temporary work and state paths. Results must identify both the\nBHV and scenario\
+    \ ID.\n\nBehavior commands must neither discover nor inherit `PI_EN_COORD_DIR`\
+    \ and\nmust not read, write, pull, or otherwise use a developer's real coordination\n\
+    checkout. A coordination behavior adapter must instead create its own\ntemporary\
+    \ project and bare remote. Only `pien behavior requirements snapshot`\nmay read\
+    \ coordination state, and then only from its required explicit\n`--coord-dir`\
+    \ argument."
+  applicable_repos:
+  - pi-en
+  behavior_coverage: required
+- requirement_key: BHV-004
+  item_id: PIEN-QRQ-20261024-215021-001
+  status: active
+  title: Local requirement-to-behavior coverage reporting
+  body: "#### BHV-004 \u2014 Local requirement-to-behavior coverage reporting\n\n\
+    `pien behavior requirements snapshot` must require `--coord-dir` and a\nrepository\
+    \ ID, read that explicit coordination source without modifying it,\nand write\
+    \ only `pi-en-behaviors/requirements.snapshot.yaml`. The tracked\nsnapshot records\
+    \ source revision, repository ID, requirement key, item ID,\nstatus, title, body,\
+    \ applicability, and behavior-coverage policy.\n\nRequirements may declare `applicable_repos`\
+    \ (omission means domain-wide) and\n`behavior_coverage` as `required`, `optional`,\
+    \ or `not-applicable`.\nCoordination may validate only the shape of issue/requirement\
+    \ BHV references;\nlocal behavior tooling validates existence to avoid a cross-repository\
+    \ CI\ndependency.\n\n`pien behavior coverage` must work only from local tracked\
+    \ artifacts, report\nJSON on request, and detect missing snapshot requirements,\
+    \ inactive or\nsuperseded claims, missing active coverage for applicable required\n\
+    requirements, and active BHVs without executable scenarios. Compliance is\nadvisory\
+    \ by default and may be enforced only after a repository explicitly\nselects enforced\
+    \ mode. Requirement snapshots and coverage are optional for\nexternal-project\
+    \ adoption: a project can initialize, author, lint, and test\nits project-local\
+    \ BHVs using only its own repository. They become available\nonly when that project\
+    \ deliberately supplies an explicit coordination source\nand chooses to use requirement\
+    \ traceability."
+  applicable_repos:
+  - pi-en
+  behavior_coverage: required
