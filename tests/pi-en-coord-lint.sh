@@ -121,6 +121,14 @@ if pi-en-coord-lint \
   exit 1
 fi
 cp "$tmp/requirement.key.clean.yaml" ".pi-en/coordination/$requirement_path"
+printf 'related_behaviors: [not-a-BHV]\n' >>".pi-en/coordination/$requirement_path"
+if pi-en-coord-lint \
+  --coord-dir .pi-en/coordination \
+  --project-root . >/dev/null 2>&1; then
+  printf 'expected lint to fail for invalid flow-style related_behaviors\n' >&2
+  exit 1
+fi
+cp "$tmp/requirement.key.clean.yaml" ".pi-en/coordination/$requirement_path"
 
 if pi-en-coord-new \
   --coord-dir .pi-en/coordination \

@@ -181,7 +181,7 @@ validate_related_behaviors() {
         if ! printf '%s' "$reference" | grep -Eq '^[A-Z0-9]+-BHV-[0-9]{8}-[0-9]{6}-[0-9]{3}$'; then
           lint_fail "$file related_behaviors entry has invalid BHV ID shape: $reference"
         fi
-      done < <(printf '%s' "$value" | tr ',' '\n')
+      done < <(printf '%s\n' "$value" | tr ',' '\n')
       return
     fi
     lint_fail "$file related_behaviors must be a YAML list"
