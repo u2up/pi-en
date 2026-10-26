@@ -14,6 +14,7 @@ grep -Fqx 'pi-en behavior: Python runtime unavailable; rebuild and relaunch with
 "$runner" --project-root "$tmp" init
 [ -f "$tmp/pi-en-behaviors/MANIFEST.yaml" ]
 [ -f "$tmp/pi-en-behaviors/GLOSSARY.yaml" ]
+grep -Fqx 'compliance: advisory' "$tmp/pi-en-behaviors/MANIFEST.yaml"
 # init is additive.
 printf '# retained\n' >> "$tmp/pi-en-behaviors/GLOSSARY.yaml"
 "$runner" --project-root "$tmp" init
@@ -24,6 +25,7 @@ repository_id: test
 item_key: TEST
 glossary: GLOSSARY.yaml
 adapter: ./adapter
+compliance: advisory
 YAML
 cat > "$tmp/pi-en-behaviors/GLOSSARY.yaml" <<'YAML'
 language_version: v1
@@ -79,6 +81,14 @@ scenarios:
     then: [{term: observed, args: {ok: true}}]
 YAML
 "$runner" --project-root "$tmp" lint
+grep -v '^compliance:' "$tmp/pi-en-behaviors/MANIFEST.yaml" > "$tmp/MANIFEST.yaml"
+mv "$tmp/MANIFEST.yaml" "$tmp/pi-en-behaviors/MANIFEST.yaml"
+if "$runner" --project-root "$tmp" lint >"$tmp/missing-compliance.out" 2>&1; then
+  echo 'behavior lint accepted a manifest without compliance mode' >&2
+  exit 1
+fi
+grep -Fq 'compliance must be advisory or enforced' "$tmp/missing-compliance.out"
+printf '%s\n' 'compliance: advisory' >> "$tmp/pi-en-behaviors/MANIFEST.yaml"
 env PATH=/caller-controlled-path HOME="$HOME" PI_EN_COORD_DIR="$repo_root/.pi-en/coordination" PI_EN_BEHAVIOR_RUNTIME_PATH="$runtime" "$(command -v python3)" "$repo_root/scripts/pi-en-behavior.py" --project-root "$tmp" test --group features
 "$runner" --project-root "$tmp" list --group features/demo | grep -Fq 'TEST-BHV-20261024-215036-001'
 "$runner" --project-root "$tmp" index | grep -Fq 'scenario_count'
@@ -112,4 +122,17 @@ if "$runner" --project-root "$tmp" lint >"$tmp/unsupported-type.out" 2>&1; then
   exit 1
 fi
 grep -Fq 'unsupported argument type' "$tmp/unsupported-type.out"
+cat > "$tmp/pi-en-behaviors/GLOSSARY.yaml" <<'YAML'
+language_version: v1
+groups: [features/demo]
+terms:
+  prepared: {phase: unsupported, args: {name: string}}
+  invoked: {phase: when, args: {}}
+  observed: {phase: then, args: {ok: boolean}}
+YAML
+if "$runner" --project-root "$tmp" lint >"$tmp/invalid-phase.out" 2>&1; then
+  echo 'behavior lint accepted an invalid glossary phase' >&2
+  exit 1
+fi
+grep -Fq 'phase must be given, when, or then' "$tmp/invalid-phase.out"
 printf 'pi-en behavior tests passed\n'

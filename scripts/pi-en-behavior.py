@@ -10,6 +10,8 @@ except ImportError as exc:
 
 VERSION = "v1"
 ARGUMENT_TYPES = {"string", "integer", "boolean"}
+COMPLIANCE_MODES = {"advisory", "enforced"}
+PHASES = {"given", "when", "then"}
 ID_RE = re.compile(r"^[A-Z0-9]+-BHV-[0-9]{8}-[0-9]{6}-[0-9]{3}$")
 SLUG_RE = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 
@@ -46,6 +48,8 @@ def manifest(base):
     if data.get("schema") != VERSION: fail("unsupported manifest schema; migrate the behavior root to v1")
     for key in ("repository_id", "item_key", "glossary", "adapter"):
         if not isinstance(data.get(key), str) or not data[key]: fail(f"manifest requires {key}")
+    if data.get("compliance") not in COMPLIANCE_MODES:
+        fail("manifest compliance must be advisory or enforced")
     return data
 
 def glossary(base, man):
@@ -57,6 +61,8 @@ def glossary(base, man):
     if not isinstance(groups, list) or not all(group_valid(x) for x in groups): fail("glossary groups must be normalized slash-separated slugs")
     for name, term in terms.items():
         if not isinstance(name, str) or not isinstance(term, dict): fail("glossary terms must be named mappings")
+        if term.get("phase") not in PHASES:
+            fail(f"glossary term {name} phase must be given, when, or then")
         arguments = term.get("args", {})
         if not isinstance(arguments, dict): fail(f"glossary term {name} args must be a mapping")
         for argument, kind in arguments.items():
@@ -121,7 +127,7 @@ def validate(base):
 def init(args):
     base = Path(args.project_root).resolve() / "pi-en-behaviors"; base.mkdir(parents=True, exist_ok=True); (base / "specifications").mkdir(exist_ok=True)
     man = base / "MANIFEST.yaml"; lex = base / "GLOSSARY.yaml"; adapter = base / "adapter"
-    if not man.exists(): dump(man, {"schema": VERSION, "repository_id": "replace-me", "item_key": "LOCAL", "glossary": "GLOSSARY.yaml", "adapter": "./adapter"})
+    if not man.exists(): dump(man, {"schema": VERSION, "repository_id": "replace-me", "item_key": "LOCAL", "glossary": "GLOSSARY.yaml", "adapter": "./adapter", "compliance": "advisory"})
     if not lex.exists(): dump(lex, {"language_version": VERSION, "groups": ["features"], "terms": {}})
     if not adapter.exists():
         adapter.write_text("#!/usr/bin/env bash\nset -euo pipefail\n# describe prints a JSON term map; phases receive TERM JSON_FILE STATE_DIR.\nif [ \"${1:-}\" = describe ]; then printf '{\\\"terms\\\":{}}\\n'; exit 0; fi\nexit 0\n", encoding="utf-8"); adapter.chmod(0o755)
