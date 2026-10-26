@@ -40,6 +40,10 @@ def group_declared(group, groups):
 
 def root(args):
     candidate = Path(args.project_root).resolve() / "pi-en-behaviors"
+    # Snapshot output is a project-local artifact.  Do not resolve a behavior
+    # root link and then write through it outside the selected project.
+    if candidate.is_symlink():
+        fail("behavior root must not be a symlink")
     if not candidate.is_dir(): fail(f"behavior root not found: {candidate}; run 'pien behavior init'")
     return candidate
 

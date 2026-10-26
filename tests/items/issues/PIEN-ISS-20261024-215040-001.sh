@@ -90,6 +90,19 @@ PI_EN_COORD_DIR="$tmp/ignored" "$runner" --project-root "$project" requirements 
 grep -Fq 'source_revision:' "$project/pi-en-behaviors/requirements.snapshot.yaml"
 grep -Fq 'BHV-ONE' "$project/pi-en-behaviors/requirements.snapshot.yaml"
 
+# The behavior root itself must be a real project directory.  Otherwise root()
+# would resolve a link and os.replace could write the snapshot outside it.
+behavior_target="$tmp/behavior-target"
+mv "$project/pi-en-behaviors" "$behavior_target"
+ln -s "$behavior_target" "$project/pi-en-behaviors"
+if "$runner" --project-root "$project" requirements snapshot --coord-dir "$coord" --repo-id example > "$tmp/root-link.out" 2>&1; then
+  echo 'snapshot unexpectedly followed symlinked behavior root' >&2
+  exit 1
+fi
+grep -Fq 'behavior root must not be a symlink' "$tmp/root-link.out"
+rm "$project/pi-en-behaviors"
+mv "$behavior_target" "$project/pi-en-behaviors"
+
 # Snapshot output must be the project-local artifact, never a symlink target.
 target="$tmp/snapshot-target.yaml"
 printf 'unchanged\n' > "$target"
