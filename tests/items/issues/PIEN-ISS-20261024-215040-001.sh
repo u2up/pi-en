@@ -142,6 +142,20 @@ if grep -Fq 'IGNORED' "$project/pi-en-behaviors/requirements.snapshot.yaml"; the
   exit 1
 fi
 
+# Read committed blobs instead of the working tree.  Git's assume-unchanged
+# flag can conceal a local tracked-file edit from `git status`.
+sed -i 's/body: one/body: forged/' "$coord/requirements/EXAMPLE-FRQ-20261024-215040-001.yaml"
+git -C "$coord" update-index --assume-unchanged requirements/EXAMPLE-FRQ-20261024-215040-001.yaml
+[ -z "$(git -C "$coord" status --porcelain)" ]
+"$runner" --project-root "$project" requirements snapshot --coord-dir "$coord" --repo-id example >/dev/null
+grep -Fq 'body: one' "$project/pi-en-behaviors/requirements.snapshot.yaml"
+if grep -Fq 'body: forged' "$project/pi-en-behaviors/requirements.snapshot.yaml"; then
+  echo 'snapshot unexpectedly read assume-unchanged working-tree content' >&2
+  exit 1
+fi
+git -C "$coord" update-index --no-assume-unchanged requirements/EXAMPLE-FRQ-20261024-215040-001.yaml
+git -C "$coord" checkout -- requirements/EXAMPLE-FRQ-20261024-215040-001.yaml
+
 "$runner" --project-root "$project" coverage --format json > "$tmp/advisory.json"
 grep -Fq '"passed": true' "$tmp/advisory.json"
 

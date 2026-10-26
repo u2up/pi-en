@@ -221,20 +221,32 @@ def snapshot(args):
     # while the snapshot claims it came from HEAD.
     try:
         tracked = subprocess.check_output(
-            ["git", "-C", str(coord), "ls-tree", "-r", "--name-only", revision,
-             "--", "requirements"], text=True).splitlines()
+            ["git", "-C", str(coord), "ls-tree", "-r", "-z",
+             "--format=%(objectmode) %(objecttype) %(path)", revision,
+             "--", "requirements"], text=True).split("\0")
     except (OSError, subprocess.CalledProcessError):
         fail("coordination directory must expose requirements at its HEAD revision")
-    paths = [coord / relative for relative in tracked
-             if Path(relative).parent == Path("requirements")
-             and Path(relative).suffix == ".yaml"]
-    for path in sorted(paths):
-        if path.is_symlink() or not path.is_file():
-            fail(f"tracked requirement must be a regular file: {path}")
-        item = load(path)
+    paths = []
+    for entry in tracked:
+        if not entry: continue
+        mode, object_type, relative = entry.split(" ", 2)
+        path = Path(relative)
+        if path.parent == Path("requirements") and path.suffix == ".yaml":
+            if mode not in ("100644", "100755") or object_type != "blob":
+                fail(f"tracked requirement must be a regular file: {relative}")
+            paths.append(relative)
+    for relative in sorted(paths):
+        try:
+            content = subprocess.check_output(
+                ["git", "-C", str(coord), "show", f"{revision}:{relative}"], text=True)
+            item = yaml.safe_load(content)
+        except (OSError, subprocess.CalledProcessError, yaml.YAMLError) as exc:
+            fail(f"invalid YAML in tracked requirement {relative}: {exc}")
+        if not isinstance(item, dict):
+            fail(f"tracked requirement {relative} must contain a YAML mapping")
         applicable = item.get("applicable_repos")
         if applicable is not None and (not isinstance(applicable, list) or not all(isinstance(x, str) and x for x in applicable)):
-            fail(f"{path}: applicable_repos must be a list of repository IDs")
+            fail(f"{relative}: applicable_repos must be a list of repository IDs")
         policy = item.get("behavior_coverage", "optional")
         if policy not in ("required", "optional", "not-applicable"):
             fail(f"{path}: invalid behavior_coverage policy")
