@@ -124,6 +124,14 @@ an active coordination requirement item.
 Do not add or maintain a separate Markdown `## Activity` section in item files.
 It duplicates issue event history and will drift.
 
+## Behavior specification references
+
+Issues may include `related_behaviors` containing immutable project-owned BHV
+IDs. Keep the actual BHV YAML, glossary, adapter, fixtures, and lifecycle in
+the implementation repository's tracked `pi-en-behaviors/` root; do not embed
+BHV bodies in coordination items or use coordination lifecycle commands to
+manage them.
+
 ## Testability and tests
 
 Every item should declare either:

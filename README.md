@@ -2145,7 +2145,47 @@ tests/items/issues/PIEN-ISS-20260607-204155-001.sh
 tests/items/requirements/PIEN-FRQ-20260607-204155-001.sh
 ```
 
-## 14. Notes
+## 14. Behavior specifications in external projects
+
+Behavior Specifications (BHVs) are project-owned executable BDD examples. They
+live in tracked `pi-en-behaviors/`, never in ignored mutable `.pi-en/` state or
+coordination item bodies. See [Behavior specifications](designs/behavior-specifications.md)
+for the data model and ownership rules.
+
+For an external project, make Pi-en tooling available through a pinned flake,
+profile, or checkout, then adopt it additively:
+
+```bash
+pien behavior init
+# Edit pi-en-behaviors/MANIFEST.yaml and GLOSSARY.yaml; implement its adapter.
+pien behavior new --id SHOP-BHV-20261026-120000-001 \
+  --group features/checkout --title 'Customer completes checkout'
+pien behavior lint
+pien behavior test
+```
+
+Commit the behavior root, adapter, fixtures, and CI commands in that project.
+Author public domain-language outcomes and retain complementary unit,
+integration, security, property, and performance tests. Generated or
+characterization examples require human review before they become accepted
+behavior. A project can pin Pi-en for reproducible CI; runner upgrades require
+a deliberate artifact migration or an explicit retained runner pin.
+
+BHV files stay flat under `pi-en-behaviors/specifications/`; their immutable
+IDs are cross-repository references. Use declared logical groups and
+`--group` selectors rather than directories, use `regroup` to change metadata,
+and generate the catalog with `pien behavior index`.
+
+Requirement snapshots and coverage are optional. A project that deliberately
+uses coordination may create a local snapshot with
+`pien behavior requirements snapshot --coord-dir DIR --repo-id ID` and then
+run `pien behavior coverage`; ordinary init, lint, and test need no
+coordination checkout. Components own component BHVs, while an umbrella
+integration repository owns system-level BHVs based on pinned component
+artifacts or results, not implementation details. Coordination issues may
+reference BHV IDs only.
+
+## 15. Notes
 
 - Pi's built-in tool list is `read,bash,edit,write,grep,find,ls`.
   `pi-en` allowlists those by default. If you need extension/custom tools

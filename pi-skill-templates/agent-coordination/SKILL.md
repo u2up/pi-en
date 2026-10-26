@@ -117,6 +117,14 @@ implementation_refs:
     commit: 32225e01ffebef26b1aeca098e7081ff913066cc
 ```
 
+## Behavior specification references
+
+Issue items may use `related_behaviors` to reference immutable BHV IDs. BHV
+bodies, glossaries, adapters, fixtures, and lifecycle remain tracked in the
+implementation repository's `pi-en-behaviors/` root, not in coordination.
+Never embed a BHV body in an issue or use coordination lifecycle commands to
+manage one.
+
 ## Testability
 
 Every item should declare `testable: yes` or `testable: no`. If `testable: no`,

@@ -112,7 +112,11 @@ bare remote root is `.pi-en/agent-remotes`.
 
 Do not merge project-owned Pi resources into `.pi-en/`. Project-specific
 rules, skills, prompts, roles, extensions, and settings stay in `AGENTS.md` and
-`.pi/` because those resources may be committed with the project.
+`.pi/` because those resources may be committed with the project. Likewise,
+project-owned Behavior Specifications live in tracked `pi-en-behaviors/`, not
+in `.pi-en/`; coordination can reference immutable BHV IDs but never embeds
+BHV bodies or owns their lifecycle. See
+[Behavior specifications](behavior-specifications.md).
 
 Sensitive sandbox Pi state is not part of this default operational root. It
 continues to live outside the project by default under the XDG state location,
