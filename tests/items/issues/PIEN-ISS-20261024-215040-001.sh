@@ -89,6 +89,20 @@ PI_EN_COORD_DIR="$tmp/ignored" "$runner" --project-root "$project" requirements 
 [ ! -e "$tmp/ignored" ]
 grep -Fq 'source_revision:' "$project/pi-en-behaviors/requirements.snapshot.yaml"
 grep -Fq 'BHV-ONE' "$project/pi-en-behaviors/requirements.snapshot.yaml"
+
+# Snapshot output must be the project-local artifact, never a symlink target.
+target="$tmp/snapshot-target.yaml"
+printf 'unchanged\n' > "$target"
+rm "$project/pi-en-behaviors/requirements.snapshot.yaml"
+ln -s "$target" "$project/pi-en-behaviors/requirements.snapshot.yaml"
+if "$runner" --project-root "$project" requirements snapshot --coord-dir "$coord" --repo-id example; then
+  echo 'snapshot unexpectedly followed symlink output' >&2
+  exit 1
+fi
+grep -Fxq 'unchanged' "$target"
+rm "$project/pi-en-behaviors/requirements.snapshot.yaml"
+"$runner" --project-root "$project" requirements snapshot --coord-dir "$coord" --repo-id example >/dev/null
+
 "$runner" --project-root "$project" coverage --format json > "$tmp/advisory.json"
 grep -Fq '"passed": true' "$tmp/advisory.json"
 

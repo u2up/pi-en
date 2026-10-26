@@ -228,6 +228,10 @@ def snapshot(args):
             })
     base = root(args)
     output = base / "requirements.snapshot.yaml"
+    # Never follow an existing link: the opt-in snapshot command may update
+    # only its project-local tracked artifact.
+    if output.is_symlink():
+        fail("requirements snapshot output must not be a symlink")
     with open(output, "w", encoding="utf-8") as stream:
         yaml.safe_dump({"schema": VERSION, "source_revision": revision,
                         "repository_id": args.repo_id, "requirements": requirements}, stream,
