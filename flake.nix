@@ -13,23 +13,9 @@
       mkBehaviorPythonEnv = pkgs:
         pkgs.python3.withPackages (pythonPackages: [ pythonPackages.pyyaml ]);
 
-      mkBehaviorPython = pkgs:
-        let
-          python = mkBehaviorPythonEnv pkgs;
-          # Keep this runtime independent of the coordination command graph:
-          # coordination commands use mkRuntime, which includes this wrapper.
-          adapterRuntimePath = pkgs.lib.makeBinPath [
-            pkgs.bash pkgs.coreutils pkgs.git pkgs.gnugrep python
-          ];
-        in
-        pkgs.writeShellScriptBin "pi-en-behavior-python" ''
-          export PYTHONPYCACHEPREFIX="''${XDG_CACHE_HOME:-''${HOME}/.cache}/pi-en/python-bytecode"
-          # Adapters receive this fixed Nix runtime rather than the caller PATH.
-          export PI_EN_BEHAVIOR_RUNTIME_PATH="${adapterRuntimePath}"
-          exec ${python}/bin/python "$@"
-        '';
-
-      mkRuntime = pkgs:
+      # Keep adapter command dependencies separate from mkRuntime: the latter
+      # includes mkBehaviorPython, whose sealed adapter PATH needs this base.
+      mkBehaviorRuntimeBase = pkgs:
         with pkgs; [
           bash
           bubblewrap
@@ -46,10 +32,36 @@
           jq
           nodejs
           (mkBehaviorPythonEnv pkgs)
-          (mkBehaviorPython pkgs)
           ripgrep
           which
         ];
+
+      # Repository-local scripts win over PATH in the pien dispatcher.  Supply
+      # their expected behavior interpreter without recursively constructing
+      # the sealed adapter PATH.
+      mkAdapterBehaviorPython = pkgs:
+        let python = mkBehaviorPythonEnv pkgs;
+        in pkgs.writeShellScriptBin "pi-en-behavior-python" ''
+          export PYTHONPYCACHEPREFIX="''${XDG_CACHE_HOME:-''${HOME}/.cache}/pi-en/python-bytecode"
+          exec ${python}/bin/python "$@"
+        '';
+
+      mkBehaviorPython = pkgs:
+        let
+          python = mkBehaviorPythonEnv pkgs;
+          adapterRuntimePath = pkgs.lib.makeBinPath (
+            (mkBehaviorRuntimeBase pkgs) ++ [ (mkAdapterBehaviorPython pkgs) ]
+          );
+        in
+        pkgs.writeShellScriptBin "pi-en-behavior-python" ''
+          export PYTHONPYCACHEPREFIX="''${XDG_CACHE_HOME:-''${HOME}/.cache}/pi-en/python-bytecode"
+          # Adapters receive this fixed Nix runtime rather than the caller PATH.
+          export PI_EN_BEHAVIOR_RUNTIME_PATH="${adapterRuntimePath}"
+          exec ${python}/bin/python "$@"
+        '';
+
+      mkRuntime = pkgs:
+        (mkBehaviorRuntimeBase pkgs) ++ [ (mkBehaviorPython pkgs) ];
 
       mkDevShellTools = pkgs:
         with pkgs; [
@@ -471,6 +483,10 @@
             command -v pi-en-bootstrap-coordination >/dev/null
             pi-en-coord-lint --help >/dev/null
             pi-en-bootstrap-coordination --help >/dev/null
+          '';
+
+          behavior-adapter-smoke = smokeCheck "pi-en-behavior-adapter-smoke" [ pien ] ''
+            pien behavior --project-root ${./.} test
           '';
         };
 

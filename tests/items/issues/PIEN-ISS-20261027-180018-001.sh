@@ -8,18 +8,18 @@ fail() {
   exit 1
 }
 
-# Behavior adapters run with a fixed, minimal PATH. The bundled adapter uses
-# grep for behavior assertions, so this sealed runtime must explicitly retain
-# GNU grep rather than relying on the caller's PATH.
-behavior_runtime="$(awk '
-  /mkBehaviorPython = pkgs:/ { in_behavior = 1 }
-  /mkRuntime = pkgs:/ { in_behavior = 0 }
-  in_behavior { print }
-' "$repo_root/flake.nix")"
+# Behavior adapters run with a fixed PATH. The bundled adapter uses grep for
+# behavior assertions, so this sealed runtime must explicitly retain GNU grep
+# rather than relying on the caller's PATH.
+flake="$repo_root/flake.nix"
 
-grep -Eq 'adapterRuntimePath = pkgs\.lib\.makeBinPath \[' <<<"$behavior_runtime" ||
-  fail 'Could not locate the isolated adapter runtime.'
-grep -Fq 'pkgs.gnugrep' <<<"$behavior_runtime" ||
+grep -Fq 'mkBehaviorRuntimeBase = pkgs:' "$flake" ||
+  fail 'Could not locate the isolated adapter runtime base.'
+grep -Fq 'mkAdapterBehaviorPython = pkgs:' "$flake" ||
+  fail 'The isolated adapter runtime must provide the behavior interpreter.'
+grep -Eq '^[[:space:]]+gnugrep$' "$flake" ||
   fail 'The isolated adapter runtime must provide GNU grep.'
+grep -Fq 'behavior-adapter-smoke' "$flake" ||
+  fail 'Nix checks must execute the complete behavior adapter suite.'
 
 printf 'PIEN-ISS-20261027-180018-001 passed\n'
