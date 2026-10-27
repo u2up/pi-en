@@ -1282,10 +1282,13 @@ source <(pien completion bash)
 ```
 
 Completion must suggest top-level commands, nested `sandbox`, `coord`,
-`coord rules`, `coord requirements`, `roles`, and `completion` subcommands,
-and known options for leaf commands. Path-valued options should keep path
-completion. The completion implementation should not require Nix-only tools;
-it must work in host-runtime installations as well as Nix-provided shells.
+`coord rules`, `coord requirements`, `roles`, `completion`, and `behavior`
+subcommands, and known options for leaf commands. The `behavior` hierarchy
+includes its `requirements snapshot` leaf; option suggestions must respect
+each leaf's parser scope instead of presenting generic unsupported flags.
+Path-valued options should keep path completion. The completion
+implementation should not require Nix-only tools; it must work in
+host-runtime installations as well as Nix-provided shells.
 
 #### BHV-001 — Project-owned behavior command and file contracts
 
