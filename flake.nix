@@ -18,7 +18,9 @@
           python = mkBehaviorPythonEnv pkgs;
           # Keep this runtime independent of the coordination command graph:
           # coordination commands use mkRuntime, which includes this wrapper.
-          adapterRuntimePath = pkgs.lib.makeBinPath [ pkgs.bash pkgs.coreutils pkgs.git python ];
+          adapterRuntimePath = pkgs.lib.makeBinPath [
+            pkgs.bash pkgs.coreutils pkgs.git pkgs.gnugrep python
+          ];
         in
         pkgs.writeShellScriptBin "pi-en-behavior-python" ''
           export PYTHONPYCACHEPREFIX="''${XDG_CACHE_HOME:-''${HOME}/.cache}/pi-en/python-bytecode"
