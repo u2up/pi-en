@@ -419,7 +419,29 @@ _pien() {
           ;;
       esac
       ;;
-    run|raw|shell|behavior) command_path="${words[1]}" ;;
+    run|raw|shell) command_path="${words[1]}" ;;
+    behavior)
+      command_path="behavior"
+      i=2
+      while [ "$i" -lt "$cword" ]; do
+        case "${words[i]}" in
+          --project-root) ((i += 2)); continue ;;
+          --project-root=*) ((i += 1)); continue ;;
+          init|new|list|regroup|index|document|lint|test|coverage)
+            command_path="behavior ${words[i]}"
+            break
+            ;;
+          requirements)
+            command_path="behavior requirements"
+            if [ "${words[i+1]:-}" = "snapshot" ] && [ $((i + 1)) -lt "$cword" ]; then
+              command_path="behavior requirements snapshot"
+            fi
+            break
+            ;;
+        esac
+        ((i += 1))
+      done
+      ;;
     sandbox) command_path="sandbox" ;;
     roles)
       command_path="roles"
@@ -440,6 +462,10 @@ _pien() {
     fi
     return 0
   fi
+  if [ "$prev" = "--format" ] && [ "$command_path" = "behavior coverage" ]; then
+    COMPREPLY=( $(_pien_comp_words "text json") )
+    return 0
+  fi
   if [[ " $path_options " == *" $prev "* ]]; then
     compopt -o default 2>/dev/null || true
     return 0
@@ -456,7 +482,12 @@ _pien() {
       coord\ claim|coord\ done|coord\ review|coord\ verify|coord\ close) option_words="--coord-dir --agent-id --role --result --message --no-pull --no-push --force --pass --fail --help -h" ;;
       coord\ bootstrap) option_words="--project-root --root --remote --project --project-key --repo-id --register-repo --implementation-remote --domain-generated-file --generated-requirements-docs --dir --agent-id --bare-only --print-only --dry-run --no-status --help -h" ;;
       coord\ pull|coord\ push|coord\ lint|coord\ repo|coord\ init|coord\ clone|coord\ new) option_words="--coord-dir --repo-id --help -h" ;;
-      behavior) option_words="--project-root --group --id --title --help -h" ;;
+      behavior) option_words="--project-root --help -h" ;;
+      behavior\ new) option_words="--id --group --title --help -h" ;;
+      behavior\ list|behavior\ test|behavior\ regroup) option_words="--group --help -h" ;;
+      behavior\ coverage) option_words="--format --help -h" ;;
+      behavior\ requirements\ snapshot) option_words="--coord-dir --repo-id --help -h" ;;
+      behavior\ init|behavior\ index|behavior\ document|behavior\ lint|behavior\ requirements) option_words="--help -h" ;;
       run|shell|"")
         if $raw_marker_seen; then
           option_words="--help -h"
@@ -492,7 +523,10 @@ _pien() {
       esac
       ;;
     behavior)
-      [ "$cword" -eq 2 ] && COMPREPLY=( $(_pien_comp_words "init new list regroup index document lint test coverage requirements") )
+      case "$command_path" in
+        behavior) COMPREPLY=( $(_pien_comp_words "init new list regroup index document lint test coverage requirements") ) ;;
+        "behavior requirements") COMPREPLY=( $(_pien_comp_words "snapshot") ) ;;
+      esac
       ;;
     roles)
       [ "$cword" -eq 2 ] && COMPREPLY=( $(_pien_comp_words "serial") )

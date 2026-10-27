@@ -274,6 +274,35 @@ assert_no_completion --runtime coord --
 assert_no_completion --runtime sandbox --
 assert_no_completion --runtime recipe --
 assert_no_completion host coord --runtime h
+assert_completion init behavior i
+assert_completion new behavior n
+assert_completion list behavior l
+assert_completion regroup behavior r
+assert_completion index behavior i
+assert_completion document behavior d
+assert_completion lint behavior l
+assert_completion test behavior t
+assert_completion coverage behavior c
+assert_completion requirements behavior r
+assert_completion snapshot behavior requirements s
+assert_completion list behavior --project-root /tmp l
+assert_completion --project-root behavior --
+assert_no_completion --project-root behavior lint --
+assert_completion --id behavior new --
+assert_completion --group behavior new --
+assert_completion --title behavior new --
+assert_no_completion --format behavior new --
+assert_completion --group behavior list --
+assert_completion --group behavior test --
+assert_completion --group behavior regroup --
+assert_no_completion --id behavior regroup --
+assert_completion --format behavior coverage --
+assert_no_completion --group behavior coverage --
+assert_completion text behavior coverage --format t
+assert_completion json behavior coverage --format j
+assert_completion --coord-dir behavior requirements snapshot --
+assert_completion --repo-id behavior requirements snapshot --
+assert_no_completion --project-root behavior requirements snapshot --
 COMPTEST
 } > "$completion_env"
 bash "$completion_env"
