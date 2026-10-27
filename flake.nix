@@ -56,7 +56,7 @@
         pkgs.writeShellScriptBin "pi-en-behavior-python" ''
           export PYTHONPYCACHEPREFIX="''${XDG_CACHE_HOME:-''${HOME}/.cache}/pi-en/python-bytecode"
           # Adapters receive this fixed Nix runtime rather than the caller PATH.
-          export PI_EN_BEHAVIOR_RUNTIME_PATH="${adapterRuntimePath}"
+          export PI_EN_BEHAVIOR_RUNTIME_PATH="''${PI_EN_BEHAVIOR_RUNTIME_PATH:-${adapterRuntimePath}}"
           exec ${python}/bin/python "$@"
         '';
 
@@ -337,6 +337,25 @@
         agentCoordCommands = mkAgentCoordCommands pkgs;
         agentCoordCommandPackages = builtins.attrValues agentCoordCommands;
         roleManagerPackage = mkRoleManagerPackage pkgs;
+        # Assemble the behavior fixture from explicit paths: flake source
+        # filtering can otherwise omit the adapter required by this check.
+        behaviorSmokeSource = pkgs.runCommand "pi-en-behavior-smoke-source" { } ''
+          mkdir -p "$out/tests/behaviors"
+          cp -R ${./pi-en-behaviors} "$out/pi-en-behaviors"
+          cp ${./pien} "$out/pien"
+          sed -i '1c #!${pkgs.bash}/bin/bash' "$out/pien"
+          chmod +x "$out/pien"
+          cp -R ${./scripts} "$out/scripts"
+          chmod -R u+w "$out/scripts"
+          grep -rl '^#!/usr/bin/env bash$' "$out/scripts" | while read -r script; do
+            sed -i '1c #!${pkgs.bash}/bin/bash' "$script"
+          done
+          ln -s ${./role-manager} "$out/role-manager"
+          ln -s ${./pi-skill-templates} "$out/pi-skill-templates"
+          cp ${./tests/behaviors/adapter.sh} "$out/tests/behaviors/adapter.sh"
+          sed -i '1c #!${pkgs.bash}/bin/bash' "$out/tests/behaviors/adapter.sh"
+          chmod +x "$out/tests/behaviors/adapter.sh"
+        '';
         piCorePien = mkPien pkgs { includeCoordinationHelpers = false; };
         coreRuntimePaths = (mkRuntime pkgs) ++ [
           piBwrap
@@ -486,7 +505,8 @@
           '';
 
           behavior-adapter-smoke = smokeCheck "pi-en-behavior-adapter-smoke" [ pien ] ''
-            pien behavior --project-root ${./.} test
+            PI_EN_BEHAVIOR_RUNTIME_PATH="${piRuntime}/bin" \
+              pien behavior --project-root ${behaviorSmokeSource} test
           '';
         };
 
