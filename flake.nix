@@ -56,7 +56,7 @@
         pkgs.writeShellScriptBin "pi-en-behavior-python" ''
           export PYTHONPYCACHEPREFIX="''${XDG_CACHE_HOME:-''${HOME}/.cache}/pi-en/python-bytecode"
           # Adapters receive this fixed Nix runtime rather than the caller PATH.
-          export PI_EN_BEHAVIOR_RUNTIME_PATH="''${PI_EN_BEHAVIOR_RUNTIME_PATH:-${adapterRuntimePath}}"
+          export PI_EN_BEHAVIOR_RUNTIME_PATH="${adapterRuntimePath}"
           exec ${python}/bin/python "$@"
         '';
 
@@ -505,8 +505,7 @@
           '';
 
           behavior-adapter-smoke = smokeCheck "pi-en-behavior-adapter-smoke" [ pien ] ''
-            PI_EN_BEHAVIOR_RUNTIME_PATH="${piRuntime}/bin" \
-              pien behavior --project-root ${behaviorSmokeSource} test
+            pien behavior --project-root ${behaviorSmokeSource} test
           '';
         };
 

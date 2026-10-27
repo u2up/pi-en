@@ -19,6 +19,11 @@ grep -Fq 'mkAdapterBehaviorPython = pkgs:' "$flake" ||
   fail 'The isolated adapter runtime must provide the behavior interpreter.'
 grep -Eq '^[[:space:]]+gnugrep$' "$flake" ||
   fail 'The isolated adapter runtime must provide GNU grep.'
+grep -Fq 'export PI_EN_BEHAVIOR_RUNTIME_PATH="${adapterRuntimePath}"' "$flake" ||
+  fail 'The packaged adapter runtime must not inherit a caller-controlled PATH.'
+if grep -Fq "PI_EN_BEHAVIOR_RUNTIME_PATH=\"''\${PI_EN_BEHAVIOR_RUNTIME_PATH:-" "$flake"; then
+  fail 'The packaged adapter runtime must not permit caller PATH overrides.'
+fi
 grep -Fq 'behavior-adapter-smoke' "$flake" ||
   fail 'Nix checks must execute the complete behavior adapter suite.'
 
