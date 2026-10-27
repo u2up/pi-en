@@ -40,12 +40,12 @@ It is built around four complementary layers:
 4. **Optional project-owned Behavior Specifications (BHVs) for executable
    acceptance**
 
-   BHVs are versioned, human-reviewed examples of user-visible or domain
-   behavior that run in the implementation repository's ordinary CI. They
-   provide executable evidence that important intended behavior remains true
-   after agent-assisted changes. BHVs can be used independently, or linked to
-   coordination requirements when teams need requirement-to-behavior
-   traceability.
+   BHVs are versioned, human-reviewed executable BDD examples of user-visible
+   or domain behavior that run in the implementation repository's ordinary
+   CI. They provide executable evidence that important intended behavior
+   remains true after agent-assisted changes. BHVs can be used independently,
+   or linked to coordination requirements when teams need
+   requirement-to-behavior traceability.
 
    **Problem addressed:** ensuring that coordinated, reproducible agent work
    is not only delivered safely, but demonstrably preserves the behavior users
